@@ -2,26 +2,30 @@ GSOAP_PREFIX=/usr
 GSOAP_BASE=$(GSOAP_PREFIX)/share/gsoap
 GSOAP_IMPORT=$(GSOAP_BASE)/import
 GSOAP_PLUGINS=$(GSOAP_BASE)/plugin
-GSOAP_CFLAGS= -I gen -I $(GSOAP_PREFIX)/include -I $(GSOAP_PLUGINS)
+GSOAP_CFLAGS= -I gen -I $(GSOAP_PREFIX)/include -I $(GSOAP_PLUGINS) -DSOAP_PURE_VIRTUAL
 GSOAP_LDFLAGS= -lgsoap++ -L $(GSOAP_PREFIX)/lib/
 
-all: server.exe client.exe
+CXXFLAGS+=$(GSOAP_CFLAGS) -std=c++11 -pthread
 
-server.exe: gen/soapC.o gen/soapDeviceBindingService.o server.o
-	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) 
+all: gen server.exe client.exe
 
-client.exe: gen/soapC.o gen/soapDeviceBindingProxy.o client.o
-	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) 
+SOAP_SRC=$(wildcard gen/soapC_*.cpp)
+SOAP_OBJ=$(SOAP_SRC:%.cpp=%.o)
+
+server.exe: $(SOAP_OBJ) gen/soapDeviceBindingService.o gen/soapMediaBindingService.o server.o 
+	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) -pthread
+
+client.exe: $(SOAP_OBJ) gen/soapDeviceBindingProxy.o gen/soapMediaBindingProxy.o client.o 
+	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS)
 
 gen:
 	mkdir gen
 
-gen/onvif.h: gen
+gen/onvif.h: 
 	wsdl2h devicemgmt.wsdl media.wsdl onvif.xsd b-2.xsd include bf-2.xsd t-1.xsd -o $@ 
 
-gen/soapC.cpp: gen/onvif.h
-
-	soapcpp2 -2ix $^ -I $(GSOAP_IMPORT) -d gen 
+gen/soapDeviceBindingService.cpp: gen/onvif.h
+	soapcpp2 -2ix $^ -I $(GSOAP_IMPORT) -d gen -f500
 
 clean:
 	rm -rf gen *.o
