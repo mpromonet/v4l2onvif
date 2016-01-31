@@ -12,17 +12,17 @@ all: gen server.exe client.exe
 SOAP_SRC=$(wildcard gen/soapC_*.cpp)
 SOAP_OBJ=$(SOAP_SRC:%.cpp=%.o)
 
-server.exe: $(SOAP_OBJ) gen/soapDeviceBindingService.o gen/soapMediaBindingService.o server.o 
+server.exe: $(SOAP_OBJ) gen/soapDeviceBindingService.o serverDevice.o gen/soapMediaBindingService.o serverMedia.o gen/soapRecordingBindingService.o serverRecording.o gen/soapReplayBindingService.o serverReplay.o server.o   
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) -pthread
 
-client.exe: $(SOAP_OBJ) gen/soapDeviceBindingProxy.o gen/soapMediaBindingProxy.o client.o 
+client.exe: $(SOAP_OBJ) gen/soapDeviceBindingProxy.o gen/soapMediaBindingProxy.o gen/soapRecordingBindingProxy.o gen/soapReplayBindingProxy.o client.o 
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS)
 
 gen:
 	mkdir gen
 
 gen/onvif.h: 
-	wsdl2h devicemgmt.wsdl media.wsdl onvif.xsd b-2.xsd include bf-2.xsd t-1.xsd -o $@ 
+	wsdl2h devicemgmt.wsdl media.wsdl recording.wsdl replay.wsdl onvif.xsd b-2.xsd include bf-2.xsd t-1.xsd -o $@ 
 
 gen/soapDeviceBindingService.cpp: gen/onvif.h
 	soapcpp2 -2ix $^ -I $(GSOAP_IMPORT) -d gen -f500
