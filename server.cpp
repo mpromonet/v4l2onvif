@@ -17,6 +17,8 @@
 #include "soapRecordingBindingService.h"
 #include "soapReplayBindingService.h"
 
+#include "wsseapi.h"
+
 int http_get(struct soap *soap)
 {
 	int retCode = 404;
@@ -60,6 +62,7 @@ int main(int argc, char* argv[])
 	DeviceBindingService deviceService;
 	deviceService.user = (void*)"devicemgmt.wsdl";
 	deviceService.fget = http_get; 
+	soap_wsse_verify_auto(&deviceService, SOAP_SMD_NONE, NULL, 0);
 	if (deviceService.run(8080) != SOAP_OK)
 	{
 		deviceService.soap_stream_fault(std::cerr);

@@ -9,6 +9,8 @@
 **
 ** -------------------------------------------------------------------------*/
 
+#include <ifaddrs.h>
+
 #include "soapDeviceBindingService.h"
 
 int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds__GetServicesResponse &tds__GetServicesResponse) 
@@ -272,7 +274,36 @@ int DeviceBindingService::SetDynamicDNS(_tds__SetDynamicDNS *tds__SetDynamicDNS,
 
 int DeviceBindingService::GetNetworkInterfaces(_tds__GetNetworkInterfaces *tds__GetNetworkInterfaces, _tds__GetNetworkInterfacesResponse &tds__GetNetworkInterfacesResponse) 
 {
-	std::cout << __PRETTY_FUNCTION__ << std::endl;
+	std::cout << __PRETTY_FUNCTION__ << std::endl;	
+	
+	char host[NI_MAXHOST];
+	struct ifaddrs *ifaddr = NULL;
+	if (getifaddrs(&ifaddr) == 0) 
+	{
+		for (struct ifaddrs* ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
+		{
+			if (ifa->ifa_addr != NULL)			
+			{
+				int family = ifa->ifa_addr->sa_family;
+				if (family == AF_INET)
+				{
+					if (getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, sizeof(host), NULL, 0, NI_NUMERICHOST) == 0)
+					{
+						tds__GetNetworkInterfacesResponse.NetworkInterfaces.push_back(soap_new_tt__NetworkInterface(this));
+						tds__GetNetworkInterfacesResponse.NetworkInterfaces.back()->Enabled = true;
+						tds__GetNetworkInterfacesResponse.NetworkInterfaces.back()->Info = soap_new_tt__NetworkInterfaceInfo(this);
+						tds__GetNetworkInterfacesResponse.NetworkInterfaces.back()->Info->Name = soap_new_std__string(this);
+						tds__GetNetworkInterfacesResponse.NetworkInterfaces.back()->Info->Name->assign(ifa->ifa_name);
+						tds__GetNetworkInterfacesResponse.NetworkInterfaces.back()->IPv4 = soap_new_tt__IPv4NetworkInterface(this);
+						tds__GetNetworkInterfacesResponse.NetworkInterfaces.back()->IPv4->Config = soap_new_tt__IPv4Configuration(this);
+						tds__GetNetworkInterfacesResponse.NetworkInterfaces.back()->IPv4->Config->Manual.push_back(soap_new_tt__PrefixedIPv4Address(this));
+						tds__GetNetworkInterfacesResponse.NetworkInterfaces.back()->IPv4->Config->Manual.back()->Address = host;						
+					}
+				}
+			}
+		}
+	}
+
 	return SOAP_OK;
 }
 

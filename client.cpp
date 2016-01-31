@@ -16,14 +16,27 @@
 #include "soapRecordingBindingProxy.h"
 #include "soapReplayBindingProxy.h"
 
+#include "wsseapi.h"
+
 int main(int argc, char* argv[])
 {
 	std::string url = "http://127.0.0.1:8080";
+	std::string username = "admin";
+	std::string password = "admin";
 	if (argc > 1)
 	{
 		url.assign(argv[1]);
 	}
+	if (argc > 3)
+	{
+		username.assign(argv[2]);
+		password.assign(argv[3]);
+	}
+	
+	// create connection to devicemgmt.wsdl server
         DeviceBindingProxy deviceProxy(url.c_str());
+	soap_wsse_add_Security(&deviceProxy);
+	soap_wsse_add_UsernameTokenDigest(&deviceProxy, "Id", username.c_str() , password.c_str());	
 	
 	// call Device::GetDeviceInformation
 	_tds__GetDeviceInformation         tds__GetDeviceInformation;
