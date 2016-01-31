@@ -24,7 +24,7 @@ gen:
 	mkdir gen
 	
 gen/onvif.h: 
-	wsdl2h devicemgmt.wsdl media.wsdl recording.wsdl replay.wsdl onvif.xsd b-2.xsd include bf-2.xsd t-1.xsd -o $@.tmp 
+	wsdl2h -z6 devicemgmt.wsdl media.wsdl recording.wsdl replay.wsdl onvif.xsd b-2.xsd include bf-2.xsd t-1.xsd -o $@.tmp 
 	echo '#import "wsse.h"' > $@
 	cat $@.tmp >> $@
 

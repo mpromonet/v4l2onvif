@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
 	// call Device::GetDeviceInformation
 	_tds__GetDeviceInformation         tds__GetDeviceInformation;
 	_tds__GetDeviceInformationResponse tds__GetDeviceInformationResponse;
-	if (deviceProxy.GetDeviceInformation(&tds__GetDeviceInformation, tds__GetDeviceInformationResponse) == SOAP_OK)
+	if (deviceProxy.GetDeviceInformation(&tds__GetDeviceInformation, &tds__GetDeviceInformationResponse) == SOAP_OK)
 	{
 		std::cout << "Manufacturer:" << tds__GetDeviceInformationResponse.Manufacturer << std::endl;
 	}
@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
 	// call Device::GetHostname
 	_tds__GetHostname         tds__GetHostname;
 	_tds__GetHostnameResponse tds__GetHostnameResponse;
-	if (deviceProxy.GetHostname(&tds__GetHostname, tds__GetHostnameResponse) == SOAP_OK)
+	if (deviceProxy.GetHostname(&tds__GetHostname, &tds__GetHostnameResponse) == SOAP_OK)
 	{
 		std::cout << "Hostname:" << tds__GetHostnameResponse.HostnameInformation->Name->c_str() << std::endl;
 	}
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 	// call Device::GetCapabilities
 	_tds__GetCapabilities         tds__GetCapabilities;
 	_tds__GetCapabilitiesResponse tds__GetCapabilitiesResponse;
-	if (deviceProxy.GetCapabilities(&tds__GetCapabilities, tds__GetCapabilitiesResponse) == SOAP_OK)
+	if (deviceProxy.GetCapabilities(&tds__GetCapabilities, &tds__GetCapabilitiesResponse) == SOAP_OK)
 	{
 		if (tds__GetCapabilitiesResponse.Capabilities->Media != NULL)
 		{
@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 			// call Device::GetProfiles
 			_trt__GetProfiles         trt__GetProfiles;
 			_trt__GetProfilesResponse trt__GetProfilesResponse;
-			if (mediaProxy.GetProfiles(&trt__GetProfiles, trt__GetProfilesResponse) == SOAP_OK)
+			if (mediaProxy.GetProfiles(&trt__GetProfiles, &trt__GetProfilesResponse) == SOAP_OK)
 			{		
 				std::vector<tt__Profile*>& profiles(trt__GetProfilesResponse.Profiles);
 				for (std::vector<tt__Profile*>::iterator it(profiles.begin()) ; it != profiles.end(); ++it)
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 					_trt__GetStreamUri         trt__GetStreamUri;
 					_trt__GetStreamUriResponse trt__GetStreamUriResponse;
 					trt__GetStreamUri.ProfileToken = token;
-					if (mediaProxy.GetStreamUri(&trt__GetStreamUri, trt__GetStreamUriResponse) == SOAP_OK)
+					if (mediaProxy.GetStreamUri(&trt__GetStreamUri, &trt__GetStreamUriResponse) == SOAP_OK)
 					{
 						std::cout << "MediaUri:" << trt__GetStreamUriResponse.MediaUri->Uri << std::endl;
 					}
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 			
 			_trc__GetRecordings         trc__GetRecordings;
 			_trc__GetRecordingsResponse trc__GetRecordingsResponse;
-			if (recordingProxy.GetRecordings(&trc__GetRecordings, trc__GetRecordingsResponse) == SOAP_OK)
+			if (recordingProxy.GetRecordings(&trc__GetRecordings, &trc__GetRecordingsResponse) == SOAP_OK)
 			{
 				std::vector<tt__GetRecordingsResponseItem*>& recordings(trc__GetRecordingsResponse.RecordingItem);
 				for (std::vector<tt__GetRecordingsResponseItem*>::iterator it(recordings.begin()) ; it != recordings.end(); ++it)
@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
 						_trp__GetReplayUri         trp__GetReplayUri;
 						_trp__GetReplayUriResponse trp__GetReplayUriResponse;
 						trp__GetReplayUri.RecordingToken = token;
-						if (replayProxy->GetReplayUri(&trp__GetReplayUri, trp__GetReplayUriResponse) == SOAP_OK)
+						if (replayProxy->GetReplayUri(&trp__GetReplayUri, &trp__GetReplayUriResponse) == SOAP_OK)
 						{
 							std::cout << "Replay Uri:" << trp__GetReplayUriResponse.Uri << std::endl;
 						}
