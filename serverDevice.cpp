@@ -189,15 +189,17 @@ int DeviceBindingService::GetWsdlUrl(_tds__GetWsdlUrl *tds__GetWsdlUrl, _tds__Ge
 int DeviceBindingService::GetCapabilities(_tds__GetCapabilities *tds__GetCapabilities, _tds__GetCapabilitiesResponse &tds__GetCapabilitiesResponse) 
 {
 	std::cout << __PRETTY_FUNCTION__ << std::endl;
+	std::string url("http://");
+	url.append(this->host);
 	tds__GetCapabilitiesResponse.Capabilities = soap_new_tt__Capabilities(this);
 	tds__GetCapabilitiesResponse.Capabilities->Device = soap_new_tt__DeviceCapabilities(this);
 	tds__GetCapabilitiesResponse.Capabilities->Media  = soap_new_tt__MediaCapabilities(this);
-	tds__GetCapabilitiesResponse.Capabilities->Media->XAddr = "http://127.0.0.1:8081";
+	tds__GetCapabilitiesResponse.Capabilities->Media->XAddr = url + ":8081";
 	tds__GetCapabilitiesResponse.Capabilities->Extension  = soap_new_tt__CapabilitiesExtension(this);
 	tds__GetCapabilitiesResponse.Capabilities->Extension->Recording  = soap_new_tt__RecordingCapabilities(this);
-	tds__GetCapabilitiesResponse.Capabilities->Extension->Recording->XAddr = "http://127.0.0.1:8082";
+	tds__GetCapabilitiesResponse.Capabilities->Extension->Recording->XAddr = url + ":8082";
 	tds__GetCapabilitiesResponse.Capabilities->Extension->Replay  = soap_new_tt__ReplayCapabilities(this);
-	tds__GetCapabilitiesResponse.Capabilities->Extension->Replay->XAddr = "http://127.0.0.1:8083";
+	tds__GetCapabilitiesResponse.Capabilities->Extension->Replay->XAddr = url + ":8083";
 	return SOAP_OK;
 }
 
@@ -210,6 +212,13 @@ int DeviceBindingService::SetDPAddresses(_tds__SetDPAddresses *tds__SetDPAddress
 int DeviceBindingService::GetHostname(_tds__GetHostname *tds__GetHostname, _tds__GetHostnameResponse &tds__GetHostnameResponse) 
 {
 	std::cout << __PRETTY_FUNCTION__ << std::endl;
+	char buffer[HOST_NAME_MAX];
+	tds__GetHostnameResponse.HostnameInformation = soap_new_req_tt__HostnameInformation(this, false);
+	tds__GetHostnameResponse.HostnameInformation->Name = soap_new_std__string(this);
+	if (gethostname(buffer, sizeof(buffer)) == 0)
+	{
+		tds__GetHostnameResponse.HostnameInformation->Name->assign(buffer);
+	}
 	return SOAP_OK;
 }
 

@@ -36,6 +36,18 @@ int main(int argc, char* argv[])
 	{
 		deviceProxy.soap_stream_fault(std::cerr);
 	}
+
+	// call Device::GetHostname
+	_tds__GetHostname         tds__GetHostname;
+	_tds__GetHostnameResponse tds__GetHostnameResponse;
+	if (deviceProxy.GetHostname(&tds__GetHostname, tds__GetHostnameResponse) == SOAP_OK)
+	{
+		std::cout << "Hostname:" << tds__GetHostnameResponse.HostnameInformation->Name->c_str() << std::endl;
+	}
+	else
+	{
+		deviceProxy.soap_stream_fault(std::cerr);
+	}
 	
 	// call Device::GetCapabilities
 	_tds__GetCapabilities         tds__GetCapabilities;

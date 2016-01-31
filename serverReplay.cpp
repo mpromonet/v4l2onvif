@@ -21,7 +21,9 @@ int ReplayBindingService::GetServiceCapabilities(_trp__GetServiceCapabilities *t
 int ReplayBindingService::GetReplayUri(_trp__GetReplayUri *trp__GetReplayUri, _trp__GetReplayUriResponse &trp__GetReplayUriResponse) 
 {
 	std::cout << __PRETTY_FUNCTION__ << std::endl;
-	trp__GetReplayUriResponse.Uri = "rtsp://127.0.0.1/";
+	trp__GetReplayUriResponse.Uri = "rtsp://";
+	trp__GetReplayUriResponse.Uri.append(this->host);
+	trp__GetReplayUriResponse.Uri.append("/");
 	if (trp__GetReplayUri != NULL)
 	{
 		trp__GetReplayUriResponse.Uri.append(trp__GetReplayUri->RecordingToken);
