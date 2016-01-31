@@ -11,6 +11,7 @@
 
 
 #include "soapMediaBindingService.h"
+#include "serviceContext.h"
 
 int MediaBindingService::GetServiceCapabilities(_trt__GetServiceCapabilities *trt__GetServiceCapabilities, _trt__GetServiceCapabilitiesResponse *trt__GetServiceCapabilitiesResponse) 
 {
@@ -417,9 +418,10 @@ int MediaBindingService::GetGuaranteedNumberOfVideoEncoderInstances(_trt__GetGua
 int MediaBindingService::GetStreamUri(_trt__GetStreamUri *trt__GetStreamUri, _trt__GetStreamUriResponse *trt__GetStreamUriResponse) 
 {
 	std::cout << __PRETTY_FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->user;
 	trt__GetStreamUriResponse->MediaUri = soap_new_tt__MediaUri(this);
 	trt__GetStreamUriResponse->MediaUri->Uri = "rtsp://";
-	trt__GetStreamUriResponse->MediaUri->Uri.append(this->host);
+	trt__GetStreamUriResponse->MediaUri->Uri.append(ctx->m_ip);
 	trt__GetStreamUriResponse->MediaUri->Uri.append("/");
 	if (trt__GetStreamUri != NULL)
 	{

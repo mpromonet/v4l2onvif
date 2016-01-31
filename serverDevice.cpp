@@ -12,6 +12,7 @@
 #include <ifaddrs.h>
 
 #include "soapDeviceBindingService.h"
+#include "serviceContext.h"
 
 int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds__GetServicesResponse *tds__GetServicesResponse) 
 {
@@ -191,8 +192,11 @@ int DeviceBindingService::GetWsdlUrl(_tds__GetWsdlUrl *tds__GetWsdlUrl, _tds__Ge
 int DeviceBindingService::GetCapabilities(_tds__GetCapabilities *tds__GetCapabilities, _tds__GetCapabilitiesResponse *tds__GetCapabilitiesResponse) 
 {
 	std::cout << __PRETTY_FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->user;
+	
 	std::string url("http://");
-	url.append(this->host);
+	url.append(ctx->m_ip);
+	
 	tds__GetCapabilitiesResponse->Capabilities = soap_new_tt__Capabilities(this);
 	tds__GetCapabilitiesResponse->Capabilities->Device = soap_new_tt__DeviceCapabilities(this);
 	tds__GetCapabilitiesResponse->Capabilities->Media  = soap_new_tt__MediaCapabilities(this);
@@ -303,6 +307,7 @@ int DeviceBindingService::GetNetworkInterfaces(_tds__GetNetworkInterfaces *tds__
 			}
 		}
 	}
+	freeifaddrs(ifaddr);
 
 	return SOAP_OK;
 }

@@ -11,6 +11,7 @@
 
 
 #include "soapReplayBindingService.h"
+#include "serviceContext.h"
 
 int ReplayBindingService::GetServiceCapabilities(_trp__GetServiceCapabilities *trp__GetServiceCapabilities, _trp__GetServiceCapabilitiesResponse *trp__GetServiceCapabilitiesResponse) 
 {
@@ -21,8 +22,9 @@ int ReplayBindingService::GetServiceCapabilities(_trp__GetServiceCapabilities *t
 int ReplayBindingService::GetReplayUri(_trp__GetReplayUri *trp__GetReplayUri, _trp__GetReplayUriResponse *trp__GetReplayUriResponse) 
 {
 	std::cout << __PRETTY_FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->user;
 	trp__GetReplayUriResponse->Uri = "rtsp://";
-	trp__GetReplayUriResponse->Uri.append(this->host);
+	trp__GetReplayUriResponse->Uri.append(ctx->m_ip);
 	trp__GetReplayUriResponse->Uri.append("/");
 	if (trp__GetReplayUri != NULL)
 	{
