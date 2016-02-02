@@ -13,6 +13,7 @@
 
 #include "soapDeviceBindingService.h"
 #include "serviceContext.h"
+#include "wsseapi.h"
 
 int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds__GetServicesResponse *tds__GetServicesResponse) 
 {
@@ -195,12 +196,14 @@ int DeviceBindingService::GetCapabilities(_tds__GetCapabilities *tds__GetCapabil
 	ServiceContext* ctx = (ServiceContext*)this->user;
 	
 	std::string url("http://");
-	url.append(ctx->m_ip);
+	url.append(getServerIpFromClientIp(htonl(this->ip)));
 	
 	tds__GetCapabilitiesResponse->Capabilities = soap_new_tt__Capabilities(this);
 	tds__GetCapabilitiesResponse->Capabilities->Device = soap_new_tt__DeviceCapabilities(this);
 	tds__GetCapabilitiesResponse->Capabilities->Media  = soap_new_tt__MediaCapabilities(this);
 	tds__GetCapabilitiesResponse->Capabilities->Media->XAddr = url + ":8081";
+	tds__GetCapabilitiesResponse->Capabilities->Events = soap_new_tt__EventCapabilities(this);
+	tds__GetCapabilitiesResponse->Capabilities->Events->XAddr = url + ":8084";
 	tds__GetCapabilitiesResponse->Capabilities->Extension  = soap_new_tt__CapabilitiesExtension(this);
 	tds__GetCapabilitiesResponse->Capabilities->Extension->Recording  = soap_new_tt__RecordingCapabilities(this);
 	tds__GetCapabilitiesResponse->Capabilities->Extension->Recording->XAddr = url + ":8082";
@@ -218,6 +221,14 @@ int DeviceBindingService::SetDPAddresses(_tds__SetDPAddresses *tds__SetDPAddress
 int DeviceBindingService::GetHostname(_tds__GetHostname *tds__GetHostname, _tds__GetHostnameResponse *tds__GetHostnameResponse) 
 {
 	std::cout << __PRETTY_FUNCTION__ << std::endl;
+	
+	const char *username = soap_wsse_get_Username(this);
+	if (!username)
+		return this->error; // no username: return FailedAuthentication
+	const char *password = "admin";
+	if (soap_wsse_verify_Password(this, password))
+		return this->error; // password verification failed: return FailedAuthentication
+      
 	char buffer[HOST_NAME_MAX];
 	tds__GetHostnameResponse->HostnameInformation = soap_new_req_tt__HostnameInformation(this, false);
 	tds__GetHostnameResponse->HostnameInformation->Name = soap_new_std__string(this);

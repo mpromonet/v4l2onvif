@@ -9,4 +9,6 @@ struct ServiceContext
 	int         m_port;
 };
 
+std::string getServerIpFromClientIp(int ip);
+
 #endif

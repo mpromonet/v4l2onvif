@@ -14,22 +14,22 @@ SOAP_OBJ=$(SOAP_SRC:%.cpp=%.o)
 
 WSSE_SRC=$(GSOAP_PLUGINS)/wsseapi.c $(GSOAP_PLUGINS)/smdevp.c $(GSOAP_PLUGINS)/mecevp.c $(GSOAP_PLUGINS)/wsaapi.c
 
-server.exe: $(SOAP_OBJ) gen/soapDeviceBindingService.o serverDevice.o gen/soapMediaBindingService.o serverMedia.o gen/soapRecordingBindingService.o serverRecording.o gen/soapReplayBindingService.o serverReplay.o $(WSSE_SRC) server.o   
+server.exe: $(SOAP_OBJ) gen/soapDeviceBindingService.o serverDevice.o gen/soapMediaBindingService.o serverMedia.o gen/soapRecordingBindingService.o serverRecording.o gen/soapReplayBindingService.o serverReplay.o gen/soapEventBindingService.o serverEvent.o gen/soapPullPointSubscriptionBindingService.o serverPullPointSubscription.o $(WSSE_SRC) server.o   
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) -pthread
 
-client.exe: $(SOAP_OBJ) gen/soapDeviceBindingProxy.o gen/soapMediaBindingProxy.o gen/soapRecordingBindingProxy.o gen/soapReplayBindingProxy.o $(WSSE_SRC) client.o 
+client.exe: $(SOAP_OBJ) gen/soapDeviceBindingProxy.o gen/soapMediaBindingProxy.o gen/soapRecordingBindingProxy.o gen/soapReplayBindingProxy.o gen/soapEventBindingProxy.o gen/soapPullPointSubscriptionBindingProxy.o $(WSSE_SRC) client.o 
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS)
 
 gen:
 	mkdir gen
 	
 gen/onvif.h: 
-	wsdl2h -z6 devicemgmt.wsdl media.wsdl recording.wsdl replay.wsdl onvif.xsd b-2.xsd include bf-2.xsd t-1.xsd -o $@.tmp 
+	$(GSOAP_PREFIX)/bin/wsdl2h -Ntev -z6 devicemgmt.wsdl media.wsdl recording.wsdl replay.wsdl event.wsdl onvif.xsd b-2.xsd include bf-2.xsd t-1.xsd bw-2.wsdl -o $@.tmp 
 	echo '#import "wsse.h"' > $@
 	cat $@.tmp >> $@
 
 gen/soapDeviceBindingService.cpp: gen/onvif.h
-	soapcpp2 -2ix $^ -I $(GSOAP_IMPORT) -d gen -f500
+	$(GSOAP_PREFIX)/bin/soapcpp2 -2ix $^ -I $(GSOAP_IMPORT) -d gen -f500 
 
 clean:
 	rm -rf gen *.o

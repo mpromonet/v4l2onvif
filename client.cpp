@@ -15,6 +15,8 @@
 #include "soapMediaBindingProxy.h"
 #include "soapRecordingBindingProxy.h"
 #include "soapReplayBindingProxy.h"
+#include "soapEventBindingProxy.h"
+#include "soapPullPointSubscriptionBindingProxy.h"
 
 #include "wsseapi.h"
 
@@ -103,6 +105,42 @@ int main(int argc, char* argv[])
 				mediaProxy.soap_stream_fault(std::cerr);
 			}	
 		}	
+		if (tds__GetCapabilitiesResponse.Capabilities->Events != NULL)
+		{
+			std::string eventUrl(tds__GetCapabilitiesResponse.Capabilities->Events->XAddr);
+			std::cout << "Event Url:" << eventUrl << std::endl;
+			
+			EventBindingProxy eventProxy(eventUrl.c_str());
+			
+			_tev__CreatePullPointSubscription         tev__CreatePullPointSubscription;
+			_tev__CreatePullPointSubscriptionResponse tev__CreatePullPointSubscriptionResponse;
+			if (eventProxy.CreatePullPointSubscription(&tev__CreatePullPointSubscription, &tev__CreatePullPointSubscriptionResponse) == SOAP_OK)
+			{
+				std::cout << "Pullpoint Url:" << tev__CreatePullPointSubscriptionResponse.SubscriptionReference.Address << std::endl;
+				PullPointSubscriptionBindingProxy pullpoint(tev__CreatePullPointSubscriptionResponse.SubscriptionReference.Address);
+				
+				_tev__PullMessages         tev__PullMessages;
+				_tev__PullMessagesResponse tev__PullMessagesResponse;
+				if (pullpoint.PullMessages(&tev__PullMessages, &tev__PullMessagesResponse) == SOAP_OK)
+				{
+					std::vector<wsnt__NotificationMessageHolderType*>& list(tev__PullMessagesResponse.wsnt__NotificationMessage);
+					std::vector<wsnt__NotificationMessageHolderType*>::iterator it;
+					for (it = list.begin(); it != list.end(); ++it)
+					{
+						wsnt__NotificationMessageHolderType * msg = *it;
+						std::cout << "Message:" << msg->Message.__any << std::endl;
+					}
+				}
+				else
+				{
+					pullpoint.soap_stream_fault(std::cerr);
+				}
+			}
+			else
+			{
+				eventProxy.soap_stream_fault(std::cerr);
+			}
+		}
 		std::unique_ptr<ReplayBindingProxy> replayProxy;
 		if ( (tds__GetCapabilitiesResponse.Capabilities->Extension != NULL) && (tds__GetCapabilitiesResponse.Capabilities->Extension->Replay != NULL) )
 		{

@@ -18,6 +18,8 @@
 #include "soapMediaBindingService.h"
 #include "soapRecordingBindingService.h"
 #include "soapReplayBindingService.h"
+#include "soapEventBindingService.h"
+#include "soapPullPointSubscriptionBindingService.h"
 
 #include "wsseapi.h"
 
@@ -47,9 +49,9 @@ int http_get(struct soap *soap)
 	return retCode;
 } 
 
-int main(int argc, char* argv[])
-{		
-	// search first ip
+std::string getServerIpFromClientIp(int clientip)
+{
+	std::string serverip;
 	char host[NI_MAXHOST];
 	struct ifaddrs *ifaddr = NULL;
 	if (getifaddrs(&ifaddr) == 0) 
@@ -59,18 +61,30 @@ int main(int argc, char* argv[])
 			if (ifa->ifa_addr != NULL)			
 			{
 				int family = ifa->ifa_addr->sa_family;
-				if ( (family == AF_INET) && ((ifa->ifa_flags & IFF_LOOPBACK) == 0) )
+				struct sockaddr_in* addr = (struct sockaddr_in*)ifa->ifa_addr;
+				struct sockaddr_in* mask = (struct sockaddr_in*)ifa->ifa_netmask;
+				if (mask != NULL)
 				{
-					if (getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, sizeof(host), NULL, 0, NI_NUMERICHOST) == 0)
+					if ( (family == AF_INET) && ( (addr->sin_addr.s_addr & mask->sin_addr.s_addr) == (clientip & mask->sin_addr.s_addr)) )
 					{
-						std::cout << host << std::endl;
-						break;
+						if (getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, sizeof(host), NULL, 0, NI_NUMERICHOST) == 0)
+						{
+							serverip = host;
+							std::cout << "serverip:" << host << std::endl;
+							break;
+						}
 					}
 				}
 			}
 		}
 	}
 	freeifaddrs(ifaddr);
+	return serverip;
+}
+	
+int main(int argc, char* argv[])
+{		
+	std::string host("0.0.0.0");
 	
 	ServiceContext mediaCtx("media.wsdl", host, 8081);
 	MediaBindingService mediaService;
@@ -89,17 +103,28 @@ int main(int argc, char* argv[])
 	replayService.user = (void*)&replayCtx;
 	replayService.fget = http_get; 	
 	std::thread replayThread(&ReplayBindingService::run, &replayService, replayCtx.m_port);	
-	
+
+	ServiceContext eventCtx("event.wsdl", host, 8084);
+	EventBindingService eventService;
+	eventService.user = (void*)&eventCtx;
+	eventService.fget = http_get; 	
+	std::thread eventThread(&EventBindingService::run, &eventService, eventCtx.m_port);	
+
+	PullPointSubscriptionBindingService pullPointService;
+	std::thread pullPointThread(&PullPointSubscriptionBindingService::run, &pullPointService, 8085);	
+
 	ServiceContext deviceCtx("devicemgmt.wsdl", host, 8080);
 	DeviceBindingService deviceService;
 	deviceService.user = (void*)&deviceCtx;
 	deviceService.fget = http_get; 
-	soap_wsse_verify_auto(&deviceService, SOAP_SMD_NONE, NULL, 0);
+	soap_register_plugin(&deviceService, soap_wsse);
 	if (deviceService.run(deviceCtx.m_port) != SOAP_OK)
 	{
 		deviceService.soap_stream_fault(std::cerr);
 	}
-	
+		
+	pullPointThread.join();
+	eventThread.join();
 	replayThread.join();
 	recordingThread.join();
 	mediaThread.join();
