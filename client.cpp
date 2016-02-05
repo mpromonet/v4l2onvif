@@ -14,6 +14,7 @@
 #include "soapDeviceBindingProxy.h"
 #include "soapMediaBindingProxy.h"
 #include "soapRecordingBindingProxy.h"
+#include "soapReceiverBindingProxy.h"
 #include "soapReplayBindingProxy.h"
 #include "soapEventBindingProxy.h"
 #include "soapPullPointSubscriptionBindingProxy.h"
@@ -37,8 +38,8 @@ int main(int argc, char* argv[])
 	
 	// create connection to devicemgmt.wsdl server
         DeviceBindingProxy deviceProxy(url.c_str());
-	soap_wsse_add_Security(&deviceProxy);
-	soap_wsse_add_UsernameTokenDigest(&deviceProxy, "Id", username.c_str() , password.c_str());	
+	soap_wsse_add_Security(deviceProxy.soap);
+	soap_wsse_add_UsernameTokenDigest(deviceProxy.soap, "Id", username.c_str() , password.c_str());	
 	
 	// call Device::GetDeviceInformation
 	_tds__GetDeviceInformation         tds__GetDeviceInformation;
@@ -185,6 +186,30 @@ int main(int argc, char* argv[])
 			else
 			{
 				recordingProxy.soap_stream_fault(std::cerr);
+			}
+		}
+		
+		if ( (tds__GetCapabilitiesResponse.Capabilities->Extension != NULL) && (tds__GetCapabilitiesResponse.Capabilities->Extension->Receiver != NULL) )
+		{
+			std::string receiverUrl(tds__GetCapabilitiesResponse.Capabilities->Extension->Receiver->XAddr);
+			std::cout << "Receiver Url:" << receiverUrl << std::endl;
+			
+			ReceiverBindingProxy receiverProxy(receiverUrl.c_str());
+			
+			_trv__GetReceivers         trv__GetReceivers;
+			_trv__GetReceiversResponse trv__GetReceiversResponse;
+			if (receiverProxy.GetReceivers(&trv__GetReceivers, &trv__GetReceiversResponse) == SOAP_OK)
+			{
+				std::vector<tt__Receiver*>& recordings(trv__GetReceiversResponse.Receivers);
+				for (std::vector<tt__Receiver*>::iterator it(recordings.begin()) ; it != recordings.end(); ++it)
+				{
+					std::string token((*it)->Token);
+					std::cout << "Receiver:" << token << std::endl;					
+				}
+			}
+			else
+			{
+				receiverProxy.soap_stream_fault(std::cerr);
 			}
 		}
 	}

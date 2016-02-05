@@ -11,12 +11,12 @@
 
 #include <net/if.h>
 #include <ifaddrs.h>
-#include <thread>
 
 #include "DeviceBinding.nsmap"
 #include "soapDeviceBindingService.h"
 #include "soapMediaBindingService.h"
 #include "soapRecordingBindingService.h"
+#include "soapReceiverBindingService.h"
 #include "soapReplayBindingService.h"
 #include "soapEventBindingService.h"
 #include "soapPullPointSubscriptionBindingService.h"
@@ -85,49 +85,64 @@ std::string getServerIpFromClientIp(int clientip)
 int main(int argc, char* argv[])
 {		
 	std::string host("0.0.0.0");
+	int port = 8080;
 	
-	ServiceContext mediaCtx("media.wsdl", host, 8081);
-	MediaBindingService mediaService;
-	mediaService.user = (void*)&mediaCtx;
-	mediaService.fget = http_get; 
-	std::thread mediaThread(&MediaBindingService::run, &mediaService, mediaCtx.m_port);	
+	struct soap *soap = soap_new();
+	ServiceContext deviceCtx("devicemgmt.wsdl", port);
+	soap->user = (void*)&deviceCtx;
+	soap->fget = http_get; 
+	{	
+		MediaBindingService mediaService(soap);
+		RecordingBindingService recordingService(soap);
+		ReceiverBindingService receiverService(soap);
+		ReplayBindingService replayService(soap);
+		EventBindingService eventService(soap);
+		PullPointSubscriptionBindingService pullPointService(soap);
 
-	ServiceContext recordingCtx("recording.wsdl", host, 8082);
-	RecordingBindingService recordingService;
-	recordingService.user = (void*)&recordingCtx;
-	recordingService.fget = http_get; 	
-	std::thread recordingThread(&RecordingBindingService::run, &recordingService, recordingCtx.m_port);	
-
-	ServiceContext replayCtx("replay.wsdl", host, 8083);
-	ReplayBindingService replayService;
-	replayService.user = (void*)&replayCtx;
-	replayService.fget = http_get; 	
-	std::thread replayThread(&ReplayBindingService::run, &replayService, replayCtx.m_port);	
-
-	ServiceContext eventCtx("event.wsdl", host, 8084);
-	EventBindingService eventService;
-	eventService.user = (void*)&eventCtx;
-	eventService.fget = http_get; 	
-	std::thread eventThread(&EventBindingService::run, &eventService, eventCtx.m_port);	
-
-	PullPointSubscriptionBindingService pullPointService;
-	std::thread pullPointThread(&PullPointSubscriptionBindingService::run, &pullPointService, 8085);	
-
-	ServiceContext deviceCtx("devicemgmt.wsdl", host, 8080);
-	DeviceBindingService deviceService;
-	deviceService.user = (void*)&deviceCtx;
-	deviceService.fget = http_get; 
-	soap_register_plugin(&deviceService, soap_wsse);
-	if (deviceService.run(deviceCtx.m_port) != SOAP_OK)
-	{
-		deviceService.soap_stream_fault(std::cerr);
-	}
+		DeviceBindingService deviceService(soap);
+		soap_register_plugin(deviceService.soap, soap_wsse);		
 		
-	pullPointThread.join();
-	eventThread.join();
-	replayThread.join();
-	recordingThread.join();
-	mediaThread.join();
+		if (!soap_valid_socket(soap_bind(soap, NULL, deviceCtx.m_port, 100))) 
+		{
+			soap_stream_fault(soap, std::cerr);
+		}
+		else
+		{
+			while (soap_accept(soap) != SOAP_OK) 
+			{
+				if (soap_begin_serve(soap))
+				{
+					soap_stream_fault(soap, std::cerr);
+				}
+				else if (deviceService.dispatch() != SOAP_NO_METHOD)
+				{
+				}
+				else if (recordingService.dispatch() != SOAP_NO_METHOD)
+				{
+				}
+				else if (receiverService.dispatch() != SOAP_NO_METHOD)
+				{
+				}
+				else if (replayService.dispatch() != SOAP_NO_METHOD)
+				{
+				}
+				else if (eventService.dispatch() != SOAP_NO_METHOD)
+				{
+				}
+				else if (pullPointService.dispatch() != SOAP_NO_METHOD)
+				{
+				}
+				else if (mediaService.dispatch() != SOAP_NO_METHOD)
+				{
+					soap_stream_fault(soap, std::cerr);
+				}
+			}
+		}
+	}
+	
+	soap_destroy(soap);
+	soap_end(soap);
+	soap_free(soap); 			
 	
 	return 0;
 }
