@@ -28,11 +28,13 @@
 int http_get(struct soap *soap)
 {
 	int retCode = 404;
-	ServiceContext* ctx = (ServiceContext*)soap->user;
-	FILE *fd = fopen(ctx->m_wsdlurl.c_str(), "rb"); 
+	FILE *fd = fopen(soap->path + 1, "rb"); 
 	if (fd != NULL)
 	{
-		soap->http_content = "text/xml"; 
+		if (!soap_tag_cmp(soap->path, "*.html"))
+			soap->http_content = "text/html"; 
+		if (!soap_tag_cmp(soap->path, "*.wsdl"))
+			soap->http_content = "text/xml"; 
 		soap_response(soap, SOAP_FILE);
 		for (;;)
 		{
