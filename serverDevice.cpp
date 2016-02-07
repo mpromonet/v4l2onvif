@@ -11,8 +11,11 @@
 
 #include <ifaddrs.h>
 #include <net/if.h>
+#include <netpacket/packet.h>
 
+#include <map>
 #include <sstream>
+#include <iomanip>
 
 #include "soapDeviceBindingService.h"
 #include "serviceContext.h"
@@ -301,8 +304,41 @@ int DeviceBindingService::GetNetworkInterfaces(_tds__GetNetworkInterfaces *tds__
 	struct ifaddrs *ifaddr = NULL;
 	if (getifaddrs(&ifaddr) == 0) 
 	{
+		// get MAC addresses
+		std::map<std::string,std::string> eterMap;
 		for (struct ifaddrs* ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
 		{
+			if (ifa->ifa_addr != NULL)			
+			{
+				int family = ifa->ifa_addr->sa_family;
+				if (family == AF_PACKET)
+				{
+					struct sockaddr_ll *s = (struct sockaddr_ll*)ifa->ifa_addr;
+					std::ostringstream os;
+					os << std::hex << std::setw(2) << std::setfill('0');
+					for (int i=0; i <s->sll_halen; i++)
+					{
+						if (i!=0) os <<":";
+						os << s->sll_addr[i];
+					}
+					eterMap[ifa->ifa_name] = os.str();
+				}					
+			}
+		}
+		
+		// get corresponding IP address		
+		for (struct ifaddrs* ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
+		{
+			int prefix = 0;
+			if (ifa->ifa_netmask != NULL)
+			{
+				unsigned int mask = htonl(((struct sockaddr_in *)(ifa->ifa_netmask))->sin_addr.s_addr);
+				while (mask  != 0)
+				{
+					mask <<= 1;
+					prefix++;
+				}
+			}
 			if (ifa->ifa_addr != NULL)			
 			{
 				int family = ifa->ifa_addr->sa_family;
@@ -315,10 +351,12 @@ int DeviceBindingService::GetNetworkInterfaces(_tds__GetNetworkInterfaces *tds__
 						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->Info = soap_new_tt__NetworkInterfaceInfo(this->soap);
 						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->Info->Name = soap_new_std__string(this->soap);
 						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->Info->Name->assign(ifa->ifa_name);
+						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->Info->HwAddress = eterMap[ifa->ifa_name];
 						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4 = soap_new_tt__IPv4NetworkInterface(this->soap);
 						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4->Config = soap_new_tt__IPv4Configuration(this->soap);
 						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4->Config->Manual.push_back(soap_new_tt__PrefixedIPv4Address(this->soap));
-						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4->Config->Manual.back()->Address = host;						
+						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4->Config->Manual.back()->Address = host;		
+						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4->Config->Manual.back()->PrefixLength = prefix;
 					}
 				}
 			}
