@@ -3,8 +3,10 @@
 
 struct ServiceContext
 {
-	ServiceContext(const std::string& wsdlurl, int port = 0) : m_wsdlurl(wsdlurl), m_port(port) {};
 	std::string m_wsdlurl;
+	std::string m_rtspurl;
+	std::string m_device;
+	std::string m_rtspport;
 	int         m_port;
 };
 

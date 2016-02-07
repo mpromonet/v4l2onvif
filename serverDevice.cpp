@@ -319,9 +319,10 @@ int DeviceBindingService::GetNetworkInterfaces(_tds__GetNetworkInterfaces *tds__
 					for (int i=0; i <s->sll_halen; i++)
 					{
 						if (i!=0) os <<":";
-						os << s->sll_addr[i];
+						os << (int)s->sll_addr[i];
 					}
 					eterMap[ifa->ifa_name] = os.str();
+					std::cout <<  ifa->ifa_name <<  " " << os.str() << std::endl;
 				}					
 			}
 		}

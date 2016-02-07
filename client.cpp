@@ -64,6 +64,32 @@ int main(int argc, char* argv[])
 	{
 		deviceProxy.soap_stream_fault(std::cerr);
 	}
+
+	// call Device::GetNetworkInterfaces
+	_tds__GetNetworkInterfaces         tds__GetNetworkInterfaces;
+	_tds__GetNetworkInterfacesResponse tds__GetNetworkInterfacesResponse;
+	if (deviceProxy.GetNetworkInterfaces(&tds__GetNetworkInterfaces, &tds__GetNetworkInterfacesResponse) == SOAP_OK)
+	{
+		for (auto iface : tds__GetNetworkInterfacesResponse.NetworkInterfaces)
+		{
+			if (iface->Info != NULL)
+			{
+				std::cout << iface->Info->Name->c_str() << std::endl;
+				std::cout << iface->Info->HwAddress << std::endl;			
+			}
+			if ( (iface->IPv4 != NULL) && (iface->IPv4->Config != NULL) )
+			{
+				for (auto addr : iface->IPv4->Config ->Manual)
+				{
+					std::cout << addr->Address  << "/" << addr->PrefixLength << std::endl;					
+				}
+			}
+		}
+	}
+	else
+	{
+		deviceProxy.soap_stream_fault(std::cerr);
+	}
 	
 	// call Device::GetCapabilities
 	_tds__GetCapabilities         tds__GetCapabilities;
@@ -82,10 +108,9 @@ int main(int argc, char* argv[])
 			_trt__GetProfilesResponse trt__GetProfilesResponse;
 			if (mediaProxy.GetProfiles(&trt__GetProfiles, &trt__GetProfilesResponse) == SOAP_OK)
 			{		
-				std::vector<tt__Profile*>& profiles(trt__GetProfilesResponse.Profiles);
-				for (std::vector<tt__Profile*>::iterator it(profiles.begin()) ; it != profiles.end(); ++it)
+				for (auto profile : trt__GetProfilesResponse.Profiles)
 				{
-					std::string token((*it)->token);
+					std::string token(profile->token);
 					std::cout << "MediaProfile:" << token << std::endl;
 					
 					_trt__GetStreamUri         trt__GetStreamUri;
@@ -124,11 +149,8 @@ int main(int argc, char* argv[])
 				_tev__PullMessagesResponse tev__PullMessagesResponse;
 				if (pullpoint.PullMessages(&tev__PullMessages, &tev__PullMessagesResponse) == SOAP_OK)
 				{
-					std::vector<wsnt__NotificationMessageHolderType*>& list(tev__PullMessagesResponse.wsnt__NotificationMessage);
-					std::vector<wsnt__NotificationMessageHolderType*>::iterator it;
-					for (it = list.begin(); it != list.end(); ++it)
+					for (auto msg : tev__PullMessagesResponse.wsnt__NotificationMessage)
 					{
-						wsnt__NotificationMessageHolderType * msg = *it;
 						std::cout << "Message:" << msg->Message.__any << std::endl;
 					}
 				}
@@ -161,10 +183,9 @@ int main(int argc, char* argv[])
 			_trc__GetRecordingsResponse trc__GetRecordingsResponse;
 			if (recordingProxy.GetRecordings(&trc__GetRecordings, &trc__GetRecordingsResponse) == SOAP_OK)
 			{
-				std::vector<tt__GetRecordingsResponseItem*>& recordings(trc__GetRecordingsResponse.RecordingItem);
-				for (std::vector<tt__GetRecordingsResponseItem*>::iterator it(recordings.begin()) ; it != recordings.end(); ++it)
+				for (auto recording : trc__GetRecordingsResponse.RecordingItem)
 				{
-					std::string token((*it)->RecordingToken);
+					std::string token(recording->RecordingToken);
 					std::cout << "Recording:" << token << std::endl;
 					
 					if (replayProxy.get() != NULL)
@@ -200,10 +221,9 @@ int main(int argc, char* argv[])
 			_trv__GetReceiversResponse trv__GetReceiversResponse;
 			if (receiverProxy.GetReceivers(&trv__GetReceivers, &trv__GetReceiversResponse) == SOAP_OK)
 			{
-				std::vector<tt__Receiver*>& recordings(trv__GetReceiversResponse.Receivers);
-				for (std::vector<tt__Receiver*>::iterator it(recordings.begin()) ; it != recordings.end(); ++it)
+				for (auto receiver : trv__GetReceiversResponse.Receivers)
 				{
-					std::string token((*it)->Token);
+					std::string token(receiver->Token);
 					std::cout << "Receiver:" << token << std::endl;					
 				}
 			}

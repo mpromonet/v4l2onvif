@@ -22,6 +22,13 @@ int MediaBindingService::GetServiceCapabilities(_trt__GetServiceCapabilities *tr
 int MediaBindingService::GetVideoSources(_trt__GetVideoSources *trt__GetVideoSources, _trt__GetVideoSourcesResponse *trt__GetVideoSourcesResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
+	trt__GetVideoSourcesResponse->VideoSources.push_back(soap_new_tt__VideoSource(this->soap));
+	trt__GetVideoSourcesResponse->VideoSources.back()->token = ctx->m_device;
+	trt__GetVideoSourcesResponse->VideoSources.back()->Resolution = soap_new_req_tt__VideoResolution(this->soap, 640, 480);
+	trt__GetVideoSourcesResponse->VideoSources.back()->Imaging = soap_new_tt__ImagingSettings(this->soap);
+	
 	return SOAP_OK;
 }
 
@@ -52,12 +59,12 @@ int MediaBindingService::GetProfile(_trt__GetProfile *trt__GetProfile, _trt__Get
 int MediaBindingService::GetProfiles(_trt__GetProfiles *trt__GetProfiles, _trt__GetProfilesResponse *trt__GetProfilesResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;	
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
 	trt__GetProfilesResponse->Profiles.push_back(soap_new_tt__Profile(this->soap));
-	trt__GetProfilesResponse->Profiles.back()->Name = "video.264";
-	trt__GetProfilesResponse->Profiles.back()->token = "video.264";
-	trt__GetProfilesResponse->Profiles.push_back(soap_new_tt__Profile(this->soap));
-	trt__GetProfilesResponse->Profiles.back()->Name = "video.mp4e";
-	trt__GetProfilesResponse->Profiles.back()->token = "video.mp4e";
+	trt__GetProfilesResponse->Profiles.back()->Name = ctx->m_device;
+	trt__GetProfilesResponse->Profiles.back()->token = ctx->m_rtspurl;
+	
 	return SOAP_OK;
 }
 
@@ -418,9 +425,13 @@ int MediaBindingService::GetGuaranteedNumberOfVideoEncoderInstances(_trt__GetGua
 int MediaBindingService::GetStreamUri(_trt__GetStreamUri *trt__GetStreamUri, _trt__GetStreamUriResponse *trt__GetStreamUriResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
 	trt__GetStreamUriResponse->MediaUri = soap_new_tt__MediaUri(this->soap);
 	trt__GetStreamUriResponse->MediaUri->Uri = "rtsp://";
-	trt__GetStreamUriResponse->MediaUri->Uri.append(getServerIpFromClientIp(htonl(this->soap->ip)));
+	trt__GetStreamUriResponse->MediaUri->Uri.append(getServerIpFromClientIp(htonl(this->soap->ip)));	
+	trt__GetStreamUriResponse->MediaUri->Uri.append(":");
+	trt__GetStreamUriResponse->MediaUri->Uri.append(ctx->m_rtspport);
 	trt__GetStreamUriResponse->MediaUri->Uri.append("/");
 	if (trt__GetStreamUri != NULL)
 	{

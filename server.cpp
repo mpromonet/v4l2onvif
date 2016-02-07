@@ -18,6 +18,7 @@
 #include "soapRecordingBindingService.h"
 #include "soapReceiverBindingService.h"
 #include "soapReplayBindingService.h"
+#include "soapImagingBindingService.h"
 #include "soapEventBindingService.h"
 #include "soapPullPointSubscriptionBindingService.h"
 
@@ -88,9 +89,15 @@ int main(int argc, char* argv[])
 {		
 	std::string host("0.0.0.0");
 	int port = 8080;
+	std::string device("/dev/video0");
+	
+	ServiceContext deviceCtx;
+	deviceCtx.m_port = port;
+	deviceCtx.m_rtspport = "554";
+	deviceCtx.m_device = device;
+	deviceCtx.m_rtspurl = "unicast";
 	
 	struct soap *soap = soap_new();
-	ServiceContext deviceCtx("devicemgmt.wsdl", port);
 	soap->user = (void*)&deviceCtx;
 	soap->fget = http_get; 
 	{	
@@ -98,6 +105,7 @@ int main(int argc, char* argv[])
 		RecordingBindingService recordingService(soap);
 		ReceiverBindingService receiverService(soap);
 		ReplayBindingService replayService(soap);
+		ImagingBindingService imagingService(soap);
 		EventBindingService eventService(soap);
 		PullPointSubscriptionBindingService pullPointService(soap);
 
@@ -126,6 +134,9 @@ int main(int argc, char* argv[])
 				{
 				}
 				else if (replayService.dispatch() != SOAP_NO_METHOD)
+				{
+				}
+				else if (imagingService.dispatch() != SOAP_NO_METHOD)
 				{
 				}
 				else if (eventService.dispatch() != SOAP_NO_METHOD)
