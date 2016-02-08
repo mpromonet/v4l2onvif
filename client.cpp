@@ -42,6 +42,7 @@ int main(int argc, char* argv[])
 	soap_wsse_add_UsernameTokenDigest(deviceProxy.soap, "Id", username.c_str() , password.c_str());	
 	
 	// call Device::GetDeviceInformation
+	std::cout << "=>Device::GetDeviceInformation" << std::endl;	
 	_tds__GetDeviceInformation         tds__GetDeviceInformation;
 	_tds__GetDeviceInformationResponse tds__GetDeviceInformationResponse;
 	if (deviceProxy.GetDeviceInformation(&tds__GetDeviceInformation, &tds__GetDeviceInformationResponse) == SOAP_OK)
@@ -54,6 +55,7 @@ int main(int argc, char* argv[])
 	}
 
 	// call Device::GetHostname
+	std::cout << "=>Device::GetHostname" << std::endl;	
 	_tds__GetHostname         tds__GetHostname;
 	_tds__GetHostnameResponse tds__GetHostnameResponse;
 	if (deviceProxy.GetHostname(&tds__GetHostname, &tds__GetHostnameResponse) == SOAP_OK)
@@ -66,6 +68,7 @@ int main(int argc, char* argv[])
 	}
 
 	// call Device::GetNetworkInterfaces
+	std::cout << "=>Device::GetNetworkInterfaces" << std::endl;	
 	_tds__GetNetworkInterfaces         tds__GetNetworkInterfaces;
 	_tds__GetNetworkInterfacesResponse tds__GetNetworkInterfacesResponse;
 	if (deviceProxy.GetNetworkInterfaces(&tds__GetNetworkInterfaces, &tds__GetNetworkInterfacesResponse) == SOAP_OK)
@@ -74,14 +77,13 @@ int main(int argc, char* argv[])
 		{
 			if (iface->Info != NULL)
 			{
-				std::cout << iface->Info->Name->c_str() << std::endl;
-				std::cout << iface->Info->HwAddress << std::endl;			
+				std::cout << iface->Info->Name->c_str() <<  " MAC:" << iface->Info->HwAddress << std::endl;			
 			}
 			if ( (iface->IPv4 != NULL) && (iface->IPv4->Config != NULL) )
 			{
 				for (auto addr : iface->IPv4->Config ->Manual)
 				{
-					std::cout << addr->Address  << "/" << addr->PrefixLength << std::endl;					
+					std::cout << "IP:" << addr->Address  << "/" << addr->PrefixLength << std::endl;					
 				}
 			}
 		}
@@ -91,7 +93,25 @@ int main(int argc, char* argv[])
 		deviceProxy.soap_stream_fault(std::cerr);
 	}
 	
+	// call Device::GetServices
+	std::cout << "=>Device::GetServices" << std::endl;		
+	_tds__GetServices         tds__GetServices;
+	tds__GetServices.IncludeCapability = true;
+	_tds__GetServicesResponse tds__GetServicesResponse;
+	if (deviceProxy.GetServices(&tds__GetServices, &tds__GetServicesResponse) == SOAP_OK)
+	{
+		for (auto service : tds__GetServicesResponse.Service)
+		{
+			std::cout << service->Namespace << " " << service->XAddr << " " << service->Version->Major << "." << service->Version->Minor << std::endl;
+			if (service->Capabilities)
+			{
+				std::cout << service->Capabilities->__any << std::endl;
+			}
+		}
+	}
+	
 	// call Device::GetCapabilities
+	std::cout << "=>Device::GetCapabilities" << std::endl;		
 	_tds__GetCapabilities         tds__GetCapabilities;
 	_tds__GetCapabilitiesResponse tds__GetCapabilitiesResponse;
 	if (deviceProxy.GetCapabilities(&tds__GetCapabilities, &tds__GetCapabilitiesResponse) == SOAP_OK)
@@ -104,6 +124,7 @@ int main(int argc, char* argv[])
 			MediaBindingProxy mediaProxy(mediaUrl.c_str());
 			
 			// call Device::GetProfiles
+			std::cout << "=>Device::GetProfiles" << std::endl;					
 			_trt__GetProfiles         trt__GetProfiles;
 			_trt__GetProfilesResponse trt__GetProfilesResponse;
 			if (mediaProxy.GetProfiles(&trt__GetProfiles, &trt__GetProfilesResponse) == SOAP_OK)

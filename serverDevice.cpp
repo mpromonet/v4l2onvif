@@ -65,7 +65,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	}
 	
 	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
-	tds__GetServicesResponse->Service.back()->Namespace  = "http://www.onvif.org/ver10/event/wsdl";
+	tds__GetServicesResponse->Service.back()->Namespace  = "http://www.onvif.org/ver10/events/wsdl";
 	tds__GetServicesResponse->Service.back()->XAddr = url;
 	tds__GetServicesResponse->Service.back()->Version = soap_new_req_tt__OnvifVersion(this->soap,2,6);
 	if (tds__GetServices->IncludeCapability)
