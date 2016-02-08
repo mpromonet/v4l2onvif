@@ -17,7 +17,7 @@ gen:
 	mkdir gen
 	
 gen/onvif.h: 
-	$(GSOAP_PREFIX)/bin/wsdl2h -Ntev -z6 devicemgmt.wsdl media.wsdl recording.wsdl replay.wsdl receiver.wsdl event.wsdl imaging.wsdl onvif.xsd b-2.xsd include bf-2.xsd t-1.xsd bw-2.wsdl -o $@.tmp 
+	$(GSOAP_PREFIX)/bin/wsdl2h -d -Ntev -z6 devicemgmt.wsdl media.wsdl recording.wsdl replay.wsdl receiver.wsdl event.wsdl imaging.wsdl onvif.xsd b-2.xsd include bf-2.xsd t-1.xsd bw-2.wsdl -o $@.tmp 
 	echo '#import "wsse.h"' > $@
 	cat $@.tmp >> $@
 

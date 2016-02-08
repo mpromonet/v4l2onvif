@@ -24,6 +24,90 @@
 int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds__GetServicesResponse *tds__GetServicesResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;	
+	std::ostringstream os;
+	os << "http://" << getServerIpFromClientIp(htonl(this->soap->ip)) << ":" << ctx->m_port;
+	std::string url(os.str());
+	
+	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
+	tds__GetServicesResponse->Service.back()->Namespace  = "http://www.onvif.org/ver10/device/wsdl";
+	tds__GetServicesResponse->Service.back()->XAddr = url;
+	tds__GetServicesResponse->Service.back()->Version = soap_new_req_tt__OnvifVersion(this->soap,2,5);
+	if (tds__GetServices->IncludeCapability)
+	{
+		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
+		tds__DeviceServiceCapabilities *capabilities = soap_new_tds__DeviceServiceCapabilities(this->soap);
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+	}
+
+	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
+	tds__GetServicesResponse->Service.back()->Namespace  = "http://www.onvif.org/ver10/media/wsdl";
+	tds__GetServicesResponse->Service.back()->XAddr = url;
+	tds__GetServicesResponse->Service.back()->Version = soap_new_req_tt__OnvifVersion(this->soap,2,6);
+	if (tds__GetServices->IncludeCapability)
+	{
+		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
+		trt__Capabilities *capabilities = soap_new_trt__Capabilities(this->soap);
+		capabilities->ProfileCapabilities = soap_new_trt__ProfileCapabilities(this->soap);
+		capabilities->StreamingCapabilities = soap_new_trt__StreamingCapabilities(this->soap);
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+	}
+
+	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
+	tds__GetServicesResponse->Service.back()->Namespace  = "http://www.onvif.org/ver20/imaging/wsdl";
+	tds__GetServicesResponse->Service.back()->XAddr = url;
+	tds__GetServicesResponse->Service.back()->Version = soap_new_req_tt__OnvifVersion(this->soap,2,5);
+	if (tds__GetServices->IncludeCapability)
+	{
+		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
+		tt__ImagingCapabilities *capabilities = soap_new_tt__ImagingCapabilities(this->soap);
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+	}
+	
+	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
+	tds__GetServicesResponse->Service.back()->Namespace  = "http://www.onvif.org/ver10/event/wsdl";
+	tds__GetServicesResponse->Service.back()->XAddr = url;
+	tds__GetServicesResponse->Service.back()->Version = soap_new_req_tt__OnvifVersion(this->soap,2,6);
+	if (tds__GetServices->IncludeCapability)
+	{
+		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
+		tt__EventCapabilities *capabilities = soap_new_tt__EventCapabilities(this->soap);
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+	}
+
+	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
+	tds__GetServicesResponse->Service.back()->Namespace  = "http://www.onvif.org/ver10/recording/wsdl";
+	tds__GetServicesResponse->Service.back()->XAddr = url;
+	tds__GetServicesResponse->Service.back()->Version = soap_new_req_tt__OnvifVersion(this->soap,2,5);
+	if (tds__GetServices->IncludeCapability)
+	{
+		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
+		tt__RecordingCapabilities *capabilities = soap_new_tt__RecordingCapabilities(this->soap);
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+	}
+
+	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
+	tds__GetServicesResponse->Service.back()->Namespace  = "http://www.onvif.org/ver10/replay/wsdl";
+	tds__GetServicesResponse->Service.back()->XAddr = url;
+	tds__GetServicesResponse->Service.back()->Version = soap_new_req_tt__OnvifVersion(this->soap,2,2);
+	if (tds__GetServices->IncludeCapability)
+	{
+		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
+		tt__ReplayCapabilities *capabilities = soap_new_tt__ReplayCapabilities(this->soap);
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+	}
+
+	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
+	tds__GetServicesResponse->Service.back()->Namespace  = "http://www.onvif.org/ver10/receiver/wsdl";
+	tds__GetServicesResponse->Service.back()->XAddr = url;
+	tds__GetServicesResponse->Service.back()->Version = soap_new_req_tt__OnvifVersion(this->soap,2,1);
+	if (tds__GetServices->IncludeCapability)
+	{
+		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
+		tt__ReceiverCapabilities *capabilities = soap_new_tt__ReceiverCapabilities(this->soap);
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+	}
+
 	return SOAP_OK;
 }
 
@@ -207,8 +291,11 @@ int DeviceBindingService::GetCapabilities(_tds__GetCapabilities *tds__GetCapabil
 	
 	tds__GetCapabilitiesResponse->Capabilities = soap_new_tt__Capabilities(this->soap);
 	tds__GetCapabilitiesResponse->Capabilities->Device = soap_new_tt__DeviceCapabilities(this->soap);
+	tds__GetCapabilitiesResponse->Capabilities->Device->XAddr = url;
 	tds__GetCapabilitiesResponse->Capabilities->Media  = soap_new_tt__MediaCapabilities(this->soap);
 	tds__GetCapabilitiesResponse->Capabilities->Media->XAddr = url;
+	tds__GetCapabilitiesResponse->Capabilities->Imaging = soap_new_tt__ImagingCapabilities(this->soap);
+	tds__GetCapabilitiesResponse->Capabilities->Imaging->XAddr = url;
 	tds__GetCapabilitiesResponse->Capabilities->Events = soap_new_tt__EventCapabilities(this->soap);
 	tds__GetCapabilitiesResponse->Capabilities->Events->XAddr = url;
 	tds__GetCapabilitiesResponse->Capabilities->Extension  = soap_new_tt__CapabilitiesExtension(this->soap);
