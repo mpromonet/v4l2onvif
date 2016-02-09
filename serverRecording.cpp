@@ -34,7 +34,9 @@ int RecordingBindingService::GetRecordings(_trc__GetRecordings *trc__GetRecordin
 {
 	std::cout << __FUNCTION__ << std::endl;
 	trc__GetRecordingsResponse->RecordingItem.push_back(soap_new_tt__GetRecordingsResponseItem(this->soap));
-	trc__GetRecordingsResponse->RecordingItem.back()->RecordingToken = "token";	
+	trc__GetRecordingsResponse->RecordingItem.back()->RecordingToken = "recordtoken";
+	trc__GetRecordingsResponse->RecordingItem.back()->Configuration	= soap_new_tt__RecordingConfiguration(this->soap);
+	trc__GetRecordingsResponse->RecordingItem.back()->Configuration->Source = soap_new_tt__RecordingSourceInformation(this->soap);
 	return SOAP_OK;
 }
 
@@ -95,6 +97,13 @@ int RecordingBindingService::DeleteRecordingJob(_trc__DeleteRecordingJob *trc__D
 int RecordingBindingService::GetRecordingJobs(_trc__GetRecordingJobs *trc__GetRecordingJobs, _trc__GetRecordingJobsResponse *trc__GetRecordingJobsResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	trc__GetRecordingJobsResponse->JobItem.push_back(soap_new_tt__GetRecordingJobsResponseItem(this->soap));
+	trc__GetRecordingJobsResponse->JobItem.back()->JobToken = "jobtoken";	
+	trc__GetRecordingJobsResponse->JobItem.back()->JobConfiguration	= soap_new_tt__RecordingJobConfiguration(this->soap);
+	trc__GetRecordingJobsResponse->JobItem.back()->JobConfiguration->RecordingToken = "recordtoken";	
+	trc__GetRecordingJobsResponse->JobItem.back()->JobConfiguration->Source.push_back(soap_new_tt__RecordingJobSource(this->soap));
+	trc__GetRecordingJobsResponse->JobItem.back()->JobConfiguration->Source.back()->SourceToken = soap_new_tt__SourceReference(this->soap);
+	trc__GetRecordingJobsResponse->JobItem.back()->JobConfiguration->Source.back()->SourceToken->Token = "sourcetoken";
 	return SOAP_OK;
 }
 
@@ -107,6 +116,11 @@ int RecordingBindingService::SetRecordingJobConfiguration(_trc__SetRecordingJobC
 int RecordingBindingService::GetRecordingJobConfiguration(_trc__GetRecordingJobConfiguration *trc__GetRecordingJobConfiguration, _trc__GetRecordingJobConfigurationResponse *trc__GetRecordingJobConfigurationResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	trc__GetRecordingJobConfigurationResponse->JobConfiguration = soap_new_tt__RecordingJobConfiguration(this->soap);
+	trc__GetRecordingJobConfigurationResponse->JobConfiguration->RecordingToken = "recordtoken";	
+	trc__GetRecordingJobConfigurationResponse->JobConfiguration->Source.push_back(soap_new_tt__RecordingJobSource(this->soap));
+	trc__GetRecordingJobConfigurationResponse->JobConfiguration->Source.back()->SourceToken = soap_new_tt__SourceReference(this->soap);
+	trc__GetRecordingJobConfigurationResponse->JobConfiguration->Source.back()->SourceToken->Token = "sourcetoken";
 	return SOAP_OK;
 }
 

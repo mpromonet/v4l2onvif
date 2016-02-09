@@ -284,6 +284,11 @@ int DeviceBindingService::SetUser(_tds__SetUser *tds__SetUser, _tds__SetUserResp
 int DeviceBindingService::GetWsdlUrl(_tds__GetWsdlUrl *tds__GetWsdlUrl, _tds__GetWsdlUrlResponse *tds__GetWsdlUrlResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;	
+	std::ostringstream os;
+	os << "http://" << getServerIpFromClientIp(htonl(this->soap->ip)) << ":" << ctx->m_port;
+	
+	tds__GetWsdlUrlResponse->WsdlUrl = os.str();
 	return SOAP_OK;
 }
 
@@ -723,6 +728,11 @@ int DeviceBindingService::CreateStorageConfiguration(_tds__CreateStorageConfigur
 int DeviceBindingService::GetStorageConfiguration(_tds__GetStorageConfiguration *tds__GetStorageConfiguration, _tds__GetStorageConfigurationResponse *tds__GetStorageConfigurationResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	tds__GetStorageConfigurationResponse->StorageConfiguration = soap_new_tds__StorageConfiguration(this->soap);
+	tds__GetStorageConfigurationResponse->StorageConfiguration->token = "storagetoken";
+	tds__GetStorageConfigurationResponse->StorageConfiguration->Data = soap_new_tds__StorageConfigurationData(this->soap);
+	tds__GetStorageConfigurationResponse->StorageConfiguration->Data->LocalPath = soap_new_std__string(this->soap);
+	tds__GetStorageConfigurationResponse->StorageConfiguration->Data->LocalPath->assign("/tmp");
 	return SOAP_OK;
 }
 

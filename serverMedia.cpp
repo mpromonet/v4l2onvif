@@ -9,7 +9,6 @@
 **
 ** -------------------------------------------------------------------------*/
 
-
 #include "soapMediaBindingService.h"
 #include "serviceContext.h"
 
@@ -24,10 +23,19 @@ int MediaBindingService::GetVideoSources(_trt__GetVideoSources *trt__GetVideoSou
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
 	
-	trt__GetVideoSourcesResponse->VideoSources.push_back(soap_new_tt__VideoSource(this->soap));
-	trt__GetVideoSourcesResponse->VideoSources.back()->token = ctx->m_device;
-	trt__GetVideoSourcesResponse->VideoSources.back()->Resolution = soap_new_req_tt__VideoResolution(this->soap, 640, 480);
-	trt__GetVideoSourcesResponse->VideoSources.back()->Imaging = soap_new_tt__ImagingSettings(this->soap);
+	int width;
+	int height;
+	int format;
+	for (auto it: ctx->m_devices) 
+	{
+		if (getFormat(it.first.c_str(), width, height, format))
+		{
+			trt__GetVideoSourcesResponse->VideoSources.push_back(soap_new_tt__VideoSource(this->soap));
+			trt__GetVideoSourcesResponse->VideoSources.back()->token = it.first;
+			trt__GetVideoSourcesResponse->VideoSources.back()->Resolution = soap_new_req_tt__VideoResolution(this->soap, width, height);
+			trt__GetVideoSourcesResponse->VideoSources.back()->Imaging = soap_new_tt__ImagingSettings(this->soap);		
+		}
+	}
 	
 	return SOAP_OK;
 }
@@ -53,6 +61,16 @@ int MediaBindingService::CreateProfile(_trt__CreateProfile *trt__CreateProfile, 
 int MediaBindingService::GetProfile(_trt__GetProfile *trt__GetProfile, _trt__GetProfileResponse *trt__GetProfileResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
+	auto it = ctx->m_devices.find(trt__GetProfile->ProfileToken);
+	if (it != ctx->m_devices.end())
+	{
+		trt__GetProfileResponse->Profile = soap_new_tt__Profile(this->soap);
+		trt__GetProfileResponse->Profile->Name = it->first;
+		trt__GetProfileResponse->Profile->token = it->first;
+	}
+	
 	return SOAP_OK;
 }
 
@@ -61,9 +79,12 @@ int MediaBindingService::GetProfiles(_trt__GetProfiles *trt__GetProfiles, _trt__
 	std::cout << __FUNCTION__ << std::endl;	
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
 	
-	trt__GetProfilesResponse->Profiles.push_back(soap_new_tt__Profile(this->soap));
-	trt__GetProfilesResponse->Profiles.back()->Name = ctx->m_device;
-	trt__GetProfilesResponse->Profiles.back()->token = ctx->m_rtspurl;
+	for (auto it: ctx->m_devices) 
+	{
+		trt__GetProfilesResponse->Profiles.push_back(soap_new_tt__Profile(this->soap));
+		trt__GetProfilesResponse->Profiles.back()->Name = it.first;
+		trt__GetProfilesResponse->Profiles.back()->token = it.first;
+	}
 	
 	return SOAP_OK;
 }
@@ -185,12 +206,27 @@ int MediaBindingService::DeleteProfile(_trt__DeleteProfile *trt__DeleteProfile, 
 int MediaBindingService::GetVideoSourceConfigurations(_trt__GetVideoSourceConfigurations *trt__GetVideoSourceConfigurations, _trt__GetVideoSourceConfigurationsResponse *trt__GetVideoSourceConfigurationsResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
+	for (auto it: ctx->m_devices) 
+	{	
+		trt__GetVideoSourceConfigurationsResponse->Configurations.push_back(soap_new_tt__VideoSourceConfiguration(this->soap));
+		trt__GetVideoSourceConfigurationsResponse->Configurations.back()->token = it.first;
+		trt__GetVideoSourceConfigurationsResponse->Configurations.back()->SourceToken = it.first;
+	}
 	return SOAP_OK;
 }
 
 int MediaBindingService::GetVideoEncoderConfigurations(_trt__GetVideoEncoderConfigurations *trt__GetVideoEncoderConfigurations, _trt__GetVideoEncoderConfigurationsResponse *trt__GetVideoEncoderConfigurationsResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
+	for (auto it: ctx->m_devices) 
+	{	
+		trt__GetVideoEncoderConfigurationsResponse->Configurations.push_back(getVideoEncoderCfg(this->soap, it.first.c_str()));
+	}
+	
 	return SOAP_OK;
 }
 
@@ -233,12 +269,30 @@ int MediaBindingService::GetAudioDecoderConfigurations(_trt__GetAudioDecoderConf
 int MediaBindingService::GetVideoSourceConfiguration(_trt__GetVideoSourceConfiguration *trt__GetVideoSourceConfiguration, _trt__GetVideoSourceConfigurationResponse *trt__GetVideoSourceConfigurationResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
+	auto it = ctx->m_devices.find(trt__GetVideoSourceConfiguration->ConfigurationToken);
+	if (it != ctx->m_devices.end())
+	{
+		trt__GetVideoSourceConfigurationResponse->Configuration = soap_new_tt__VideoSourceConfiguration(this->soap);
+		trt__GetVideoSourceConfigurationResponse->Configuration->token = it->first;
+		trt__GetVideoSourceConfigurationResponse->Configuration->SourceToken = it->first;
+	}
+	
 	return SOAP_OK;
 }
 
 int MediaBindingService::GetVideoEncoderConfiguration(_trt__GetVideoEncoderConfiguration *trt__GetVideoEncoderConfiguration, _trt__GetVideoEncoderConfigurationResponse *trt__GetVideoEncoderConfigurationResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
+	auto it = ctx->m_devices.find(trt__GetVideoEncoderConfiguration->ConfigurationToken);
+	if (it != ctx->m_devices.end())
+	{
+		trt__GetVideoEncoderConfigurationResponse->Configuration = getVideoEncoderCfg(this->soap, it->first.c_str());	
+	}
+	
 	return SOAP_OK;
 }
 
@@ -281,12 +335,29 @@ int MediaBindingService::GetAudioDecoderConfiguration(_trt__GetAudioDecoderConfi
 int MediaBindingService::GetCompatibleVideoEncoderConfigurations(_trt__GetCompatibleVideoEncoderConfigurations *trt__GetCompatibleVideoEncoderConfigurations, _trt__GetCompatibleVideoEncoderConfigurationsResponse *trt__GetCompatibleVideoEncoderConfigurationsResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
+	auto it = ctx->m_devices.find(trt__GetCompatibleVideoEncoderConfigurations->ProfileToken);
+	if (it != ctx->m_devices.end())
+	{
+		trt__GetCompatibleVideoEncoderConfigurationsResponse->Configurations.push_back(getVideoEncoderCfg(this->soap, it->first.c_str()));
+	}
+	
 	return SOAP_OK;
 }
 
 int MediaBindingService::GetCompatibleVideoSourceConfigurations(_trt__GetCompatibleVideoSourceConfigurations *trt__GetCompatibleVideoSourceConfigurations, _trt__GetCompatibleVideoSourceConfigurationsResponse *trt__GetCompatibleVideoSourceConfigurationsResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
+	auto it = ctx->m_devices.find(trt__GetCompatibleVideoSourceConfigurations->ProfileToken);
+	if (it != ctx->m_devices.end())
+	{
+		trt__GetCompatibleVideoSourceConfigurationsResponse->Configurations.push_back(soap_new_tt__VideoSourceConfiguration(this->soap));
+		trt__GetCompatibleVideoSourceConfigurationsResponse->Configurations.back()->token = it->first;
+		trt__GetCompatibleVideoSourceConfigurationsResponse->Configurations.back()->SourceToken = it->first;
+	}
 	return SOAP_OK;
 }
 
@@ -435,7 +506,11 @@ int MediaBindingService::GetStreamUri(_trt__GetStreamUri *trt__GetStreamUri, _tr
 	trt__GetStreamUriResponse->MediaUri->Uri.append("/");
 	if (trt__GetStreamUri != NULL)
 	{
-		trt__GetStreamUriResponse->MediaUri->Uri.append(trt__GetStreamUri->ProfileToken);
+		auto it = ctx->m_devices.find(trt__GetStreamUri->ProfileToken);
+		if (it != ctx->m_devices.end())
+		{
+			trt__GetStreamUriResponse->MediaUri->Uri.append(it->second);
+		}
 	}	
 	return SOAP_OK;
 }

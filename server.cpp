@@ -12,6 +12,10 @@
 #include <net/if.h>
 #include <ifaddrs.h>
 
+#include <sys/ioctl.h>
+#include <linux/videodev2.h>
+#include <libv4l2.h>
+
 #include "DeviceBinding.nsmap"
 #include "soapDeviceBindingService.h"
 #include "soapMediaBindingService.h"
@@ -78,19 +82,63 @@ std::string getServerIpFromClientIp(int clientip)
 	return serverip;
 }
 	
+int getFormat(const char* device, int& width, int& height, int& format)
+{
+	int ret = 0;
+	int fd = v4l2_open(device, O_RDWR | O_NONBLOCK, 0);
+	
+	struct v4l2_format     fmt;
+	memset(&fmt,0,sizeof(fmt));
+	fmt.type  = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	if (0 == ioctl(fd,VIDIOC_G_FMT,&fmt))
+	{
+		width  = fmt.fmt.pix.width;
+		height = fmt.fmt.pix.height;
+		format = fmt.fmt.pix.pixelformat;
+		ret = 1;
+	}
+	v4l2_close(fd);	
+	return ret;
+}
+	
+tt__VideoEncoderConfiguration* getVideoEncoderCfg(struct soap* soap, const char* device)
+{
+	tt__VideoEncoderConfiguration* cfg = soap_new_tt__VideoEncoderConfiguration(soap);
+	int width;
+	int height;
+	int format;	
+	if (getFormat(device, width, height, format))
+	{
+		if (format == V4L2_PIX_FMT_H264)
+		{
+			cfg->Encoding = tt__VideoEncoding__H264;
+			cfg->Resolution = soap_new_req_tt__VideoResolution(soap, width, height);
+			cfg->H264 = soap_new_tt__H264Configuration(soap);
+			cfg->H264->H264Profile = tt__H264Profile__Baseline;
+		}
+	}
+	return cfg;
+}
+
 int main(int argc, char* argv[])
 {		
-	std::string host("0.0.0.0");
-	int port = 8080;
-	std::string device("/dev/video0");
+	std::string device = "/dev/video0";
+	std::string url    = "unicast";
+	if (argc > 1)
+	{
+		device.assign(argv[1]);
+	}
+	if (argc > 2)
+	{
+		url.assign(argv[2]);
+	}
 	
 	ServiceContext deviceCtx;
-	deviceCtx.m_port = port;
+	deviceCtx.m_port = 8080;
 	deviceCtx.m_rtspport = "554";
-	deviceCtx.m_device = device;
-	deviceCtx.m_rtspurl = "unicast";
-	deviceCtx.m_user    = "admin";
-	deviceCtx.m_password= "admin";
+	deviceCtx.m_user = "admin";
+	deviceCtx.m_password = "admin";
+	deviceCtx.m_devices.insert(std::pair<std::string,std::string>(device, url));
 	
 	struct soap *soap = soap_new();
 	soap->user = (void*)&deviceCtx;

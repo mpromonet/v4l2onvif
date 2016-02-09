@@ -24,7 +24,7 @@ gen/onvif.h:
 gen/soapDeviceBindingService.cpp: gen/onvif.h
 	$(GSOAP_PREFIX)/bin/soapcpp2 -2jx $^ -I $(GSOAP_IMPORT) -d gen -f250 
 
-server.exe: $(SOAP_OBJ) gen/soapDeviceBindingService.o serverDevice.o gen/soapMediaBindingService.o serverMedia.o gen/soapRecordingBindingService.o serverRecording.o gen/soapReplayBindingService.o serverReplay.o gen/soapEventBindingService.o serverEvent.o gen/soapPullPointSubscriptionBindingService.o serverPullPointSubscription.o gen/soapReceiverBindingService.o serverReceiver.o  gen/soapImagingBindingService.o serverImaging.o $(GSOAP_WSSE) server.o   
+server.exe: $(SOAP_OBJ) gen/soapDeviceBindingService.o serverDevice.o gen/soapMediaBindingService.o serverMedia.o gen/soapRecordingBindingService.o serverRecording.o gen/soapReplayBindingService.o serverReplay.o gen/soapEventBindingService.o serverEvent.o gen/soapPullPointSubscriptionBindingService.o serverPullPointSubscription.o gen/soapReceiverBindingService.o serverReceiver.o  gen/soapImagingBindingService.o serverImaging.o $(GSOAP_WSSE) server.o  -lv4l2 
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS)
 
 client.exe: $(SOAP_OBJ) gen/soapDeviceBindingProxy.o gen/soapMediaBindingProxy.o gen/soapRecordingBindingProxy.o gen/soapReplayBindingProxy.o gen/soapEventBindingProxy.o gen/soapPullPointSubscriptionBindingProxy.o gen/soapReceiverBindingProxy.o gen/soapImagingBindingProxy.o $(GSOAP_WSSE) client.o 

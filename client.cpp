@@ -122,6 +122,35 @@ int main(int argc, char* argv[])
 			std::cout << "\tMedia Url:" << mediaUrl << std::endl;
 			
 			MediaBindingProxy mediaProxy(mediaUrl.c_str());
+
+			// call Device::GetVideoSources
+			std::cout << "=>Device::GetVideoSources" << std::endl;				
+			_trt__GetVideoSources         trt__GetVideoSources;
+			_trt__GetVideoSourcesResponse trt__GetVideoSourcesResponse;			
+			if (mediaProxy.GetVideoSources(&trt__GetVideoSources, &trt__GetVideoSourcesResponse) == SOAP_OK)
+			{		
+				for (auto source : trt__GetVideoSourcesResponse.VideoSources)
+				{
+					std::cout << "\t" << source->token;
+					if (source->Resolution)
+					{
+						std::cout << " " << source->Resolution->Width << "x" << source->Resolution->Height;
+					}
+					std::cout << std::endl;
+					
+					_trt__GetVideoEncoderConfiguration         trt__GetVideoEncoderConfiguration;
+					trt__GetVideoEncoderConfiguration.ConfigurationToken = source->token;
+					_trt__GetVideoEncoderConfigurationResponse trt__GetVideoEncoderConfigurationResponse;
+					if (mediaProxy.GetVideoEncoderConfiguration(&trt__GetVideoEncoderConfiguration, &trt__GetVideoEncoderConfigurationResponse) == SOAP_OK)
+					{		
+						std::cout << "\tEncoding:" << trt__GetVideoEncoderConfigurationResponse.Configuration->Encoding << std::endl;
+						if (trt__GetVideoEncoderConfigurationResponse.Configuration->Resolution)
+						{
+							std::cout << "\t" << trt__GetVideoEncoderConfigurationResponse.Configuration->Resolution->Width << "x" << trt__GetVideoEncoderConfigurationResponse.Configuration->Resolution->Height << std::endl;
+						}
+					}
+				}
+			}
 			
 			// call Device::GetProfiles
 			std::cout << "=>Device::GetProfiles" << std::endl;					
@@ -223,6 +252,21 @@ int main(int argc, char* argv[])
 							replayProxy->soap_stream_fault(std::cerr);
 						}
 					}
+				}
+			}
+			else
+			{
+				recordingProxy.soap_stream_fault(std::cerr);
+			}
+			
+			_trc__GetRecordingJobs         trc__GetRecordingJobs;
+			_trc__GetRecordingJobsResponse trc__GetRecordingJobsResponse;
+			if (recordingProxy.GetRecordingJobs(&trc__GetRecordingJobs, &trc__GetRecordingJobsResponse) == SOAP_OK)
+			{
+				for (auto job : trc__GetRecordingJobsResponse.JobItem)
+				{
+					std::string token(job->JobToken);
+					std::cout << "\tRecordingJob:" << token << std::endl;
 				}
 			}
 			else
