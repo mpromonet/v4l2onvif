@@ -40,10 +40,8 @@ int http_get(struct soap *soap)
 		for (;;)
 		{
 			size_t r = fread(soap->tmpbuf, 1, sizeof(soap->tmpbuf), fd);
-			if (!r)
+			if ( (r == 0) || (soap_send_raw(soap, soap->tmpbuf, r)) )
 				break;
-			if (soap_send_raw(soap, soap->tmpbuf, r))
-				break; // can't send, but little we can do about that
 		}
 		fclose(fd);
 		soap_end_send(soap);
@@ -61,21 +59,16 @@ std::string getServerIpFromClientIp(int clientip)
 	{
 		for (struct ifaddrs* ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
 		{
-			if (ifa->ifa_addr != NULL)			
+			if ( (ifa->ifa_netmask != NULL) && (ifa->ifa_netmask->sa_family == AF_INET) && (ifa->ifa_addr != NULL) && (ifa->ifa_addr->sa_family == AF_INET) )  
 			{
-				int family = ifa->ifa_addr->sa_family;
 				struct sockaddr_in* addr = (struct sockaddr_in*)ifa->ifa_addr;
 				struct sockaddr_in* mask = (struct sockaddr_in*)ifa->ifa_netmask;
-				if (mask != NULL)
+				if ( (addr->sin_addr.s_addr & mask->sin_addr.s_addr) == (clientip & mask->sin_addr.s_addr) )
 				{
-					if ( (family == AF_INET) && ( (addr->sin_addr.s_addr & mask->sin_addr.s_addr) == (clientip & mask->sin_addr.s_addr)) )
+					if (getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, sizeof(host), NULL, 0, NI_NUMERICHOST) == 0)
 					{
-						if (getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, sizeof(host), NULL, 0, NI_NUMERICHOST) == 0)
-						{
-							serverip = host;
-							std::cout << "serverip:" << host << std::endl;
-							break;
-						}
+						serverip = host;
+						break;
 					}
 				}
 			}
@@ -96,6 +89,8 @@ int main(int argc, char* argv[])
 	deviceCtx.m_rtspport = "554";
 	deviceCtx.m_device = device;
 	deviceCtx.m_rtspurl = "unicast";
+	deviceCtx.m_user    = "admin";
+	deviceCtx.m_password= "admin";
 	
 	struct soap *soap = soap_new();
 	soap->user = (void*)&deviceCtx;
@@ -126,27 +121,42 @@ int main(int argc, char* argv[])
 				}
 				else if (deviceService.dispatch() != SOAP_NO_METHOD)
 				{
+					soap_send_fault(soap);
+					soap_stream_fault(soap, std::cerr);
 				}
 				else if (recordingService.dispatch() != SOAP_NO_METHOD)
 				{
+					soap_send_fault(soap);
+					soap_stream_fault(soap, std::cerr);
 				}
 				else if (receiverService.dispatch() != SOAP_NO_METHOD)
 				{
+					soap_send_fault(soap);
+					soap_stream_fault(soap, std::cerr);
 				}
 				else if (replayService.dispatch() != SOAP_NO_METHOD)
 				{
+					soap_send_fault(soap);
+					soap_stream_fault(soap, std::cerr);
 				}
 				else if (imagingService.dispatch() != SOAP_NO_METHOD)
 				{
+					soap_send_fault(soap);
+					soap_stream_fault(soap, std::cerr);
 				}
 				else if (eventService.dispatch() != SOAP_NO_METHOD)
 				{
+					soap_send_fault(soap);
+					soap_stream_fault(soap, std::cerr);
 				}
 				else if (pullPointService.dispatch() != SOAP_NO_METHOD)
 				{
+					soap_send_fault(soap);
+					soap_stream_fault(soap, std::cerr);
 				}
 				else if (mediaService.dispatch() != SOAP_NO_METHOD)
 				{
+					soap_send_fault(soap);
 					soap_stream_fault(soap, std::cerr);
 				}
 			}

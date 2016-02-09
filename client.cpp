@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 	_tds__GetDeviceInformationResponse tds__GetDeviceInformationResponse;
 	if (deviceProxy.GetDeviceInformation(&tds__GetDeviceInformation, &tds__GetDeviceInformationResponse) == SOAP_OK)
 	{
-		std::cout << "Manufacturer:" << tds__GetDeviceInformationResponse.Manufacturer << std::endl;
+		std::cout << "\tManufacturer:" << tds__GetDeviceInformationResponse.Manufacturer << std::endl;
 	}
 	else
 	{
@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
 	_tds__GetHostnameResponse tds__GetHostnameResponse;
 	if (deviceProxy.GetHostname(&tds__GetHostname, &tds__GetHostnameResponse) == SOAP_OK)
 	{
-		std::cout << "Hostname:" << tds__GetHostnameResponse.HostnameInformation->Name->c_str() << std::endl;
+		std::cout << "\tHostname:" << tds__GetHostnameResponse.HostnameInformation->Name->c_str() << std::endl;
 	}
 	else
 	{
@@ -77,13 +77,13 @@ int main(int argc, char* argv[])
 		{
 			if (iface->Info != NULL)
 			{
-				std::cout << iface->Info->Name->c_str() <<  " MAC:" << iface->Info->HwAddress << std::endl;			
+				std::cout << "\t" << iface->Info->Name->c_str() <<  " " << iface->Info->HwAddress << std::endl;			
 			}
 			if ( (iface->IPv4 != NULL) && (iface->IPv4->Config != NULL) )
 			{
-				for (auto addr : iface->IPv4->Config ->Manual)
+				for (auto addr : iface->IPv4->Config->Manual)
 				{
-					std::cout << "IP:" << addr->Address  << "/" << addr->PrefixLength << std::endl;					
+					std::cout << "\tIP:" << addr->Address  << "/" << addr->PrefixLength << std::endl;					
 				}
 			}
 		}
@@ -102,10 +102,10 @@ int main(int argc, char* argv[])
 	{
 		for (auto service : tds__GetServicesResponse.Service)
 		{
-			std::cout << service->Namespace << " " << service->XAddr << " " << service->Version->Major << "." << service->Version->Minor << std::endl;
+			std::cout << "\t" << service->Namespace << " " << service->XAddr << " " << service->Version->Major << "." << service->Version->Minor << std::endl;
 			if (service->Capabilities)
 			{
-				std::cout << service->Capabilities->__any << std::endl;
+				std::cout << "\t" << service->Capabilities->__any << std::endl;
 			}
 		}
 	}
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 		if (tds__GetCapabilitiesResponse.Capabilities->Media != NULL)
 		{
 			std::string mediaUrl(tds__GetCapabilitiesResponse.Capabilities->Media->XAddr);
-			std::cout << "Media Url:" << mediaUrl << std::endl;
+			std::cout << "\tMedia Url:" << mediaUrl << std::endl;
 			
 			MediaBindingProxy mediaProxy(mediaUrl.c_str());
 			
@@ -132,14 +132,14 @@ int main(int argc, char* argv[])
 				for (auto profile : trt__GetProfilesResponse.Profiles)
 				{
 					std::string token(profile->token);
-					std::cout << "MediaProfile:" << token << std::endl;
+					std::cout << "\tMediaProfile:" << token << std::endl;
 					
 					_trt__GetStreamUri         trt__GetStreamUri;
 					_trt__GetStreamUriResponse trt__GetStreamUriResponse;
 					trt__GetStreamUri.ProfileToken = token;
 					if (mediaProxy.GetStreamUri(&trt__GetStreamUri, &trt__GetStreamUriResponse) == SOAP_OK)
 					{
-						std::cout << "MediaUri:" << trt__GetStreamUriResponse.MediaUri->Uri << std::endl;
+						std::cout << "\tMediaUri:" << trt__GetStreamUriResponse.MediaUri->Uri << std::endl;
 					}
 					else
 					{
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
 		if (tds__GetCapabilitiesResponse.Capabilities->Events != NULL)
 		{
 			std::string eventUrl(tds__GetCapabilitiesResponse.Capabilities->Events->XAddr);
-			std::cout << "Event Url:" << eventUrl << std::endl;
+			std::cout << "\tEvent Url:" << eventUrl << std::endl;
 			
 			EventBindingProxy eventProxy(eventUrl.c_str());
 			
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
 			_tev__CreatePullPointSubscriptionResponse tev__CreatePullPointSubscriptionResponse;
 			if (eventProxy.CreatePullPointSubscription(&tev__CreatePullPointSubscription, &tev__CreatePullPointSubscriptionResponse) == SOAP_OK)
 			{
-				std::cout << "Pullpoint Url:" << tev__CreatePullPointSubscriptionResponse.SubscriptionReference.Address << std::endl;
+				std::cout << "\tPullpoint Url:" << tev__CreatePullPointSubscriptionResponse.SubscriptionReference.Address << std::endl;
 				PullPointSubscriptionBindingProxy pullpoint(tev__CreatePullPointSubscriptionResponse.SubscriptionReference.Address);
 				
 				_tev__PullMessages         tev__PullMessages;
@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
 				{
 					for (auto msg : tev__PullMessagesResponse.wsnt__NotificationMessage)
 					{
-						std::cout << "Message:" << msg->Message.__any << std::endl;
+						std::cout << "\tMessage:" << msg->Message.__any << std::endl;
 					}
 				}
 				else
@@ -189,14 +189,14 @@ int main(int argc, char* argv[])
 		if ( (tds__GetCapabilitiesResponse.Capabilities->Extension != NULL) && (tds__GetCapabilitiesResponse.Capabilities->Extension->Replay != NULL) )
 		{
 			std::string replayUrl(tds__GetCapabilitiesResponse.Capabilities->Extension->Replay->XAddr);
-			std::cout << "Replay Url:" << replayUrl << std::endl;
+			std::cout << "\tReplay Url:" << replayUrl << std::endl;
 			
 			replayProxy.reset(new ReplayBindingProxy(replayUrl.c_str()));
 		}
 		if ( (tds__GetCapabilitiesResponse.Capabilities->Extension != NULL) && (tds__GetCapabilitiesResponse.Capabilities->Extension->Recording != NULL) )
 		{
 			std::string recordingUrl(tds__GetCapabilitiesResponse.Capabilities->Extension->Recording->XAddr);
-			std::cout << "Recording Url:" << recordingUrl << std::endl;
+			std::cout << "\tRecording Url:" << recordingUrl << std::endl;
 			
 			RecordingBindingProxy recordingProxy(recordingUrl.c_str());
 			
@@ -207,7 +207,7 @@ int main(int argc, char* argv[])
 				for (auto recording : trc__GetRecordingsResponse.RecordingItem)
 				{
 					std::string token(recording->RecordingToken);
-					std::cout << "Recording:" << token << std::endl;
+					std::cout << "\tRecording:" << token << std::endl;
 					
 					if (replayProxy.get() != NULL)
 					{
@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
 						trp__GetReplayUri.RecordingToken = token;
 						if (replayProxy->GetReplayUri(&trp__GetReplayUri, &trp__GetReplayUriResponse) == SOAP_OK)
 						{
-							std::cout << "Replay Uri:" << trp__GetReplayUriResponse.Uri << std::endl;
+							std::cout << "\tReplay Uri:" << trp__GetReplayUriResponse.Uri << std::endl;
 						}
 						else
 						{
@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
 		if ( (tds__GetCapabilitiesResponse.Capabilities->Extension != NULL) && (tds__GetCapabilitiesResponse.Capabilities->Extension->Receiver != NULL) )
 		{
 			std::string receiverUrl(tds__GetCapabilitiesResponse.Capabilities->Extension->Receiver->XAddr);
-			std::cout << "Receiver Url:" << receiverUrl << std::endl;
+			std::cout << "\tReceiver Url:" << receiverUrl << std::endl;
 			
 			ReceiverBindingProxy receiverProxy(receiverUrl.c_str());
 			
@@ -245,7 +245,7 @@ int main(int argc, char* argv[])
 				for (auto receiver : trv__GetReceiversResponse.Receivers)
 				{
 					std::string token(receiver->Token);
-					std::cout << "Receiver:" << token << std::endl;					
+					std::cout << "\tReceiver:" << token << std::endl;					
 				}
 			}
 			else

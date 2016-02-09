@@ -36,7 +36,10 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	if (tds__GetServices->IncludeCapability)
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
-		tds__DeviceServiceCapabilities *capabilities = soap_new_tds__DeviceServiceCapabilities(this->soap);
+                tds__DeviceServiceCapabilities *capabilities = soap_new_tds__DeviceServiceCapabilities(this->soap);
+                capabilities->Network = soap_new_tds__NetworkCapabilities(this->soap);
+                capabilities->Security = soap_new_tds__SecurityCapabilities(this->soap);
+                capabilities->System = soap_new_tds__SystemCapabilities(this->soap);
 		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
 
@@ -49,9 +52,12 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		trt__Capabilities *capabilities = soap_new_trt__Capabilities(this->soap);
 		capabilities->ProfileCapabilities = soap_new_trt__ProfileCapabilities(this->soap);
+		capabilities->ProfileCapabilities->MaximumNumberOfProfiles =  soap_new_ptr(this->soap, 10);
 		capabilities->StreamingCapabilities = soap_new_trt__StreamingCapabilities(this->soap);
+		capabilities->StreamingCapabilities->RTPMulticast =  soap_new_ptr(this->soap, false);
 		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
+
 
 	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
 	tds__GetServicesResponse->Service.back()->Namespace  = "http://www.onvif.org/ver20/imaging/wsdl";
@@ -61,8 +67,9 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		tt__ImagingCapabilities *capabilities = soap_new_tt__ImagingCapabilities(this->soap);
-		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
+
 	
 	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
 	tds__GetServicesResponse->Service.back()->Namespace  = "http://www.onvif.org/ver10/events/wsdl";
@@ -72,7 +79,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		tt__EventCapabilities *capabilities = soap_new_tt__EventCapabilities(this->soap);
-		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
 
 	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
@@ -83,7 +90,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		tt__RecordingCapabilities *capabilities = soap_new_tt__RecordingCapabilities(this->soap);
-		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
 
 	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
@@ -94,7 +101,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		tt__ReplayCapabilities *capabilities = soap_new_tt__ReplayCapabilities(this->soap);
-		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
 
 	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
@@ -105,7 +112,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		tt__ReceiverCapabilities *capabilities = soap_new_tt__ReceiverCapabilities(this->soap);
-		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
 
 	return SOAP_OK;
@@ -294,6 +301,7 @@ int DeviceBindingService::GetCapabilities(_tds__GetCapabilities *tds__GetCapabil
 	tds__GetCapabilitiesResponse->Capabilities->Device->XAddr = url;
 	tds__GetCapabilitiesResponse->Capabilities->Media  = soap_new_tt__MediaCapabilities(this->soap);
 	tds__GetCapabilitiesResponse->Capabilities->Media->XAddr = url;
+	tds__GetCapabilitiesResponse->Capabilities->Media->StreamingCapabilities = soap_new_tt__RealTimeStreamingCapabilities(this->soap);
 	tds__GetCapabilitiesResponse->Capabilities->Imaging = soap_new_tt__ImagingCapabilities(this->soap);
 	tds__GetCapabilitiesResponse->Capabilities->Imaging->XAddr = url;
 	tds__GetCapabilitiesResponse->Capabilities->Events = soap_new_tt__EventCapabilities(this->soap);
@@ -317,13 +325,18 @@ int DeviceBindingService::SetDPAddresses(_tds__SetDPAddresses *tds__SetDPAddress
 int DeviceBindingService::GetHostname(_tds__GetHostname *tds__GetHostname, _tds__GetHostnameResponse *tds__GetHostnameResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
-	
-	const char *username = soap_wsse_get_Username(this->soap);
-	if (!username)
-		return this->soap->error; // no username: return FailedAuthentication
-	const char *password = "admin";
-	if (soap_wsse_verify_Password(this->soap, password))
-		return this->soap->error; // password verification failed: return FailedAuthentication
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	if (!ctx->m_user.empty())
+	{
+		// check authentification
+		const char *username = soap_wsse_get_Username(this->soap);
+		if (!username)
+			return this->soap->error; 
+		if (ctx->m_user != username)
+			return SOAP_FAULT;
+		if (soap_wsse_verify_Password(this->soap, ctx->m_password.c_str()))
+			return this->soap->error; 
+	}
       
 	char buffer[HOST_NAME_MAX];
 	tds__GetHostnameResponse->HostnameInformation = soap_new_req_tt__HostnameInformation(this->soap, false);
@@ -395,22 +408,17 @@ int DeviceBindingService::GetNetworkInterfaces(_tds__GetNetworkInterfaces *tds__
 		std::map<std::string,std::string> eterMap;
 		for (struct ifaddrs* ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
 		{
-			if (ifa->ifa_addr != NULL)			
+			if ( (ifa->ifa_addr != NULL) && (ifa->ifa_addr->sa_family == AF_PACKET) )			
 			{
-				int family = ifa->ifa_addr->sa_family;
-				if (family == AF_PACKET)
+				struct sockaddr_ll *s = (struct sockaddr_ll*)ifa->ifa_addr;
+				std::ostringstream os;
+				os << std::hex << std::setw(2) << std::setfill('0');
+				for (int i=0; i <s->sll_halen; i++)
 				{
-					struct sockaddr_ll *s = (struct sockaddr_ll*)ifa->ifa_addr;
-					std::ostringstream os;
-					os << std::hex << std::setw(2) << std::setfill('0');
-					for (int i=0; i <s->sll_halen; i++)
-					{
-						if (i!=0) os <<":";
-						os << (int)s->sll_addr[i];
-					}
-					eterMap[ifa->ifa_name] = os.str();
-					std::cout <<  ifa->ifa_name <<  " " << os.str() << std::endl;
-				}					
+					if (i!=0) os <<":";
+					os << (int)s->sll_addr[i];
+				}
+				eterMap[ifa->ifa_name] = os.str();
 			}
 		}
 		
@@ -418,7 +426,7 @@ int DeviceBindingService::GetNetworkInterfaces(_tds__GetNetworkInterfaces *tds__
 		for (struct ifaddrs* ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) 
 		{
 			int prefix = 0;
-			if (ifa->ifa_netmask != NULL)
+			if ( (ifa->ifa_netmask != NULL) && (ifa->ifa_netmask->sa_family == AF_INET) )
 			{
 				unsigned int mask = htonl(((struct sockaddr_in *)(ifa->ifa_netmask))->sin_addr.s_addr);
 				while (mask  != 0)
@@ -427,10 +435,9 @@ int DeviceBindingService::GetNetworkInterfaces(_tds__GetNetworkInterfaces *tds__
 					prefix++;
 				}
 			}
-			if (ifa->ifa_addr != NULL)			
+			if ( (ifa->ifa_addr != NULL) && (ifa->ifa_addr->sa_family == AF_INET) )			
 			{
-				int family = ifa->ifa_addr->sa_family;
-				if ( (family == AF_INET) && ( (ifa->ifa_flags & IFF_LOOPBACK) == 0) )
+				if ( (ifa->ifa_flags & IFF_LOOPBACK) == 0 )
 				{
 					if (getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, sizeof(host), NULL, 0, NI_NUMERICHOST) == 0)
 					{
