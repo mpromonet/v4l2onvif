@@ -14,7 +14,6 @@
 
 #include <sys/ioctl.h>
 #include <linux/videodev2.h>
-#include <libv4l2.h>
 
 #include "DeviceBinding.nsmap"
 #include "soapDeviceBindingService.h"
@@ -85,7 +84,7 @@ std::string getServerIpFromClientIp(int clientip)
 int getFormat(const char* device, int& width, int& height, int& format)
 {
 	int ret = 0;
-	int fd = v4l2_open(device, O_RDWR | O_NONBLOCK, 0);
+	int fd = open(device, O_RDWR | O_NONBLOCK, 0);
 	
 	struct v4l2_format     fmt;
 	memset(&fmt,0,sizeof(fmt));
@@ -97,7 +96,7 @@ int getFormat(const char* device, int& width, int& height, int& format)
 		format = fmt.fmt.pix.pixelformat;
 		ret = 1;
 	}
-	v4l2_close(fd);	
+	close(fd);	
 	return ret;
 }
 	
