@@ -39,12 +39,12 @@ int main(int argc, char* argv[])
 	// create connection to devicemgmt.wsdl server
         DeviceBindingProxy deviceProxy(url.c_str());
 	soap_wsse_add_Security(deviceProxy.soap);
-	soap_wsse_add_UsernameTokenDigest(deviceProxy.soap, "Id", username.c_str() , password.c_str());	
 	
 	// call Device::GetDeviceInformation
 	std::cout << "=>Device::GetDeviceInformation" << std::endl;	
 	_tds__GetDeviceInformation         tds__GetDeviceInformation;
 	_tds__GetDeviceInformationResponse tds__GetDeviceInformationResponse;
+	soap_wsse_add_UsernameTokenDigest(deviceProxy.soap, NULL, username.c_str() , password.c_str());	
 	if (deviceProxy.GetDeviceInformation(&tds__GetDeviceInformation, &tds__GetDeviceInformationResponse) == SOAP_OK)
 	{
 		std::cout << "\tManufacturer:" << tds__GetDeviceInformationResponse.Manufacturer << std::endl;
@@ -58,6 +58,7 @@ int main(int argc, char* argv[])
 	std::cout << "=>Device::GetHostname" << std::endl;	
 	_tds__GetHostname         tds__GetHostname;
 	_tds__GetHostnameResponse tds__GetHostnameResponse;
+	soap_wsse_add_UsernameTokenDigest(deviceProxy.soap, NULL, username.c_str() , password.c_str());	
 	if (deviceProxy.GetHostname(&tds__GetHostname, &tds__GetHostnameResponse) == SOAP_OK)
 	{
 		std::cout << "\tHostname:" << tds__GetHostnameResponse.HostnameInformation->Name->c_str() << std::endl;
@@ -71,6 +72,7 @@ int main(int argc, char* argv[])
 	std::cout << "=>Device::GetNetworkInterfaces" << std::endl;	
 	_tds__GetNetworkInterfaces         tds__GetNetworkInterfaces;
 	_tds__GetNetworkInterfacesResponse tds__GetNetworkInterfacesResponse;
+	soap_wsse_add_UsernameTokenDigest(deviceProxy.soap, NULL, username.c_str() , password.c_str());	
 	if (deviceProxy.GetNetworkInterfaces(&tds__GetNetworkInterfaces, &tds__GetNetworkInterfacesResponse) == SOAP_OK)
 	{
 		for (auto iface : tds__GetNetworkInterfacesResponse.NetworkInterfaces)
@@ -98,6 +100,7 @@ int main(int argc, char* argv[])
 	_tds__GetServices         tds__GetServices;
 	tds__GetServices.IncludeCapability = true;
 	_tds__GetServicesResponse tds__GetServicesResponse;
+	soap_wsse_add_UsernameTokenDigest(deviceProxy.soap, NULL, username.c_str() , password.c_str());	
 	if (deviceProxy.GetServices(&tds__GetServices, &tds__GetServicesResponse) == SOAP_OK)
 	{
 		for (auto service : tds__GetServicesResponse.Service)
@@ -114,6 +117,7 @@ int main(int argc, char* argv[])
 	std::cout << "=>Device::GetCapabilities" << std::endl;		
 	_tds__GetCapabilities         tds__GetCapabilities;
 	_tds__GetCapabilitiesResponse tds__GetCapabilitiesResponse;
+	soap_wsse_add_UsernameTokenDigest(deviceProxy.soap, NULL, username.c_str() , password.c_str());	
 	if (deviceProxy.GetCapabilities(&tds__GetCapabilities, &tds__GetCapabilitiesResponse) == SOAP_OK)
 	{
 		if (tds__GetCapabilitiesResponse.Capabilities->Media != NULL)
@@ -122,6 +126,7 @@ int main(int argc, char* argv[])
 			std::cout << "\tMedia Url:" << mediaUrl << std::endl;
 			
 			MediaBindingProxy mediaProxy(mediaUrl.c_str());
+			soap_wsse_add_Security(mediaProxy.soap);
 
 			// call Device::GetVideoSources
 			std::cout << "=>Device::GetVideoSources" << std::endl;				
@@ -187,6 +192,7 @@ int main(int argc, char* argv[])
 			std::cout << "\tEvent Url:" << eventUrl << std::endl;
 			
 			EventBindingProxy eventProxy(eventUrl.c_str());
+			soap_wsse_add_Security(eventProxy.soap);
 			
 			_tev__CreatePullPointSubscription         tev__CreatePullPointSubscription;
 			_tev__CreatePullPointSubscriptionResponse tev__CreatePullPointSubscriptionResponse;
@@ -194,6 +200,7 @@ int main(int argc, char* argv[])
 			{
 				std::cout << "\tPullpoint Url:" << tev__CreatePullPointSubscriptionResponse.SubscriptionReference.Address << std::endl;
 				PullPointSubscriptionBindingProxy pullpoint(tev__CreatePullPointSubscriptionResponse.SubscriptionReference.Address);
+				soap_wsse_add_Security(pullpoint.soap);
 				
 				_tev__PullMessages         tev__PullMessages;
 				_tev__PullMessagesResponse tev__PullMessagesResponse;
@@ -228,6 +235,7 @@ int main(int argc, char* argv[])
 			std::cout << "\tRecording Url:" << recordingUrl << std::endl;
 			
 			RecordingBindingProxy recordingProxy(recordingUrl.c_str());
+			soap_wsse_add_Security(recordingProxy.soap);
 			
 			_trc__GetRecordings         trc__GetRecordings;
 			_trc__GetRecordingsResponse trc__GetRecordingsResponse;
@@ -281,6 +289,7 @@ int main(int argc, char* argv[])
 			std::cout << "\tReceiver Url:" << receiverUrl << std::endl;
 			
 			ReceiverBindingProxy receiverProxy(receiverUrl.c_str());
+			soap_wsse_add_Security(receiverProxy.soap);
 			
 			_trv__GetReceivers         trv__GetReceivers;
 			_trv__GetReceiversResponse trv__GetReceiversResponse;
