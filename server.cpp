@@ -184,6 +184,9 @@ tt__VideoEncoderConfigurationOptions* getVideoEncoderCfgOptions(struct soap* soa
 		if (format == V4L2_PIX_FMT_H264)
 		{			
 			cfg->H264 = soap_new_tt__H264Options(soap);
+			
+			int fd = open(device.c_str(), O_RDWR | O_NONBLOCK, 0);
+			
 			struct v4l2_frmsizeenum frmsize;
 			memset(&frmsize,0,sizeof(frmsize));
 			frmsize.pixel_format = V4L2_PIX_FMT_H264;
@@ -196,15 +199,28 @@ tt__VideoEncoderConfigurationOptions* getVideoEncoderCfgOptions(struct soap* soa
 				}
 				else
 				{
-					for (int w = frmsize.stepwise.min_width; w < frmsize.stepwise.max_width ; w+=frmsize.stepwise.step_width)
+					int nb = (frmsize.stepwise.max_width-frmsize.stepwise.min_width)/frmsize.stepwise.step_width;
+					if (nb>4)
 					{
-						for (int h = frmsize.stepwise.min_height; w < frmsize.stepwise.max_heigth ; w+=frmsize.stepwise.step_height)
+						frmsize.stepwise.step_width *= (nb/4);
+					}
+					nb = (frmsize.stepwise.max_height-frmsize.stepwise.min_height)/frmsize.stepwise.step_height;
+					if (nb>4)
+					{
+						frmsize.stepwise.step_height *= (nb/4);
+					}
+				
+					for (int w = frmsize.stepwise.min_width; w <= frmsize.stepwise.max_width ; w+=frmsize.stepwise.step_width)
+					{
+						for (int h = frmsize.stepwise.min_height; h <= frmsize.stepwise.max_height ; h+=frmsize.stepwise.step_height)
 						{
 							cfg->H264->ResolutionsAvailable.push_back(soap_new_req_tt__VideoResolution(soap, w, h));
 						}
 					}
 				}
 			}
+			
+			close(fd);
 		}
 	}
 	return cfg;
@@ -223,13 +239,14 @@ tt__VideoSourceConfiguration* getVideoSourceCfg(struct soap* soap, const std::st
 	return sourcecfg;
 }
 
-tt__RecordingJobConfiguration* getRecordingJobConfiguration(struct soap* soap, const std::string & recordtoken, const std::string & sourcetoken)
+tt__RecordingJobConfiguration* getRecordingJobConfiguration(struct soap* soap, const std::string & token)
 {
 	tt__RecordingJobConfiguration* cfg = soap_new_tt__RecordingJobConfiguration(soap);
-	cfg->RecordingToken = recordtoken;	
+	cfg->RecordingToken = token;	
 	cfg->Source.push_back(soap_new_tt__RecordingJobSource(soap));
 	cfg->Source.back()->SourceToken = soap_new_tt__SourceReference(soap);
-	cfg->Source.back()->SourceToken->Token = sourcetoken;
+	cfg->Source.back()->SourceToken->Token = token;
+	cfg->Source.back()->SourceToken->Type = "http://www.onvif.org/ver10/schema/Profile";
 	return cfg;
 }
 
@@ -251,12 +268,24 @@ tt__TrackConfiguration* getTracksCfg(struct soap* soap)
 	return cfg;
 }
 
+tds__StorageConfiguration* getStorageCfg(struct soap* soap, const std::string & path)
+{
+	tds__StorageConfiguration* cfg = soap_new_tds__StorageConfiguration(soap);
+	cfg->token = path;
+	cfg->Data = soap_new_tds__StorageConfigurationData(soap);
+	cfg->Data->LocalPath = soap_new_std__string(soap);
+	cfg->Data->LocalPath->assign(path);
+	return cfg;
+}
+
+
 tds__DeviceServiceCapabilities* getDeviceServiceCapabilities(struct soap* soap)
 {
 	tds__DeviceServiceCapabilities *capabilities = soap_new_tds__DeviceServiceCapabilities(soap);
 	capabilities->Network = soap_new_tds__NetworkCapabilities(soap);
 	capabilities->Security = soap_new_tds__SecurityCapabilities(soap);
 	capabilities->System = soap_new_tds__SystemCapabilities(soap);
+	capabilities->System->StorageConfiguration = soap_new_ptr(soap, true);
 	return capabilities;
 }
 
@@ -266,7 +295,7 @@ trt__Capabilities* getMediaServiceCapabilities(struct soap* soap)
 	capabilities->ProfileCapabilities = soap_new_trt__ProfileCapabilities(soap);
 	capabilities->ProfileCapabilities->MaximumNumberOfProfiles =  soap_new_ptr(soap, 10);
 	capabilities->StreamingCapabilities = soap_new_trt__StreamingCapabilities(soap);
-	capabilities->StreamingCapabilities->RTPMulticast =  soap_new_ptr(soap, false);
+	capabilities->StreamingCapabilities->RTPMulticast = soap_new_ptr(soap, false);
 	return capabilities;
 }
 
@@ -279,6 +308,12 @@ timg__Capabilities* getImagingServiceCapabilities(struct soap* soap)
 trc__Capabilities* getRecordingServiceCapabilities(struct soap* soap)
 {
 	trc__Capabilities *capabilities = soap_new_trc__Capabilities(soap);
+	return capabilities;
+}
+
+tse__Capabilities*  getSearchServiceCapabilities(struct soap* soap)
+{
+	tse__Capabilities *capabilities = soap_new_tse__Capabilities(soap);
 	return capabilities;
 }
 
