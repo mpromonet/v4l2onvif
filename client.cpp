@@ -281,7 +281,6 @@ int main(int argc, char* argv[])
 				}
 			}
 			
-			// call Media::GetProfiles
 			std::cout << "=>Media::GetProfiles" << std::endl;					
 			_trt__GetProfiles         trt__GetProfiles;
 			_trt__GetProfilesResponse trt__GetProfilesResponse;
@@ -307,6 +306,7 @@ int main(int argc, char* argv[])
 		
 		if (recordingProxy.get() != NULL)
 		{
+			std::cout << "=>Recording::GetRecordings" << std::endl;											
 			_trc__GetRecordings         trc__GetRecordings;
 			_trc__GetRecordingsResponse trc__GetRecordingsResponse;
 			addSecurity(recordingProxy->soap, username, password);						
@@ -331,6 +331,7 @@ int main(int argc, char* argv[])
 				}
 			}
 			
+			std::cout << "=>Recording::GetRecordingJobs" << std::endl;											
 			_trc__GetRecordingJobs         trc__GetRecordingJobs;
 			_trc__GetRecordingJobsResponse trc__GetRecordingJobsResponse;
 			addSecurity(recordingProxy->soap, username, password);						
@@ -340,12 +341,26 @@ int main(int argc, char* argv[])
 				{
 					std::string token(job->JobToken);
 					std::cout << "\tRecordingJob:" << token << std::endl;
+					
+					if (job->JobConfiguration)
+					{
+						std::cout << "\tRecordingToken:" << job->JobConfiguration->RecordingToken << std::endl;						
+						for (auto src : job->JobConfiguration->Source)
+						{
+							if (src->SourceToken)
+							{
+								std::cout << "\tSourceToken:" << src->SourceToken->Token << std::endl;						
+								std::cout << "\tSourceType:" << src->SourceToken->Type << std::endl;						
+							}
+						}
+					}
 				}
 			}
 		}
 		
 		if (receiverProxy.get() != NULL)
 		{
+			std::cout << "=>Receiver::GetReceivers" << std::endl;								
 			_trv__GetReceivers         trv__GetReceivers;
 			_trv__GetReceiversResponse trv__GetReceiversResponse;
 			addSecurity(receiverProxy->soap, username, password);									
@@ -354,7 +369,12 @@ int main(int argc, char* argv[])
 				for (auto receiver : trv__GetReceiversResponse.Receivers)
 				{
 					std::string token(receiver->Token);
-					std::cout << "\tReceiver:" << token << std::endl;					
+					std::cout << "\tReceiver:" << token << std::endl;	
+
+					if (receiver->Configuration)
+					{
+						std::cout << "\tReceiver mode:" << receiver->Configuration->Mode << " uri:" << receiver->Configuration->MediaUri << std::endl;	
+					}
 				}
 			}
 		}
