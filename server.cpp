@@ -27,7 +27,7 @@
 
 #include "wsseapi.h"
 
-#include "serviceContext.h"
+#include "server.h"
 
 int http_get(struct soap *soap)
 {
@@ -81,10 +81,10 @@ std::string getServerIpFromClientIp(int clientip)
 	return serverip;
 }
 	
-int getFormat(const char* device, int& width, int& height, int& format)
+int getFormat(const std::string &device, int& width, int& height, int& format)
 {
 	int ret = 0;
-	int fd = open(device, O_RDWR | O_NONBLOCK, 0);
+	int fd = open(device.c_str(), O_RDWR | O_NONBLOCK, 0);
 	
 	struct v4l2_format     fmt;
 	memset(&fmt,0,sizeof(fmt));
@@ -99,7 +99,42 @@ int getFormat(const char* device, int& width, int& height, int& format)
 	close(fd);	
 	return ret;
 }
+
+int getCtrlValue(const std::string &device, int idctrl)
+{
+	int value = 0;
+	int fd = open(device.c_str(), O_RDWR | O_NONBLOCK, 0);
 	
+	struct v4l2_control control;
+	memset(&control, 0, sizeof(control));
+	control.id = idctrl;
+	if (ioctl (fd, VIDIOC_G_CTRL, &control) == 0) 
+	{
+		value = control.value;
+      	} 	
+	
+	close(fd);	
+	return value;
+}
+
+std::pair<int,int> getCtrlRange(const std::string &device, int idctrl)
+{
+	std::pair<int,int> value;
+	int fd = open(device.c_str(), O_RDWR | O_NONBLOCK, 0);
+	
+	struct v4l2_queryctrl queryctrl;
+	memset(&queryctrl, 0, sizeof(queryctrl));
+	queryctrl.id = idctrl;
+	if (ioctl (fd, VIDIOC_QUERYCTRL, &queryctrl) == 0) 
+	{
+		value.first = queryctrl.minimum;
+		value.second = queryctrl.maximum;
+      	} 	
+	
+	close(fd);	
+	return value;
+}
+
 tt__VideoEncoderConfiguration* getVideoEncoderCfg(struct soap* soap, const char* device)
 {
 	tt__VideoEncoderConfiguration* cfg = soap_new_tt__VideoEncoderConfiguration(soap);
@@ -114,30 +149,82 @@ tt__VideoEncoderConfiguration* getVideoEncoderCfg(struct soap* soap, const char*
 			cfg->Resolution = soap_new_req_tt__VideoResolution(soap, width, height);
 			cfg->H264 = soap_new_tt__H264Configuration(soap);
 			cfg->H264->H264Profile = tt__H264Profile__Baseline;
+			cfg->Multicast = soap_new_tt__MulticastConfiguration(soap);
+			cfg->Multicast->Address = soap_new_tt__IPAddress(soap);
+			cfg->SessionTimeout = "PT10S";
 		}
 	}
 	return cfg;
 }
 
+tt__VideoSourceConfiguration* getVideoSourceCfg(struct soap* soap, const std::string &token)
+{
+	tt__VideoSourceConfiguration* sourcecfg = soap_new_tt__VideoSourceConfiguration(soap);
+	sourcecfg->token = token;
+	sourcecfg->SourceToken = token;	
+	int width = 0;
+	int height = 0;
+	int format = 0;	
+	getFormat(token.c_str(), width, height, format);
+	sourcecfg->Bounds = soap_new_req_tt__IntRectangle(soap, 0, 0, width, height);
+	return sourcecfg;
+}
+
+tds__DeviceServiceCapabilities* getDeviceServiceCapabilities(struct soap* soap)
+{
+	tds__DeviceServiceCapabilities *capabilities = soap_new_tds__DeviceServiceCapabilities(soap);
+	capabilities->Network = soap_new_tds__NetworkCapabilities(soap);
+	capabilities->Security = soap_new_tds__SecurityCapabilities(soap);
+	capabilities->System = soap_new_tds__SystemCapabilities(soap);
+	return capabilities;
+}
+
+trt__Capabilities* getMediaServiceCapabilities(struct soap* soap)
+{
+	trt__Capabilities *capabilities = soap_new_trt__Capabilities(soap);
+	capabilities->ProfileCapabilities = soap_new_trt__ProfileCapabilities(soap);
+	capabilities->ProfileCapabilities->MaximumNumberOfProfiles =  soap_new_ptr(soap, 10);
+	capabilities->StreamingCapabilities = soap_new_trt__StreamingCapabilities(soap);
+	capabilities->StreamingCapabilities->RTPMulticast =  soap_new_ptr(soap, false);
+	return capabilities;
+}
+
+timg__Capabilities* getImagingServiceCapabilities(struct soap* soap)
+{
+	timg__Capabilities *capabilities = soap_new_timg__Capabilities(soap);
+	return capabilities;
+}
+
 int main(int argc, char* argv[])
 {		
 	std::string device = "/dev/video0";
-	std::string url    = "unicast";
-	if (argc > 1)
+	std::string path    = "unicast";
+	std::string username;
+	std::string password;	
+	int port = 8080;
+	int c = 0;
+	while ((c = getopt (argc, argv, "hu:p:d:r:")) != -1)
 	{
-		device.assign(argv[1]);
+		switch (c)
+		{
+			case 'u':	username = optarg; break;
+			case 'p':	password = optarg; break;
+			case 'd':	device = optarg; break;
+			case 'r':	path = optarg; break;
+			case 'h':
+				std::cout << argv[0] << " [-u username] [-p password] [-d v4l2 device] [-r rtsp uri]" << std::endl;
+				exit(0);
+			break;
+		}
 	}
-	if (argc > 2)
-	{
-		url.assign(argv[2]);
-	}
-	
+	std::cout << "Listening to " << port << std::endl;
+		
 	ServiceContext deviceCtx;
-	deviceCtx.m_port = 8080;
+	deviceCtx.m_port = port;
 	deviceCtx.m_rtspport = "554";
-	deviceCtx.m_user = "admin";
-	deviceCtx.m_password = "admin";
-	deviceCtx.m_devices.insert(std::pair<std::string,std::string>(device, url));
+	deviceCtx.m_user = username;
+	deviceCtx.m_password = password;
+	deviceCtx.m_devices.insert(std::pair<std::string,std::string>(device, path));
 	
 	struct soap *soap = soap_new();
 	soap->user = (void*)&deviceCtx;

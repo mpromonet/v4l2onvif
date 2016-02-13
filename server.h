@@ -14,8 +14,17 @@ struct ServiceContext
 };
 
 std::string getServerIpFromClientIp(int ip);
-int getFormat(const char* device, int& width, int& height, int& format);
+
+int getFormat(const std::string &device, int& width, int& height, int& format);
+int getCtrlValue(const std::string &device, int idctrl);
+std::pair<int,int> getCtrlRange(const std::string &device, int idctrl);
+
 tt__VideoEncoderConfiguration* getVideoEncoderCfg(struct soap* soap, const char* device);
+tt__VideoSourceConfiguration* getVideoSourceCfg(struct soap* soap, const std::string &token);
+
+tds__DeviceServiceCapabilities* getDeviceServiceCapabilities(struct soap* soap);
+trt__Capabilities* getMediaServiceCapabilities(struct soap* soap);
+timg__Capabilities* getImagingServiceCapabilities(struct soap* soap);
 
 template<typename T>
 T * soap_new_ptr(struct soap* soap, T value)

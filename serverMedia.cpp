@@ -10,11 +10,12 @@
 ** -------------------------------------------------------------------------*/
 
 #include "soapMediaBindingService.h"
-#include "serviceContext.h"
+#include "server.h"
 
 int MediaBindingService::GetServiceCapabilities(_trt__GetServiceCapabilities *trt__GetServiceCapabilities, _trt__GetServiceCapabilitiesResponse *trt__GetServiceCapabilitiesResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	trt__GetServiceCapabilitiesResponse->Capabilities = getMediaServiceCapabilities(this->soap);	
 	return SOAP_OK;
 }
 
@@ -210,9 +211,7 @@ int MediaBindingService::GetVideoSourceConfigurations(_trt__GetVideoSourceConfig
 	
 	for (auto it: ctx->m_devices) 
 	{	
-		trt__GetVideoSourceConfigurationsResponse->Configurations.push_back(soap_new_tt__VideoSourceConfiguration(this->soap));
-		trt__GetVideoSourceConfigurationsResponse->Configurations.back()->token = it.first;
-		trt__GetVideoSourceConfigurationsResponse->Configurations.back()->SourceToken = it.first;
+		trt__GetVideoSourceConfigurationsResponse->Configurations.push_back(getVideoSourceCfg(this->soap, it.first));
 	}
 	return SOAP_OK;
 }
@@ -274,9 +273,7 @@ int MediaBindingService::GetVideoSourceConfiguration(_trt__GetVideoSourceConfigu
 	auto it = ctx->m_devices.find(trt__GetVideoSourceConfiguration->ConfigurationToken);
 	if (it != ctx->m_devices.end())
 	{
-		trt__GetVideoSourceConfigurationResponse->Configuration = soap_new_tt__VideoSourceConfiguration(this->soap);
-		trt__GetVideoSourceConfigurationResponse->Configuration->token = it->first;
-		trt__GetVideoSourceConfigurationResponse->Configuration->SourceToken = it->first;
+		trt__GetVideoSourceConfigurationResponse->Configuration = getVideoSourceCfg(this->soap, it->first);
 	}
 	
 	return SOAP_OK;
@@ -354,9 +351,7 @@ int MediaBindingService::GetCompatibleVideoSourceConfigurations(_trt__GetCompati
 	auto it = ctx->m_devices.find(trt__GetCompatibleVideoSourceConfigurations->ProfileToken);
 	if (it != ctx->m_devices.end())
 	{
-		trt__GetCompatibleVideoSourceConfigurationsResponse->Configurations.push_back(soap_new_tt__VideoSourceConfiguration(this->soap));
-		trt__GetCompatibleVideoSourceConfigurationsResponse->Configurations.back()->token = it->first;
-		trt__GetCompatibleVideoSourceConfigurationsResponse->Configurations.back()->SourceToken = it->first;
+		trt__GetCompatibleVideoSourceConfigurationsResponse->Configurations.push_back(getVideoSourceCfg(this->soap, it->first));
 	}
 	return SOAP_OK;
 }

@@ -11,6 +11,7 @@
 
 
 #include "soapRecordingBindingService.h"
+#include "server.h"
 
 int RecordingBindingService::GetServiceCapabilities(_trc__GetServiceCapabilities *trc__GetServiceCapabilities, _trc__GetServiceCapabilitiesResponse *trc__GetServiceCapabilitiesResponse) 
 {

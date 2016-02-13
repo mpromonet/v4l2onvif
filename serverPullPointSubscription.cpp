@@ -12,7 +12,7 @@
 #include <sstream>
 
 #include "soapPullPointSubscriptionBindingService.h"
-#include "serviceContext.h"
+#include "server.h"
 
 
 int PullPointSubscriptionBindingService::PullMessages(_tev__PullMessages *tev__PullMessages, _tev__PullMessagesResponse *tev__PullMessagesResponse) 

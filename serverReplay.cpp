@@ -11,7 +11,7 @@
 
 
 #include "soapReplayBindingService.h"
-#include "serviceContext.h"
+#include "server.h"
 
 int ReplayBindingService::GetServiceCapabilities(_trp__GetServiceCapabilities *trp__GetServiceCapabilities, _trp__GetServiceCapabilitiesResponse *trp__GetServiceCapabilitiesResponse) 
 {

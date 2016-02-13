@@ -9,19 +9,37 @@
 **
 ** -------------------------------------------------------------------------*/
 
+#include <linux/videodev2.h>
 
 #include "soapImagingBindingService.h"
-#include "serviceContext.h"
+#include "server.h"
 
 int ImagingBindingService::GetServiceCapabilities(_timg__GetServiceCapabilities *timg__GetServiceCapabilities, _timg__GetServiceCapabilitiesResponse *timg__GetServiceCapabilitiesResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	timg__GetServiceCapabilitiesResponse->Capabilities = getImagingServiceCapabilities(this->soap);		
 	return SOAP_OK;
 }
 
 int ImagingBindingService::GetImagingSettings(_timg__GetImagingSettings *timg__GetImagingSettings, _timg__GetImagingSettingsResponse *timg__GetImagingSettingsResponse)  
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
+	auto it = ctx->m_devices.find(timg__GetImagingSettings->VideoSourceToken);
+	if (it != ctx->m_devices.end())
+	{
+		timg__GetImagingSettingsResponse->ImagingSettings = soap_new_tt__ImagingSettings20(this->soap);
+		float brightness = getCtrlValue(it->first, V4L2_CID_BRIGHTNESS);
+		timg__GetImagingSettingsResponse->ImagingSettings->Brightness = soap_new_ptr(this->soap, brightness);
+		float contrast = getCtrlValue(it->first, V4L2_CID_CONTRAST);
+		timg__GetImagingSettingsResponse->ImagingSettings->Contrast = soap_new_ptr(this->soap, contrast);
+		float saturation = getCtrlValue(it->first, V4L2_CID_SATURATION);
+		timg__GetImagingSettingsResponse->ImagingSettings->ColorSaturation = soap_new_ptr(this->soap, saturation);
+		float sharpness = getCtrlValue(it->first, V4L2_CID_SHARPNESS);
+		timg__GetImagingSettingsResponse->ImagingSettings->Sharpness = soap_new_ptr(this->soap, sharpness);
+	}
+	
 	return SOAP_OK;
 }
 
@@ -34,6 +52,21 @@ int ImagingBindingService::SetImagingSettings(_timg__SetImagingSettings *timg__S
 int ImagingBindingService::GetOptions(_timg__GetOptions *timg__GetOptions, _timg__GetOptionsResponse *timg__GetOptionsResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
+	auto it = ctx->m_devices.find(timg__GetOptions->VideoSourceToken);
+	if (it != ctx->m_devices.end())
+	{
+		timg__GetOptionsResponse->ImagingOptions = soap_new_tt__ImagingOptions20(this->soap);
+		std::pair<int,int> brightnessRange = getCtrlRange(it->first, V4L2_CID_BRIGHTNESS);
+		timg__GetOptionsResponse->ImagingOptions->Brightness = soap_new_req_tt__FloatRange(this->soap, brightnessRange.first, brightnessRange.second);
+		std::pair<int,int> contrastRange = getCtrlRange(it->first, V4L2_CID_CONTRAST);
+		timg__GetOptionsResponse->ImagingOptions->Contrast = soap_new_req_tt__FloatRange(this->soap, contrastRange.first, contrastRange.second);
+		std::pair<int,int> saturationRange = getCtrlRange(it->first, V4L2_CID_SATURATION);
+		timg__GetOptionsResponse->ImagingOptions->ColorSaturation = soap_new_req_tt__FloatRange(this->soap, saturationRange.first, saturationRange.second);
+		std::pair<int,int> sharpnessRange = getCtrlRange(it->first, V4L2_CID_SHARPNESS);
+		timg__GetOptionsResponse->ImagingOptions->Sharpness = soap_new_req_tt__FloatRange(this->soap, sharpnessRange.first, sharpnessRange.second);
+	}
 	return SOAP_OK;
 }
 
@@ -52,6 +85,8 @@ int ImagingBindingService::Stop(_timg__Stop *timg__Stop, _timg__StopResponse *ti
 int ImagingBindingService::GetStatus(_timg__GetStatus *timg__GetStatus, _timg__GetStatusResponse *timg__GetStatusResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	timg__GetStatusResponse->Status = soap_new_tt__ImagingStatus20(this->soap);
+	timg__GetStatusResponse->Status->FocusStatus20 = soap_new_tt__FocusStatus20(this->soap);
 	return SOAP_OK;
 }
 

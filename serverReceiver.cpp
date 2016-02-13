@@ -11,7 +11,7 @@
 
 
 #include "soapReceiverBindingService.h"
-#include "serviceContext.h"
+#include "server.h"
 
 int ReceiverBindingService::GetServiceCapabilities(_trv__GetServiceCapabilities *trv__GetServiceCapabilities, _trv__GetServiceCapabilitiesResponse *trv__GetServiceCapabilitiesResponse) 
 {

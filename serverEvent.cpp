@@ -12,7 +12,7 @@
 #include <sstream>
 
 #include "soapEventBindingService.h"
-#include "serviceContext.h"
+#include "server.h"
 
 
 int EventBindingService::GetServiceCapabilities(_tev__GetServiceCapabilities *tev__GetServiceCapabilities, _tev__GetServiceCapabilitiesResponse *tev__GetServiceCapabilitiesResponse) 

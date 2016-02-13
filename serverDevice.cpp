@@ -18,7 +18,7 @@
 #include <iomanip>
 
 #include "soapDeviceBindingService.h"
-#include "serviceContext.h"
+#include "server.h"
 #include "wsseapi.h"
 
 int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds__GetServicesResponse *tds__GetServicesResponse) 
@@ -36,10 +36,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	if (tds__GetServices->IncludeCapability)
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
-                tds__DeviceServiceCapabilities *capabilities = soap_new_tds__DeviceServiceCapabilities(this->soap);
-                capabilities->Network = soap_new_tds__NetworkCapabilities(this->soap);
-                capabilities->Security = soap_new_tds__SecurityCapabilities(this->soap);
-                capabilities->System = soap_new_tds__SystemCapabilities(this->soap);
+                tds__DeviceServiceCapabilities *capabilities = getDeviceServiceCapabilities(this->soap);
 		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
 
@@ -50,11 +47,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	if (tds__GetServices->IncludeCapability)
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
-		trt__Capabilities *capabilities = soap_new_trt__Capabilities(this->soap);
-		capabilities->ProfileCapabilities = soap_new_trt__ProfileCapabilities(this->soap);
-		capabilities->ProfileCapabilities->MaximumNumberOfProfiles =  soap_new_ptr(this->soap, 10);
-		capabilities->StreamingCapabilities = soap_new_trt__StreamingCapabilities(this->soap);
-		capabilities->StreamingCapabilities->RTPMulticast =  soap_new_ptr(this->soap, false);
+		trt__Capabilities *capabilities = getMediaServiceCapabilities(this->soap);
 		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
 
@@ -66,7 +59,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	if (tds__GetServices->IncludeCapability)
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
-		tt__ImagingCapabilities *capabilities = soap_new_tt__ImagingCapabilities(this->soap);
+		timg__Capabilities *capabilities = getImagingServiceCapabilities(this->soap);
 		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
 
@@ -78,7 +71,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	if (tds__GetServices->IncludeCapability)
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
-		tt__EventCapabilities *capabilities = soap_new_tt__EventCapabilities(this->soap);
+		tev__Capabilities *capabilities = soap_new_tev__Capabilities(this->soap);
 		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
 
@@ -89,7 +82,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	if (tds__GetServices->IncludeCapability)
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
-		tt__RecordingCapabilities *capabilities = soap_new_tt__RecordingCapabilities(this->soap);
+		trc__Capabilities *capabilities = soap_new_trc__Capabilities(this->soap);
 		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
 
@@ -100,7 +93,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	if (tds__GetServices->IncludeCapability)
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
-		tt__ReplayCapabilities *capabilities = soap_new_tt__ReplayCapabilities(this->soap);
+		trp__Capabilities *capabilities = soap_new_trp__Capabilities(this->soap);
 		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
 
@@ -111,7 +104,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	if (tds__GetServices->IncludeCapability)
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
-		tt__ReceiverCapabilities *capabilities = soap_new_tt__ReceiverCapabilities(this->soap);
+		trv__Capabilities *capabilities = soap_new_trv__Capabilities(this->soap);
 		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
 
@@ -121,6 +114,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 int DeviceBindingService::GetServiceCapabilities(_tds__GetServiceCapabilities *tds__GetServiceCapabilities, _tds__GetServiceCapabilitiesResponse *tds__GetServiceCapabilitiesResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	tds__GetServiceCapabilitiesResponse->Capabilities = getDeviceServiceCapabilities(this->soap);
 	return SOAP_OK;
 }
 
@@ -304,6 +298,10 @@ int DeviceBindingService::GetCapabilities(_tds__GetCapabilities *tds__GetCapabil
 	tds__GetCapabilitiesResponse->Capabilities = soap_new_tt__Capabilities(this->soap);
 	tds__GetCapabilitiesResponse->Capabilities->Device = soap_new_tt__DeviceCapabilities(this->soap);
 	tds__GetCapabilitiesResponse->Capabilities->Device->XAddr = url;
+	tds__GetCapabilitiesResponse->Capabilities->Device->System = soap_new_tt__SystemCapabilities(this->soap);
+	tds__GetCapabilitiesResponse->Capabilities->Device->System->SupportedVersions.push_back(soap_new_req_tt__OnvifVersion(this->soap,2,0));
+	tds__GetCapabilitiesResponse->Capabilities->Device->Network = soap_new_tt__NetworkCapabilities(this->soap);	
+	tds__GetCapabilitiesResponse->Capabilities->Device->Security = soap_new_tt__SecurityCapabilities(this->soap);	
 	tds__GetCapabilitiesResponse->Capabilities->Media  = soap_new_tt__MediaCapabilities(this->soap);
 	tds__GetCapabilitiesResponse->Capabilities->Media->XAddr = url;
 	tds__GetCapabilitiesResponse->Capabilities->Media->StreamingCapabilities = soap_new_tt__RealTimeStreamingCapabilities(this->soap);
