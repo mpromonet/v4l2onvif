@@ -19,12 +19,22 @@ int getFormat(const std::string &device, int& width, int& height, int& format);
 int getCtrlValue(const std::string &device, int idctrl);
 std::pair<int,int> getCtrlRange(const std::string &device, int idctrl);
 
-tt__VideoEncoderConfiguration* getVideoEncoderCfg(struct soap* soap, const char* device);
-tt__VideoSourceConfiguration* getVideoSourceCfg(struct soap* soap, const std::string &token);
-
+// service capabilities
 tds__DeviceServiceCapabilities* getDeviceServiceCapabilities(struct soap* soap);
 trt__Capabilities* getMediaServiceCapabilities(struct soap* soap);
 timg__Capabilities* getImagingServiceCapabilities(struct soap* soap);
+trc__Capabilities* getRecordingServiceCapabilities(struct soap* soap);
+
+// media 
+tt__VideoEncoderConfiguration* getVideoEncoderCfg(struct soap* soap, const std::string & device);
+tt__VideoSourceConfiguration* getVideoSourceCfg(struct soap* soap, const std::string & token);
+tt__VideoEncoderConfigurationOptions* getVideoEncoderCfgOptions(struct soap* soap, const std::string & device);
+
+// recording
+tt__RecordingJobConfiguration* getRecordingJobConfiguration(struct soap* soap, const std::string & recordtoken, const std::string & sourcetoken);
+tt__RecordingConfiguration* getRecordingCfg(struct soap* soap);
+tt__TrackConfiguration* getTracksCfg(struct soap* soap);
+
 
 template<typename T>
 T * soap_new_ptr(struct soap* soap, T value)

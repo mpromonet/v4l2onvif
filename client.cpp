@@ -179,9 +179,13 @@ int main(int argc, char* argv[])
 					if (mediaProxy.GetVideoEncoderConfiguration(&trt__GetVideoEncoderConfiguration, &trt__GetVideoEncoderConfigurationResponse) == SOAP_OK)
 					{		
 						std::cout << "\tEncoding:" << trt__GetVideoEncoderConfigurationResponse.Configuration->Encoding << std::endl;
+						if (trt__GetVideoEncoderConfigurationResponse.Configuration->H264)
+						{
+							std::cout << "\tH264Profile:" << trt__GetVideoEncoderConfigurationResponse.Configuration->H264->H264Profile << std::endl;
+						}
 						if (trt__GetVideoEncoderConfigurationResponse.Configuration->Resolution)
 						{
-							std::cout << "\t" << trt__GetVideoEncoderConfigurationResponse.Configuration->Resolution->Width << "x" << trt__GetVideoEncoderConfigurationResponse.Configuration->Resolution->Height << std::endl;
+							std::cout << "\tResolution:" << trt__GetVideoEncoderConfigurationResponse.Configuration->Resolution->Width << "x" << trt__GetVideoEncoderConfigurationResponse.Configuration->Resolution->Height << std::endl;
 						}
 					}
 					

@@ -223,7 +223,7 @@ int MediaBindingService::GetVideoEncoderConfigurations(_trt__GetVideoEncoderConf
 	
 	for (auto it: ctx->m_devices) 
 	{	
-		trt__GetVideoEncoderConfigurationsResponse->Configurations.push_back(getVideoEncoderCfg(this->soap, it.first.c_str()));
+		trt__GetVideoEncoderConfigurationsResponse->Configurations.push_back(getVideoEncoderCfg(this->soap, it.first));
 	}
 	
 	return SOAP_OK;
@@ -287,7 +287,7 @@ int MediaBindingService::GetVideoEncoderConfiguration(_trt__GetVideoEncoderConfi
 	auto it = ctx->m_devices.find(trt__GetVideoEncoderConfiguration->ConfigurationToken);
 	if (it != ctx->m_devices.end())
 	{
-		trt__GetVideoEncoderConfigurationResponse->Configuration = getVideoEncoderCfg(this->soap, it->first.c_str());	
+		trt__GetVideoEncoderConfigurationResponse->Configuration = getVideoEncoderCfg(this->soap, it->first);	
 	}
 	
 	return SOAP_OK;
@@ -337,7 +337,7 @@ int MediaBindingService::GetCompatibleVideoEncoderConfigurations(_trt__GetCompat
 	auto it = ctx->m_devices.find(trt__GetCompatibleVideoEncoderConfigurations->ProfileToken);
 	if (it != ctx->m_devices.end())
 	{
-		trt__GetCompatibleVideoEncoderConfigurationsResponse->Configurations.push_back(getVideoEncoderCfg(this->soap, it->first.c_str()));
+		trt__GetCompatibleVideoEncoderConfigurationsResponse->Configurations.push_back(getVideoEncoderCfg(this->soap, it->first));
 	}
 	
 	return SOAP_OK;
@@ -449,6 +449,18 @@ int MediaBindingService::GetVideoSourceConfigurationOptions(_trt__GetVideoSource
 int MediaBindingService::GetVideoEncoderConfigurationOptions(_trt__GetVideoEncoderConfigurationOptions *trt__GetVideoEncoderConfigurationOptions, _trt__GetVideoEncoderConfigurationOptionsResponse *trt__GetVideoEncoderConfigurationOptionsResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
+	if (trt__GetVideoEncoderConfigurationOptions->ConfigurationToken)
+	{
+		auto it = ctx->m_devices.find(trt__GetVideoEncoderConfigurationOptions->ConfigurationToken->c_str());
+		if (it != ctx->m_devices.end())
+		{	
+			trt__GetVideoEncoderConfigurationOptionsResponse->Options = getVideoEncoderCfgOptions(soap, it->first);
+		}
+	}
+	
 	return SOAP_OK;
 }
 

@@ -17,11 +17,14 @@
 
 #include "DeviceBinding.nsmap"
 #include "soapDeviceBindingService.h"
+
 #include "soapMediaBindingService.h"
 #include "soapRecordingBindingService.h"
 #include "soapReceiverBindingService.h"
 #include "soapReplayBindingService.h"
 #include "soapImagingBindingService.h"
+#include "soapSearchBindingService.h"
+
 #include "soapEventBindingService.h"
 #include "soapPullPointSubscriptionBindingService.h"
 
@@ -135,23 +138,73 @@ std::pair<int,int> getCtrlRange(const std::string &device, int idctrl)
 	return value;
 }
 
-tt__VideoEncoderConfiguration* getVideoEncoderCfg(struct soap* soap, const char* device)
+tt__H264Profile getH264Profile(int h264profile)
+{
+	tt__H264Profile profile = tt__H264Profile__Baseline;
+	switch (h264profile)
+	{
+		case V4L2_MPEG_VIDEO_H264_PROFILE_MAIN: profile = tt__H264Profile__Main; break;
+		case V4L2_MPEG_VIDEO_H264_PROFILE_EXTENDED: profile = tt__H264Profile__Extended; break;
+		case V4L2_MPEG_VIDEO_H264_PROFILE_HIGH: profile = tt__H264Profile__High; break;
+	}
+	return profile;
+}
+
+tt__VideoEncoderConfiguration* getVideoEncoderCfg(struct soap* soap, const std::string & device)
 {
 	tt__VideoEncoderConfiguration* cfg = soap_new_tt__VideoEncoderConfiguration(soap);
 	int width;
 	int height;
 	int format;	
 	if (getFormat(device, width, height, format))
-	{
+	{		
 		if (format == V4L2_PIX_FMT_H264)
-		{
+		{			
 			cfg->Encoding = tt__VideoEncoding__H264;
 			cfg->Resolution = soap_new_req_tt__VideoResolution(soap, width, height);
 			cfg->H264 = soap_new_tt__H264Configuration(soap);
-			cfg->H264->H264Profile = tt__H264Profile__Baseline;
+			cfg->H264->H264Profile = getH264Profile(getCtrlValue (device, V4L2_CID_MPEG_VIDEO_H264_PROFILE));
 			cfg->Multicast = soap_new_tt__MulticastConfiguration(soap);
 			cfg->Multicast->Address = soap_new_tt__IPAddress(soap);
 			cfg->SessionTimeout = "PT10S";
+		}
+	}
+	return cfg;
+}
+
+tt__VideoEncoderConfigurationOptions* getVideoEncoderCfgOptions(struct soap* soap, const std::string & device)
+{
+	tt__VideoEncoderConfigurationOptions* cfg = soap_new_tt__VideoEncoderConfigurationOptions(soap);
+	int width;
+	int height;
+	int format;	
+	if (getFormat(device, width, height, format))
+	{		
+		cfg->QualityRange = soap_new_req_tt__IntRange(soap, 0, 100);
+		if (format == V4L2_PIX_FMT_H264)
+		{			
+			cfg->H264 = soap_new_tt__H264Options(soap);
+			struct v4l2_frmsizeenum frmsize;
+			memset(&frmsize,0,sizeof(frmsize));
+			frmsize.pixel_format = V4L2_PIX_FMT_H264;
+			frmsize.index = 0;
+			for (frmsize.index = 0 ; (ioctl(fd, VIDIOC_ENUM_FRAMESIZES, &frmsize) == 0) ; frmsize.index++)
+			{
+				if (frmsize.type == V4L2_FRMSIZE_TYPE_DISCRETE) 
+				{				
+					cfg->H264->ResolutionsAvailable.push_back(soap_new_req_tt__VideoResolution(soap, frmsize.discrete.width, frmsize.discrete.height));
+				}
+				else
+				{
+					for (int w = frmsize.stepwise.min_width; w < frmsize.stepwise.max_width ; w+=frmsize.stepwise.step_width)
+					{
+						for (int h = frmsize.stepwise.min_height; w < frmsize.stepwise.max_heigth ; w+=frmsize.stepwise.step_height)
+						{
+							cfg->H264->ResolutionsAvailable.push_back(soap_new_req_tt__VideoResolution(soap, w, h));
+						}
+					}
+				}
+			}
 		}
 	}
 	return cfg;
@@ -165,9 +218,37 @@ tt__VideoSourceConfiguration* getVideoSourceCfg(struct soap* soap, const std::st
 	int width = 0;
 	int height = 0;
 	int format = 0;	
-	getFormat(token.c_str(), width, height, format);
+	getFormat(token, width, height, format);
 	sourcecfg->Bounds = soap_new_req_tt__IntRectangle(soap, 0, 0, width, height);
 	return sourcecfg;
+}
+
+tt__RecordingJobConfiguration* getRecordingJobConfiguration(struct soap* soap, const std::string & recordtoken, const std::string & sourcetoken)
+{
+	tt__RecordingJobConfiguration* cfg = soap_new_tt__RecordingJobConfiguration(soap);
+	cfg->RecordingToken = recordtoken;	
+	cfg->Source.push_back(soap_new_tt__RecordingJobSource(soap));
+	cfg->Source.back()->SourceToken = soap_new_tt__SourceReference(soap);
+	cfg->Source.back()->SourceToken->Token = sourcetoken;
+	return cfg;
+}
+
+tt__RecordingConfiguration* getRecordingCfg(struct soap* soap)
+{
+	tt__RecordingConfiguration* cfg = soap_new_tt__RecordingConfiguration(soap);
+	cfg->Source = soap_new_tt__RecordingSourceInformation(soap);
+	cfg->Source->SourceId = "sourceid";
+	cfg->Source->Location = "here";
+	cfg->MaximumRetentionTime = "PT24H";
+	return cfg;
+}
+
+tt__TrackConfiguration* getTracksCfg(struct soap* soap)
+{
+	tt__TrackConfiguration* cfg = soap_new_tt__TrackConfiguration(soap);
+	cfg->TrackType = tt__TrackType__Video;
+	cfg->Description = "trackdescription";
+	return cfg;
 }
 
 tds__DeviceServiceCapabilities* getDeviceServiceCapabilities(struct soap* soap)
@@ -192,6 +273,12 @@ trt__Capabilities* getMediaServiceCapabilities(struct soap* soap)
 timg__Capabilities* getImagingServiceCapabilities(struct soap* soap)
 {
 	timg__Capabilities *capabilities = soap_new_timg__Capabilities(soap);
+	return capabilities;
+}
+
+trc__Capabilities* getRecordingServiceCapabilities(struct soap* soap)
+{
+	trc__Capabilities *capabilities = soap_new_trc__Capabilities(soap);
 	return capabilities;
 }
 
@@ -229,17 +316,19 @@ int main(int argc, char* argv[])
 	struct soap *soap = soap_new();
 	soap->user = (void*)&deviceCtx;
 	soap->fget = http_get; 
-	{	
+	{			
+		DeviceBindingService deviceService(soap);
+		
 		MediaBindingService mediaService(soap);
 		RecordingBindingService recordingService(soap);
 		ReceiverBindingService receiverService(soap);
 		ReplayBindingService replayService(soap);
 		ImagingBindingService imagingService(soap);
+		SearchBindingService searchService(soap);
+		
 		EventBindingService eventService(soap);
 		PullPointSubscriptionBindingService pullPointService(soap);
 
-		DeviceBindingService deviceService(soap);
-		soap_register_plugin(deviceService.soap, soap_wsse);		
 		
 		if (!soap_valid_socket(soap_bind(soap, NULL, deviceCtx.m_port, 100))) 
 		{
@@ -289,6 +378,11 @@ int main(int argc, char* argv[])
 					soap_stream_fault(soap, std::cerr);
 				}
 				else if (mediaService.dispatch() != SOAP_NO_METHOD)
+				{
+					soap_send_fault(soap);
+					soap_stream_fault(soap, std::cerr);
+				}
+				else if (searchService.dispatch() != SOAP_NO_METHOD)
 				{
 					soap_send_fault(soap);
 					soap_stream_fault(soap, std::cerr);

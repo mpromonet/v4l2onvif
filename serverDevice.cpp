@@ -82,7 +82,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	if (tds__GetServices->IncludeCapability)
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
-		trc__Capabilities *capabilities = soap_new_trc__Capabilities(this->soap);
+		trc__Capabilities *capabilities = getRecordingServiceCapabilities(this->soap);
 		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
 
