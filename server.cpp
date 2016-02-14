@@ -187,15 +187,19 @@ tt__VideoEncoderConfiguration* ServiceContext::getVideoEncoderCfg(struct soap* s
 	int format;	
 	if (getFormat(token, width, height, format))
 	{		
+		cfg->Resolution = soap_new_req_tt__VideoResolution(soap, width, height);
+		cfg->Multicast = soap_new_tt__MulticastConfiguration(soap);
+		cfg->Multicast->Address = soap_new_tt__IPAddress(soap);
+		cfg->SessionTimeout = "PT10S";
 		if (format == V4L2_PIX_FMT_H264)
 		{			
 			cfg->Encoding = tt__VideoEncoding__H264;
-			cfg->Resolution = soap_new_req_tt__VideoResolution(soap, width, height);
 			cfg->H264 = soap_new_tt__H264Configuration(soap);
 			cfg->H264->H264Profile = getH264Profile(getCtrlValue (token, V4L2_CID_MPEG_VIDEO_H264_PROFILE));
-			cfg->Multicast = soap_new_tt__MulticastConfiguration(soap);
-			cfg->Multicast->Address = soap_new_tt__IPAddress(soap);
-			cfg->SessionTimeout = "PT10S";
+		}
+		else if (format == V4L2_PIX_FMT_JPEG)
+		{
+			cfg->Encoding = tt__VideoEncoding__JPEG;
 		}
 	}
 	return cfg;
