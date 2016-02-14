@@ -18,6 +18,8 @@
 int EventBindingService::GetServiceCapabilities(_tev__GetServiceCapabilities *tev__GetServiceCapabilities, _tev__GetServiceCapabilitiesResponse *tev__GetServiceCapabilitiesResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	tev__GetServiceCapabilitiesResponse->Capabilities = ctx->getEventServiceCapabilities(this->soap);		
 	return SOAP_OK;
 }
 
@@ -27,7 +29,7 @@ int EventBindingService::CreatePullPointSubscription(_tev__CreatePullPointSubscr
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
 	
 	std::ostringstream os;
-	os << "http://" << getServerIpFromClientIp(htonl(this->soap->ip)) << ":" << ctx->m_port;
+	os << "http://" << ctx->getServerIpFromClientIp(htonl(this->soap->ip)) << ":" << ctx->m_port;
 	std::string url(os.str());
 	
 	time_t sec = time(NULL);

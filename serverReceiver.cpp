@@ -16,6 +16,8 @@
 int ReceiverBindingService::GetServiceCapabilities(_trv__GetServiceCapabilities *trv__GetServiceCapabilities, _trv__GetServiceCapabilitiesResponse *trv__GetServiceCapabilitiesResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	trv__GetServiceCapabilitiesResponse->Capabilities = ctx->getReceiverServiceCapabilities(this->soap);	
 	return SOAP_OK;
 }
 

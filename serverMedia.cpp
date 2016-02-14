@@ -15,7 +15,8 @@
 int MediaBindingService::GetServiceCapabilities(_trt__GetServiceCapabilities *trt__GetServiceCapabilities, _trt__GetServiceCapabilitiesResponse *trt__GetServiceCapabilitiesResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
-	trt__GetServiceCapabilitiesResponse->Capabilities = getMediaServiceCapabilities(this->soap);	
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;	
+	trt__GetServiceCapabilitiesResponse->Capabilities = ctx->getMediaServiceCapabilities(this->soap);	
 	return SOAP_OK;
 }
 
@@ -29,7 +30,7 @@ int MediaBindingService::GetVideoSources(_trt__GetVideoSources *trt__GetVideoSou
 	int format;
 	for (auto it: ctx->m_devices) 
 	{
-		if (getFormat(it.first.c_str(), width, height, format))
+		if (ctx->getFormat(it.first.c_str(), width, height, format))
 		{
 			trt__GetVideoSourcesResponse->VideoSources.push_back(soap_new_tt__VideoSource(this->soap));
 			trt__GetVideoSourcesResponse->VideoSources.back()->token = it.first;
@@ -211,7 +212,7 @@ int MediaBindingService::GetVideoSourceConfigurations(_trt__GetVideoSourceConfig
 	
 	for (auto it: ctx->m_devices) 
 	{	
-		trt__GetVideoSourceConfigurationsResponse->Configurations.push_back(getVideoSourceCfg(this->soap, it.first));
+		trt__GetVideoSourceConfigurationsResponse->Configurations.push_back(ctx->getVideoSourceCfg(this->soap, it.first));
 	}
 	return SOAP_OK;
 }
@@ -223,7 +224,7 @@ int MediaBindingService::GetVideoEncoderConfigurations(_trt__GetVideoEncoderConf
 	
 	for (auto it: ctx->m_devices) 
 	{	
-		trt__GetVideoEncoderConfigurationsResponse->Configurations.push_back(getVideoEncoderCfg(this->soap, it.first));
+		trt__GetVideoEncoderConfigurationsResponse->Configurations.push_back(ctx->getVideoEncoderCfg(this->soap, it.first));
 	}
 	
 	return SOAP_OK;
@@ -273,7 +274,7 @@ int MediaBindingService::GetVideoSourceConfiguration(_trt__GetVideoSourceConfigu
 	auto it = ctx->m_devices.find(trt__GetVideoSourceConfiguration->ConfigurationToken);
 	if (it != ctx->m_devices.end())
 	{
-		trt__GetVideoSourceConfigurationResponse->Configuration = getVideoSourceCfg(this->soap, it->first);
+		trt__GetVideoSourceConfigurationResponse->Configuration = ctx->getVideoSourceCfg(this->soap, it->first);
 	}
 	
 	return SOAP_OK;
@@ -287,7 +288,7 @@ int MediaBindingService::GetVideoEncoderConfiguration(_trt__GetVideoEncoderConfi
 	auto it = ctx->m_devices.find(trt__GetVideoEncoderConfiguration->ConfigurationToken);
 	if (it != ctx->m_devices.end())
 	{
-		trt__GetVideoEncoderConfigurationResponse->Configuration = getVideoEncoderCfg(this->soap, it->first);	
+		trt__GetVideoEncoderConfigurationResponse->Configuration = ctx->getVideoEncoderCfg(this->soap, it->first);	
 	}
 	
 	return SOAP_OK;
@@ -337,7 +338,7 @@ int MediaBindingService::GetCompatibleVideoEncoderConfigurations(_trt__GetCompat
 	auto it = ctx->m_devices.find(trt__GetCompatibleVideoEncoderConfigurations->ProfileToken);
 	if (it != ctx->m_devices.end())
 	{
-		trt__GetCompatibleVideoEncoderConfigurationsResponse->Configurations.push_back(getVideoEncoderCfg(this->soap, it->first));
+		trt__GetCompatibleVideoEncoderConfigurationsResponse->Configurations.push_back(ctx->getVideoEncoderCfg(this->soap, it->first));
 	}
 	
 	return SOAP_OK;
@@ -351,7 +352,7 @@ int MediaBindingService::GetCompatibleVideoSourceConfigurations(_trt__GetCompati
 	auto it = ctx->m_devices.find(trt__GetCompatibleVideoSourceConfigurations->ProfileToken);
 	if (it != ctx->m_devices.end())
 	{
-		trt__GetCompatibleVideoSourceConfigurationsResponse->Configurations.push_back(getVideoSourceCfg(this->soap, it->first));
+		trt__GetCompatibleVideoSourceConfigurationsResponse->Configurations.push_back(ctx->getVideoSourceCfg(this->soap, it->first));
 	}
 	return SOAP_OK;
 }
@@ -457,7 +458,7 @@ int MediaBindingService::GetVideoEncoderConfigurationOptions(_trt__GetVideoEncod
 		auto it = ctx->m_devices.find(trt__GetVideoEncoderConfigurationOptions->ConfigurationToken->c_str());
 		if (it != ctx->m_devices.end())
 		{	
-			trt__GetVideoEncoderConfigurationOptionsResponse->Options = getVideoEncoderCfgOptions(soap, it->first);
+			trt__GetVideoEncoderConfigurationOptionsResponse->Options = ctx->getVideoEncoderCfgOptions(soap, it->first);
 		}
 	}
 	
@@ -507,7 +508,7 @@ int MediaBindingService::GetStreamUri(_trt__GetStreamUri *trt__GetStreamUri, _tr
 	
 	trt__GetStreamUriResponse->MediaUri = soap_new_tt__MediaUri(this->soap);
 	trt__GetStreamUriResponse->MediaUri->Uri = "rtsp://";
-	trt__GetStreamUriResponse->MediaUri->Uri.append(getServerIpFromClientIp(htonl(this->soap->ip)));	
+	trt__GetStreamUriResponse->MediaUri->Uri.append(ctx->getServerIpFromClientIp(htonl(this->soap->ip)));	
 	trt__GetStreamUriResponse->MediaUri->Uri.append(":");
 	trt__GetStreamUriResponse->MediaUri->Uri.append(ctx->m_rtspport);
 	trt__GetStreamUriResponse->MediaUri->Uri.append("/");

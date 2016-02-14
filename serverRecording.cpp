@@ -16,7 +16,8 @@
 int RecordingBindingService::GetServiceCapabilities(_trc__GetServiceCapabilities *trc__GetServiceCapabilities, _trc__GetServiceCapabilitiesResponse *trc__GetServiceCapabilitiesResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
-	trc__GetServiceCapabilitiesResponse->Capabilities = getRecordingServiceCapabilities(this->soap);
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	trc__GetServiceCapabilitiesResponse->Capabilities = ctx->getRecordingServiceCapabilities(this->soap);
 	return SOAP_OK;
 }
 
@@ -41,11 +42,11 @@ int RecordingBindingService::GetRecordings(_trc__GetRecordings *trc__GetRecordin
 	for (auto it: ctx->m_devices) 
 	{		
 		trc__GetRecordingsResponse->RecordingItem.back()->RecordingToken = it.first;
-		trc__GetRecordingsResponse->RecordingItem.back()->Configuration	= getRecordingCfg(this->soap);
+		trc__GetRecordingsResponse->RecordingItem.back()->Configuration	= ctx->getRecordingCfg(this->soap);
 		trc__GetRecordingsResponse->RecordingItem.back()->Tracks = soap_new_tt__GetTracksResponseList(soap);
 		trc__GetRecordingsResponse->RecordingItem.back()->Tracks->Track.push_back(soap_new_tt__GetTracksResponseItem(soap));
 		trc__GetRecordingsResponse->RecordingItem.back()->Tracks->Track.back()->TrackToken = "video";
-		trc__GetRecordingsResponse->RecordingItem.back()->Tracks->Track.back()->Configuration = getTracksCfg(this->soap);
+		trc__GetRecordingsResponse->RecordingItem.back()->Tracks->Track.back()->Configuration = ctx->getTracksCfg(this->soap);
 	}
 	return SOAP_OK;
 }
@@ -64,7 +65,7 @@ int RecordingBindingService::GetRecordingConfiguration(_trc__GetRecordingConfigu
 	auto it = ctx->m_devices.find(trc__GetRecordingConfiguration->RecordingToken);
 	if (it != ctx->m_devices.end())
 	{
-		trc__GetRecordingConfigurationResponse->RecordingConfiguration = getRecordingCfg(this->soap);
+		trc__GetRecordingConfigurationResponse->RecordingConfiguration = ctx->getRecordingCfg(this->soap);
 	}
 	return SOAP_OK;
 }
@@ -98,7 +99,7 @@ int RecordingBindingService::GetTrackConfiguration(_trc__GetTrackConfiguration *
 	auto it = ctx->m_devices.find(trc__GetTrackConfiguration->RecordingToken);
 	if ( (it != ctx->m_devices.end()) && (trc__GetTrackConfiguration->TrackToken == "video") )
 	{
-		trc__GetTrackConfigurationResponse->TrackConfiguration = getTracksCfg(this->soap);
+		trc__GetTrackConfigurationResponse->TrackConfiguration = ctx->getTracksCfg(this->soap);
 	}
 	return SOAP_OK;
 }
@@ -130,7 +131,7 @@ int RecordingBindingService::GetRecordingJobs(_trc__GetRecordingJobs *trc__GetRe
 	{		
 		trc__GetRecordingJobsResponse->JobItem.push_back(soap_new_tt__GetRecordingJobsResponseItem(this->soap));
 		trc__GetRecordingJobsResponse->JobItem.back()->JobToken = it.first;	
-		trc__GetRecordingJobsResponse->JobItem.back()->JobConfiguration	= getRecordingJobConfiguration(this->soap, it.first);
+		trc__GetRecordingJobsResponse->JobItem.back()->JobConfiguration	= ctx->getRecordingJobConfiguration(this->soap, it.first);
 	}
 	
 	return SOAP_OK;
@@ -150,7 +151,7 @@ int RecordingBindingService::GetRecordingJobConfiguration(_trc__GetRecordingJobC
 	auto it = ctx->m_devices.find(trc__GetRecordingJobConfiguration->JobToken);
 	if (it != ctx->m_devices.end())
 	{
-		trc__GetRecordingJobConfigurationResponse->JobConfiguration = getRecordingJobConfiguration(this->soap, it->first);
+		trc__GetRecordingJobConfigurationResponse->JobConfiguration = ctx->getRecordingJobConfiguration(this->soap, it->first);
 	}
 	return SOAP_OK;
 }

@@ -56,7 +56,7 @@ int http_get(struct soap *soap)
 	return retCode;
 } 
 
-std::string getServerIpFromClientIp(int clientip)
+std::string ServiceContext::getServerIpFromClientIp(int clientip)
 {
 	std::string serverip;
 	char host[NI_MAXHOST];
@@ -84,7 +84,7 @@ std::string getServerIpFromClientIp(int clientip)
 	return serverip;
 }
 	
-int getFormat(const std::string &device, int& width, int& height, int& format)
+int ServiceContext::getFormat(const std::string &device, int& width, int& height, int& format)
 {
 	int ret = 0;
 	int fd = open(device.c_str(), O_RDWR | O_NONBLOCK, 0);
@@ -103,7 +103,7 @@ int getFormat(const std::string &device, int& width, int& height, int& format)
 	return ret;
 }
 
-int getCtrlValue(const std::string &device, int idctrl)
+int ServiceContext::getCtrlValue(const std::string &device, int idctrl)
 {
 	int value = 0;
 	int fd = open(device.c_str(), O_RDWR | O_NONBLOCK, 0);
@@ -114,13 +114,42 @@ int getCtrlValue(const std::string &device, int idctrl)
 	if (ioctl (fd, VIDIOC_G_CTRL, &control) == 0) 
 	{
 		value = control.value;
-      	} 	
+	} 	
 	
 	close(fd);	
 	return value;
 }
 
-std::pair<int,int> getCtrlRange(const std::string &device, int idctrl)
+void ServiceContext::setCtrlValue(const std::string &device, int idctrl, int value)
+{
+	int fd = open(device.c_str(), O_RDWR | O_NONBLOCK, 0);
+	
+	struct v4l2_control control;
+	memset(&control, 0, sizeof(control));
+	control.id = idctrl;
+	control.value = value;
+	if (ioctl (fd, VIDIOC_S_CTRL, &control) == 0) 
+	{
+	} 	
+	
+	close(fd);	
+}
+
+void ServiceContext::getIdentification(const std::string &device, std::string & card, std::string & driver, std::string & bus)
+{
+	int fd = open(device.c_str(), O_RDWR | O_NONBLOCK, 0);
+	v4l2_capability cap;
+	memset(&cap,0,sizeof(cap));
+	if (-1 != ioctl(fd,VIDIOC_QUERYCAP,&cap))
+	{
+		card   = (const char*)cap.card;
+		driver = (const char*)cap.driver;
+		bus    = (const char*)cap.bus_info;
+	}
+	close(fd);	
+}
+
+std::pair<int,int> ServiceContext::getCtrlRange(const std::string &device, int idctrl)
 {
 	std::pair<int,int> value;
 	int fd = open(device.c_str(), O_RDWR | O_NONBLOCK, 0);
@@ -132,7 +161,7 @@ std::pair<int,int> getCtrlRange(const std::string &device, int idctrl)
 	{
 		value.first = queryctrl.minimum;
 		value.second = queryctrl.maximum;
-      	} 	
+   	} 	
 	
 	close(fd);	
 	return value;
@@ -150,20 +179,20 @@ tt__H264Profile getH264Profile(int h264profile)
 	return profile;
 }
 
-tt__VideoEncoderConfiguration* getVideoEncoderCfg(struct soap* soap, const std::string & device)
+tt__VideoEncoderConfiguration* ServiceContext::getVideoEncoderCfg(struct soap* soap, const std::string & token)
 {
 	tt__VideoEncoderConfiguration* cfg = soap_new_tt__VideoEncoderConfiguration(soap);
 	int width;
 	int height;
 	int format;	
-	if (getFormat(device, width, height, format))
+	if (getFormat(token, width, height, format))
 	{		
 		if (format == V4L2_PIX_FMT_H264)
 		{			
 			cfg->Encoding = tt__VideoEncoding__H264;
 			cfg->Resolution = soap_new_req_tt__VideoResolution(soap, width, height);
 			cfg->H264 = soap_new_tt__H264Configuration(soap);
-			cfg->H264->H264Profile = getH264Profile(getCtrlValue (device, V4L2_CID_MPEG_VIDEO_H264_PROFILE));
+			cfg->H264->H264Profile = getH264Profile(getCtrlValue (token, V4L2_CID_MPEG_VIDEO_H264_PROFILE));
 			cfg->Multicast = soap_new_tt__MulticastConfiguration(soap);
 			cfg->Multicast->Address = soap_new_tt__IPAddress(soap);
 			cfg->SessionTimeout = "PT10S";
@@ -172,20 +201,20 @@ tt__VideoEncoderConfiguration* getVideoEncoderCfg(struct soap* soap, const std::
 	return cfg;
 }
 
-tt__VideoEncoderConfigurationOptions* getVideoEncoderCfgOptions(struct soap* soap, const std::string & device)
+tt__VideoEncoderConfigurationOptions* ServiceContext::getVideoEncoderCfgOptions(struct soap* soap, const std::string & token)
 {
 	tt__VideoEncoderConfigurationOptions* cfg = soap_new_tt__VideoEncoderConfigurationOptions(soap);
 	int width;
 	int height;
 	int format;	
-	if (getFormat(device, width, height, format))
+	if (getFormat(token, width, height, format))
 	{		
 		cfg->QualityRange = soap_new_req_tt__IntRange(soap, 0, 100);
 		if (format == V4L2_PIX_FMT_H264)
 		{			
 			cfg->H264 = soap_new_tt__H264Options(soap);
 			
-			int fd = open(device.c_str(), O_RDWR | O_NONBLOCK, 0);
+			int fd = open(token.c_str(), O_RDWR | O_NONBLOCK, 0);
 			
 			struct v4l2_frmsizeenum frmsize;
 			memset(&frmsize,0,sizeof(frmsize));
@@ -226,7 +255,7 @@ tt__VideoEncoderConfigurationOptions* getVideoEncoderCfgOptions(struct soap* soa
 	return cfg;
 }
 
-tt__VideoSourceConfiguration* getVideoSourceCfg(struct soap* soap, const std::string &token)
+tt__VideoSourceConfiguration* ServiceContext::getVideoSourceCfg(struct soap* soap, const std::string &token)
 {
 	tt__VideoSourceConfiguration* sourcecfg = soap_new_tt__VideoSourceConfiguration(soap);
 	sourcecfg->token = token;
@@ -239,7 +268,7 @@ tt__VideoSourceConfiguration* getVideoSourceCfg(struct soap* soap, const std::st
 	return sourcecfg;
 }
 
-tt__RecordingJobConfiguration* getRecordingJobConfiguration(struct soap* soap, const std::string & token)
+tt__RecordingJobConfiguration* ServiceContext::getRecordingJobConfiguration(struct soap* soap, const std::string & token)
 {
 	tt__RecordingJobConfiguration* cfg = soap_new_tt__RecordingJobConfiguration(soap);
 	cfg->RecordingToken = token;	
@@ -250,7 +279,7 @@ tt__RecordingJobConfiguration* getRecordingJobConfiguration(struct soap* soap, c
 	return cfg;
 }
 
-tt__RecordingConfiguration* getRecordingCfg(struct soap* soap)
+tt__RecordingConfiguration* ServiceContext::getRecordingCfg(struct soap* soap)
 {
 	tt__RecordingConfiguration* cfg = soap_new_tt__RecordingConfiguration(soap);
 	cfg->Source = soap_new_tt__RecordingSourceInformation(soap);
@@ -260,7 +289,7 @@ tt__RecordingConfiguration* getRecordingCfg(struct soap* soap)
 	return cfg;
 }
 
-tt__TrackConfiguration* getTracksCfg(struct soap* soap)
+tt__TrackConfiguration* ServiceContext::getTracksCfg(struct soap* soap)
 {
 	tt__TrackConfiguration* cfg = soap_new_tt__TrackConfiguration(soap);
 	cfg->TrackType = tt__TrackType__Video;
@@ -268,7 +297,7 @@ tt__TrackConfiguration* getTracksCfg(struct soap* soap)
 	return cfg;
 }
 
-tds__StorageConfiguration* getStorageCfg(struct soap* soap, const std::string & path)
+tds__StorageConfiguration* ServiceContext::getStorageCfg(struct soap* soap, const std::string & path)
 {
 	tds__StorageConfiguration* cfg = soap_new_tds__StorageConfiguration(soap);
 	cfg->token = path;
@@ -279,7 +308,7 @@ tds__StorageConfiguration* getStorageCfg(struct soap* soap, const std::string & 
 }
 
 
-tds__DeviceServiceCapabilities* getDeviceServiceCapabilities(struct soap* soap)
+tds__DeviceServiceCapabilities* ServiceContext::getDeviceServiceCapabilities(struct soap* soap)
 {
 	tds__DeviceServiceCapabilities *capabilities = soap_new_tds__DeviceServiceCapabilities(soap);
 	capabilities->Network = soap_new_tds__NetworkCapabilities(soap);
@@ -289,7 +318,7 @@ tds__DeviceServiceCapabilities* getDeviceServiceCapabilities(struct soap* soap)
 	return capabilities;
 }
 
-trt__Capabilities* getMediaServiceCapabilities(struct soap* soap)
+trt__Capabilities* ServiceContext::getMediaServiceCapabilities(struct soap* soap)
 {
 	trt__Capabilities *capabilities = soap_new_trt__Capabilities(soap);
 	capabilities->ProfileCapabilities = soap_new_trt__ProfileCapabilities(soap);
@@ -299,21 +328,39 @@ trt__Capabilities* getMediaServiceCapabilities(struct soap* soap)
 	return capabilities;
 }
 
-timg__Capabilities* getImagingServiceCapabilities(struct soap* soap)
+timg__Capabilities* ServiceContext::getImagingServiceCapabilities(struct soap* soap)
 {
 	timg__Capabilities *capabilities = soap_new_timg__Capabilities(soap);
 	return capabilities;
 }
 
-trc__Capabilities* getRecordingServiceCapabilities(struct soap* soap)
+trc__Capabilities* ServiceContext::getRecordingServiceCapabilities(struct soap* soap)
 {
 	trc__Capabilities *capabilities = soap_new_trc__Capabilities(soap);
 	return capabilities;
 }
 
-tse__Capabilities*  getSearchServiceCapabilities(struct soap* soap)
+tse__Capabilities*  ServiceContext::getSearchServiceCapabilities(struct soap* soap)
 {
 	tse__Capabilities *capabilities = soap_new_tse__Capabilities(soap);
+	return capabilities;
+}
+
+trv__Capabilities*  ServiceContext::getReceiverServiceCapabilities(struct soap* soap)
+{
+	trv__Capabilities *capabilities = soap_new_trv__Capabilities(soap);
+	return capabilities;
+}
+
+trp__Capabilities* ServiceContext::getReplayServiceCapabilities(struct soap* soap)
+{
+	trp__Capabilities *capabilities = soap_new_trp__Capabilities(soap);
+	return capabilities;
+}
+
+tev__Capabilities* ServiceContext::getEventServiceCapabilities(struct soap* soap)
+{
+	tev__Capabilities *capabilities = soap_new_tev__Capabilities(soap);
 	return capabilities;
 }
 
@@ -342,6 +389,7 @@ int main(int argc, char* argv[])
 	std::cout << "Listening to " << port << std::endl;
 		
 	ServiceContext deviceCtx;
+	deviceCtx.m_wsdlurl = "devicemgmt.wsdl";
 	deviceCtx.m_port = port;
 	deviceCtx.m_rtspport = "554";
 	deviceCtx.m_user = username;

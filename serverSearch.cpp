@@ -16,7 +16,8 @@
 int SearchBindingService::GetServiceCapabilities(_tse__GetServiceCapabilities *tse__GetServiceCapabilities, _tse__GetServiceCapabilitiesResponse *tse__GetServiceCapabilitiesResponse) 
 {	
 	std::cout << __FUNCTION__ << std::endl;
-	tse__GetServiceCapabilitiesResponse->Capabilities = getSearchServiceCapabilities(this->soap);	
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	tse__GetServiceCapabilitiesResponse->Capabilities = ctx->getSearchServiceCapabilities(this->soap);	
 	return SOAP_OK;
 }
 
