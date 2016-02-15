@@ -60,7 +60,8 @@ void addSecurity(struct soap* soap, const std::string& username, const std::stri
 {
 	if (!username.empty())
 	{
-		soap_wsse_add_UsernameTokenDigest(soap, NULL, username.c_str() , password.c_str());	
+		soap_wsse_add_Timestamp(soap, "Time", 600);
+		soap_wsse_add_UsernameTokenDigest(soap, "User", username.c_str() , password.c_str());	
 	}
 }
 
