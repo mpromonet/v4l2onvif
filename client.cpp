@@ -10,6 +10,7 @@
 ** -------------------------------------------------------------------------*/
 
 #include <memory>
+#include <sstream>
 
 #include "DeviceBinding.nsmap"
 #include "soapDeviceBindingProxy.h"
@@ -24,6 +25,36 @@
 #include "soapPullPointSubscriptionBindingProxy.h"
 
 #include "wsseapi.h"
+
+template<typename T>
+std::string printPtr(T* ptr)
+{
+	std::ostringstream os;
+	if (ptr)
+	{
+		os << *ptr;
+	}
+	else
+	{	
+		os << "(null)";
+	}
+	return os.str();
+}
+
+template<typename T>
+std::string printRangePtr(T* ptr)
+{
+	std::ostringstream os;
+	if (ptr)
+	{
+		os << "[" << ptr->Min << "," << ptr->Max << "]";
+	}
+	else
+	{	
+		os << "(null)";
+	}
+	return os.str();
+}
 
 void addSecurity(struct soap* soap, const std::string& username, const std::string & password)
 {
@@ -259,10 +290,10 @@ int main(int argc, char* argv[])
 						addSecurity(imagingProxy->soap, username, password);						
 						if (imagingProxy->GetImagingSettings(&timg__GetImagingSettings, &timg__GetImagingSettingsResponse) == SOAP_OK)
 						{
-							std::cout << "\tBrightness:" << *timg__GetImagingSettingsResponse.ImagingSettings->Brightness      << std::endl;
-							std::cout << "\tContrast  :" << *timg__GetImagingSettingsResponse.ImagingSettings->Contrast        << std::endl;
-							std::cout << "\tSaturation:" << *timg__GetImagingSettingsResponse.ImagingSettings->ColorSaturation << std::endl;
-							std::cout << "\tSharpness :" << *timg__GetImagingSettingsResponse.ImagingSettings->Sharpness       << std::endl;
+							std::cout << "\tBrightness:" << printPtr(timg__GetImagingSettingsResponse.ImagingSettings->Brightness)      << std::endl;
+							std::cout << "\tContrast  :" << printPtr(timg__GetImagingSettingsResponse.ImagingSettings->Contrast)        << std::endl;
+							std::cout << "\tSaturation:" << printPtr(timg__GetImagingSettingsResponse.ImagingSettings->ColorSaturation) << std::endl;
+							std::cout << "\tSharpness :" << printPtr(timg__GetImagingSettingsResponse.ImagingSettings->Sharpness)       << std::endl;
 						}
 						
 						_timg__GetOptions timg__GetOptions;
@@ -271,10 +302,10 @@ int main(int argc, char* argv[])
 						addSecurity(imagingProxy->soap, username, password);						
 						if (imagingProxy->GetOptions(&timg__GetOptions, &timg__GetOptionsResponse) == SOAP_OK)
 						{
-							std::cout << "\tBrightness: [" << timg__GetOptionsResponse.ImagingOptions->Brightness->Min      << "," << timg__GetOptionsResponse.ImagingOptions->Brightness->Max      << "]" << std::endl;
-							std::cout << "\tContrast:   [" << timg__GetOptionsResponse.ImagingOptions->Contrast->Min        << "," << timg__GetOptionsResponse.ImagingOptions->Contrast->Max        << "]" << std::endl;
-							std::cout << "\tSaturation: [" << timg__GetOptionsResponse.ImagingOptions->ColorSaturation->Min << "," << timg__GetOptionsResponse.ImagingOptions->ColorSaturation->Max << "]" << std::endl;
-							std::cout << "\tSharpness:  [" << timg__GetOptionsResponse.ImagingOptions->Sharpness->Min       << "," << timg__GetOptionsResponse.ImagingOptions->Sharpness->Max       << "]" << std::endl;
+							std::cout << "\tBrightness: " << printRangePtr(timg__GetOptionsResponse.ImagingOptions->Brightness)      << std::endl;
+							std::cout << "\tContrast  : " << printRangePtr(timg__GetOptionsResponse.ImagingOptions->Contrast)        << std::endl;
+							std::cout << "\tSaturation: " << printRangePtr(timg__GetOptionsResponse.ImagingOptions->ColorSaturation) << std::endl;
+							std::cout << "\tSharpness : " << printRangePtr(timg__GetOptionsResponse.ImagingOptions->Sharpness)       << std::endl;
 						}
 						
 					}
