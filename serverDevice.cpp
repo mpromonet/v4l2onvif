@@ -315,28 +315,57 @@ int DeviceBindingService::GetCapabilities(_tds__GetCapabilities *tds__GetCapabil
 	std::string url(os.str());
 	
 	tds__GetCapabilitiesResponse->Capabilities = soap_new_tt__Capabilities(this->soap);
-	tds__GetCapabilitiesResponse->Capabilities->Device = soap_new_tt__DeviceCapabilities(this->soap);
-	tds__GetCapabilitiesResponse->Capabilities->Device->XAddr = url;
-	tds__GetCapabilitiesResponse->Capabilities->Device->System = soap_new_tt__SystemCapabilities(this->soap);
-	tds__GetCapabilitiesResponse->Capabilities->Device->System->SupportedVersions.push_back(soap_new_req_tt__OnvifVersion(this->soap,2,0));
-	tds__GetCapabilitiesResponse->Capabilities->Device->Network = soap_new_tt__NetworkCapabilities(this->soap);	
-	tds__GetCapabilitiesResponse->Capabilities->Device->Security = soap_new_tt__SecurityCapabilities(this->soap);	
-	tds__GetCapabilitiesResponse->Capabilities->Media  = soap_new_tt__MediaCapabilities(this->soap);
-	tds__GetCapabilitiesResponse->Capabilities->Media->XAddr = url;
-	tds__GetCapabilitiesResponse->Capabilities->Media->StreamingCapabilities = soap_new_tt__RealTimeStreamingCapabilities(this->soap);
-	tds__GetCapabilitiesResponse->Capabilities->Imaging = soap_new_tt__ImagingCapabilities(this->soap);
-	tds__GetCapabilitiesResponse->Capabilities->Imaging->XAddr = url;
-	tds__GetCapabilitiesResponse->Capabilities->Events = soap_new_tt__EventCapabilities(this->soap);
-	tds__GetCapabilitiesResponse->Capabilities->Events->XAddr = url;
-	tds__GetCapabilitiesResponse->Capabilities->Extension  = soap_new_tt__CapabilitiesExtension(this->soap);
-	tds__GetCapabilitiesResponse->Capabilities->Extension->Recording  = soap_new_tt__RecordingCapabilities(this->soap);
-	tds__GetCapabilitiesResponse->Capabilities->Extension->Recording->XAddr = url;
-	tds__GetCapabilitiesResponse->Capabilities->Extension->Replay  = soap_new_tt__ReplayCapabilities(this->soap);
-	tds__GetCapabilitiesResponse->Capabilities->Extension->Replay->XAddr = url;
-	tds__GetCapabilitiesResponse->Capabilities->Extension->Receiver = soap_new_tt__ReceiverCapabilities(this->soap);
-	tds__GetCapabilitiesResponse->Capabilities->Extension->Receiver->XAddr = url;
-	tds__GetCapabilitiesResponse->Capabilities->Extension->Search = soap_new_tt__SearchCapabilities(this->soap);
-	tds__GetCapabilitiesResponse->Capabilities->Extension->Search->XAddr = url;
+	std::vector<tt__CapabilityCategory>& categories(tds__GetCapabilities->Category);
+	if (categories.empty())
+	{
+		categories.push_back(tt__CapabilityCategory__All);
+	}
+	for (tt__CapabilityCategory category : categories)
+	{
+		if (!tds__GetCapabilitiesResponse->Capabilities->Device && ( (category == tt__CapabilityCategory__All) || (category == tt__CapabilityCategory__Device) ) )
+		{
+			tds__GetCapabilitiesResponse->Capabilities->Device = soap_new_tt__DeviceCapabilities(this->soap);
+			tds__GetCapabilitiesResponse->Capabilities->Device->XAddr = url;
+			tds__GetCapabilitiesResponse->Capabilities->Device->System = soap_new_tt__SystemCapabilities(this->soap);
+			tds__GetCapabilitiesResponse->Capabilities->Device->System->SupportedVersions.push_back(soap_new_req_tt__OnvifVersion(this->soap,2,0));
+			tds__GetCapabilitiesResponse->Capabilities->Device->Network = soap_new_tt__NetworkCapabilities(this->soap);	
+			tds__GetCapabilitiesResponse->Capabilities->Device->Security = soap_new_tt__SecurityCapabilities(this->soap);	
+			tds__GetCapabilitiesResponse->Capabilities->Device->IO = soap_new_tt__IOCapabilities(this->soap);
+		}
+
+		if (!tds__GetCapabilitiesResponse->Capabilities->Media && ( (category == tt__CapabilityCategory__All) || (category == tt__CapabilityCategory__Media) ) )
+		{
+			tds__GetCapabilitiesResponse->Capabilities->Media  = soap_new_tt__MediaCapabilities(this->soap);
+			tds__GetCapabilitiesResponse->Capabilities->Media->XAddr = url;
+			tds__GetCapabilitiesResponse->Capabilities->Media->StreamingCapabilities = soap_new_tt__RealTimeStreamingCapabilities(this->soap);
+		}
+
+		if (!tds__GetCapabilitiesResponse->Capabilities->Imaging && ( (category == tt__CapabilityCategory__All) || (category == tt__CapabilityCategory__Imaging) ) )
+		{
+			tds__GetCapabilitiesResponse->Capabilities->Imaging = soap_new_tt__ImagingCapabilities(this->soap);
+			tds__GetCapabilitiesResponse->Capabilities->Imaging->XAddr = url;
+		}
+
+		if (!tds__GetCapabilitiesResponse->Capabilities->Events && ( (category == tt__CapabilityCategory__All) || (category == tt__CapabilityCategory__Events) ) )
+		{
+			tds__GetCapabilitiesResponse->Capabilities->Events = soap_new_tt__EventCapabilities(this->soap);
+			tds__GetCapabilitiesResponse->Capabilities->Events->XAddr = url;
+		}
+
+		if (!tds__GetCapabilitiesResponse->Capabilities->Extension && (category == tt__CapabilityCategory__All) )
+		{
+			tds__GetCapabilitiesResponse->Capabilities->Extension  = soap_new_tt__CapabilitiesExtension(this->soap);
+			tds__GetCapabilitiesResponse->Capabilities->Extension->Recording  = soap_new_tt__RecordingCapabilities(this->soap);
+			tds__GetCapabilitiesResponse->Capabilities->Extension->Recording->XAddr = url;
+			tds__GetCapabilitiesResponse->Capabilities->Extension->Replay  = soap_new_tt__ReplayCapabilities(this->soap);
+			tds__GetCapabilitiesResponse->Capabilities->Extension->Replay->XAddr = url;
+			tds__GetCapabilitiesResponse->Capabilities->Extension->Receiver = soap_new_tt__ReceiverCapabilities(this->soap);
+			tds__GetCapabilitiesResponse->Capabilities->Extension->Receiver->XAddr = url;
+			tds__GetCapabilitiesResponse->Capabilities->Extension->Search = soap_new_tt__SearchCapabilities(this->soap);
+			tds__GetCapabilitiesResponse->Capabilities->Extension->Search->XAddr = url;
+		}
+	}
+
 	return SOAP_OK;
 }
 
@@ -461,22 +490,19 @@ int DeviceBindingService::GetNetworkInterfaces(_tds__GetNetworkInterfaces *tds__
 			}
 			if ( (ifa->ifa_addr != NULL) && (ifa->ifa_addr->sa_family == AF_INET) )			
 			{
-				if ( (ifa->ifa_flags & IFF_LOOPBACK) == 0 )
+				if ( ( (ifa->ifa_flags & IFF_LOOPBACK) == 0 ) && (getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, sizeof(host), NULL, 0, NI_NUMERICHOST) == 0) )
 				{
-					if (getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, sizeof(host), NULL, 0, NI_NUMERICHOST) == 0)
-					{
-						tds__GetNetworkInterfacesResponse->NetworkInterfaces.push_back(soap_new_tt__NetworkInterface(this->soap));
-						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->Enabled = true;
-						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->Info = soap_new_tt__NetworkInterfaceInfo(this->soap);
-						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->Info->Name = soap_new_std__string(this->soap);
-						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->Info->Name->assign(ifa->ifa_name);
-						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->Info->HwAddress = eterMap[ifa->ifa_name];
-						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4 = soap_new_tt__IPv4NetworkInterface(this->soap);
-						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4->Config = soap_new_tt__IPv4Configuration(this->soap);
-						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4->Config->Manual.push_back(soap_new_tt__PrefixedIPv4Address(this->soap));
-						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4->Config->Manual.back()->Address = host;		
-						tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4->Config->Manual.back()->PrefixLength = prefix;
-					}
+					tds__GetNetworkInterfacesResponse->NetworkInterfaces.push_back(soap_new_tt__NetworkInterface(this->soap));
+					tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->Enabled = true;
+					tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->Info = soap_new_tt__NetworkInterfaceInfo(this->soap);
+					tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->Info->Name = soap_new_std__string(this->soap);
+					tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->Info->Name->assign(ifa->ifa_name);
+					tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->Info->HwAddress = eterMap[ifa->ifa_name];
+					tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4 = soap_new_tt__IPv4NetworkInterface(this->soap);
+					tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4->Config = soap_new_tt__IPv4Configuration(this->soap);
+					tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4->Config->Manual.push_back(soap_new_tt__PrefixedIPv4Address(this->soap));
+					tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4->Config->Manual.back()->Address = host;		
+					tds__GetNetworkInterfacesResponse->NetworkInterfaces.back()->IPv4->Config->Manual.back()->PrefixLength = prefix;
 				}
 			}
 		}

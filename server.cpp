@@ -86,7 +86,19 @@ std::string ServiceContext::getServerIpFromClientIp(int clientip)
 		char hostname[HOST_NAME_MAX];
 		if (gethostname(hostname, sizeof(hostname)) == 0)
 		{
-			serverAddress.assign(hostname);
+			struct addrinfo hints;
+			struct addrinfo *result;
+			memset(&hints, 0, sizeof(struct addrinfo));
+			hints.ai_family = AF_INET;
+			if (getaddrinfo(hostname, NULL, &hints, &result) == 0)
+			{
+				if (result != NULL) 
+				{
+					struct sockaddr_in* addr = (struct sockaddr_in *) result->ai_addr;
+					serverAddress.assign(inet_ntoa( addr->sin_addr ));
+					freeaddrinfo(result); 
+				}
+			}
 		}
 	}
 	return serverAddress;
