@@ -58,7 +58,7 @@ int http_get(struct soap *soap)
 
 std::string ServiceContext::getServerIpFromClientIp(int clientip)
 {
-	std::string serverip;
+	std::string serverAddress;
 	char host[NI_MAXHOST];
 	struct ifaddrs *ifaddr = NULL;
 	if (getifaddrs(&ifaddr) == 0) 
@@ -73,7 +73,7 @@ std::string ServiceContext::getServerIpFromClientIp(int clientip)
 				{
 					if (getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, sizeof(host), NULL, 0, NI_NUMERICHOST) == 0)
 					{
-						serverip = host;
+						serverAddress = host;
 						break;
 					}
 				}
@@ -81,7 +81,15 @@ std::string ServiceContext::getServerIpFromClientIp(int clientip)
 		}
 	}
 	freeifaddrs(ifaddr);
-	return serverip;
+	if (serverAddress.empty())
+	{
+		char hostname[HOST_NAME_MAX];
+		if (gethostname(hostname, sizeof(hostname)) == 0)
+		{
+			serverAddress.assign(hostname);
+		}
+	}
+	return serverAddress;
 }
 	
 int ServiceContext::getFormat(const std::string &device, int& width, int& height, int& format)
