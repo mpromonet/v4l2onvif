@@ -11,7 +11,7 @@
 
 
 #include "soapSearchBindingService.h"
-#include "server.h"
+#include "onvif_impl.h"
 
 int SearchBindingService::GetServiceCapabilities(_tse__GetServiceCapabilities *tse__GetServiceCapabilities, _tse__GetServiceCapabilitiesResponse *tse__GetServiceCapabilitiesResponse) 
 {	

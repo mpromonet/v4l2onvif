@@ -10,7 +10,7 @@
 ** -------------------------------------------------------------------------*/
 
 #include "soapMediaBindingService.h"
-#include "server.h"
+#include "onvif_impl.h"
 
 int MediaBindingService::GetServiceCapabilities(_trt__GetServiceCapabilities *trt__GetServiceCapabilities, _trt__GetServiceCapabilitiesResponse *trt__GetServiceCapabilitiesResponse) 
 {
@@ -444,13 +444,22 @@ int MediaBindingService::SetAudioDecoderConfiguration(_trt__SetAudioDecoderConfi
 int MediaBindingService::GetVideoSourceConfigurationOptions(_trt__GetVideoSourceConfigurationOptions *trt__GetVideoSourceConfigurationOptions, _trt__GetVideoSourceConfigurationOptionsResponse *trt__GetVideoSourceConfigurationOptionsResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
+	if (trt__GetVideoSourceConfigurationOptions->ConfigurationToken)
+	{
+		auto it = ctx->m_devices.find(trt__GetVideoSourceConfigurationOptions->ConfigurationToken->c_str());
+		if (it != ctx->m_devices.end())
+		{	
+			trt__GetVideoSourceConfigurationOptionsResponse->Options = ctx->getVideoSourceCfgOptions(soap, it->first);
+		}
+	}
 	return SOAP_OK;
 }
 
 int MediaBindingService::GetVideoEncoderConfigurationOptions(_trt__GetVideoEncoderConfigurationOptions *trt__GetVideoEncoderConfigurationOptions, _trt__GetVideoEncoderConfigurationOptionsResponse *trt__GetVideoEncoderConfigurationOptionsResponse) 
 {
-	std::cout << __FUNCTION__ << std::endl;
-	
+	std::cout << __FUNCTION__ << std::endl;	
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
 	
 	if (trt__GetVideoEncoderConfigurationOptions->ConfigurationToken)

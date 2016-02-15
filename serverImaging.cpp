@@ -12,7 +12,7 @@
 #include <linux/videodev2.h>
 
 #include "soapImagingBindingService.h"
-#include "server.h"
+#include "onvif_impl.h"
 
 int ImagingBindingService::GetServiceCapabilities(_timg__GetServiceCapabilities *timg__GetServiceCapabilities, _timg__GetServiceCapabilitiesResponse *timg__GetServiceCapabilitiesResponse) 
 {

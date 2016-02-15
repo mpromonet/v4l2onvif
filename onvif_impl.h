@@ -1,7 +1,20 @@
+/* ---------------------------------------------------------------------------
+** This software is in the public domain, furnished "as is", without technical
+** support, and with no warranty, express or implied, as to its usefulness for
+** any purpose.
+**
+** onvif_impl.h
+** 
+** onvif callbacks
+**
+** -------------------------------------------------------------------------*/
+
 #ifndef SERVICE_CONTEXT_H
 #define SERVICE_CONTEXT_H
 
 #include <map>
+
+#include "soapH.h"
 
 class ServiceContext
 {
@@ -29,8 +42,9 @@ public:
 	tds__StorageConfiguration* getStorageCfg(struct soap* soap, const std::string & path);
 
 	// media 
-	tt__VideoEncoderConfiguration*        getVideoEncoderCfg       (struct soap* soap, const std::string & token);
 	tt__VideoSourceConfiguration*         getVideoSourceCfg        (struct soap* soap, const std::string & token);
+	tt__VideoSourceConfigurationOptions*  getVideoSourceCfgOptions (struct soap* soap, const std::string & token);
+	tt__VideoEncoderConfiguration*        getVideoEncoderCfg       (struct soap* soap, const std::string & token);
 	tt__VideoEncoderConfigurationOptions* getVideoEncoderCfgOptions(struct soap* soap, const std::string & token);
 
 	// recording

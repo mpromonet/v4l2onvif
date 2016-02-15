@@ -18,7 +18,7 @@
 #include <iomanip>
 
 #include "soapDeviceBindingService.h"
-#include "server.h"
+#include "onvif_impl.h"
 #include "wsseapi.h"
 
 int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds__GetServicesResponse *tds__GetServicesResponse) 

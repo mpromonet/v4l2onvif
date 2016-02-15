@@ -11,7 +11,7 @@
 
 
 #include "soapRecordingBindingService.h"
-#include "server.h"
+#include "onvif_impl.h"
 
 int RecordingBindingService::GetServiceCapabilities(_trc__GetServiceCapabilities *trc__GetServiceCapabilities, _trc__GetServiceCapabilitiesResponse *trc__GetServiceCapabilitiesResponse) 
 {
