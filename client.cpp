@@ -327,6 +327,9 @@ int main(int argc, char* argv[])
 					_trt__GetStreamUri         trt__GetStreamUri;
 					_trt__GetStreamUriResponse trt__GetStreamUriResponse;
 					trt__GetStreamUri.ProfileToken = token;
+					trt__GetStreamUri.StreamSetup = soap_new_tt__StreamSetup(mediaProxy->soap);
+					trt__GetStreamUri.StreamSetup->Transport = soap_new_tt__Transport(mediaProxy->soap);
+					trt__GetStreamUri.StreamSetup->Transport->Protocol = tt__TransportProtocol__RTSP;
 					addSecurity(mediaProxy->soap, username, password);						
 					if (mediaProxy->GetStreamUri(&trt__GetStreamUri, &trt__GetStreamUriResponse) == SOAP_OK)
 					{
@@ -413,6 +416,7 @@ int main(int argc, char* argv[])
 		
 		if (eventProxy.get() != NULL)
 		{
+			std::cout << "=>Event::CreatePullPoint" << std::endl;								
 			_tev__CreatePullPointSubscription         tev__CreatePullPointSubscription;
 			_tev__CreatePullPointSubscriptionResponse tev__CreatePullPointSubscriptionResponse;
 			addSecurity(eventProxy->soap, username, password);						
@@ -423,6 +427,8 @@ int main(int argc, char* argv[])
 				soap_wsse_add_Security(pullpoint.soap);
 				
 				_tev__PullMessages         tev__PullMessages;
+				tev__PullMessages.Timeout = "PT10S";
+				tev__PullMessages.MessageLimit = 100;
 				_tev__PullMessagesResponse tev__PullMessagesResponse;
 				if (pullpoint.PullMessages(&tev__PullMessages, &tev__PullMessagesResponse) == SOAP_OK)
 				{
