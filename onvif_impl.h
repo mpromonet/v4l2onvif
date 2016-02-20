@@ -53,7 +53,6 @@ public:
 	tt__TrackConfiguration*        getTracksCfg(struct soap* soap);
 	
 public:
-	std::string m_wsdlurl;
 	std::map<std::string,std::string> m_devices;
 	std::string m_rtspport;
 	int         m_port;

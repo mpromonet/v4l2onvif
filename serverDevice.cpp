@@ -299,8 +299,7 @@ int DeviceBindingService::GetWsdlUrl(_tds__GetWsdlUrl *tds__GetWsdlUrl, _tds__Ge
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;	
 	std::ostringstream os;
-	os << "http://" << ctx->getServerIpFromClientIp(htonl(this->soap->ip)) << ":" << ctx->m_port << "/" << ctx->m_wsdlurl;
-	
+	os << "http://" << ctx->getServerIpFromClientIp(htonl(this->soap->ip)) << ":" << ctx->m_port;	
 	tds__GetWsdlUrlResponse->WsdlUrl = os.str();
 	return SOAP_OK;
 }

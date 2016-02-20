@@ -64,8 +64,8 @@ int main(int argc, char* argv[])
 		{
 			case 'u':	username = optarg; break;
 			case 'p':	password = optarg; break;
-			case 'd':	device = optarg; break;
-			case 'r':	path = optarg; break;
+			case 'd':	device   = optarg; break;
+			case 'r':	path     = optarg; break;
 			case 'h':
 				std::cout << argv[0] << " [-u username] [-p password] [-d v4l2 device] [-r rtsp uri]" << std::endl;
 				exit(0);
@@ -75,7 +75,6 @@ int main(int argc, char* argv[])
 	std::cout << "Listening to " << port << std::endl;
 		
 	ServiceContext deviceCtx;
-	deviceCtx.m_wsdlurl = "devicemgmt.wsdl";
 	deviceCtx.m_port = port;
 	deviceCtx.m_rtspport = "554";
 	deviceCtx.m_user = username;
@@ -86,16 +85,16 @@ int main(int argc, char* argv[])
 	soap->user = (void*)&deviceCtx;
 	soap->fget = http_get; 
 	{			
-		DeviceBindingService deviceService(soap);
+		DeviceBindingService                deviceService(soap);
 		
-		MediaBindingService mediaService(soap);
-		RecordingBindingService recordingService(soap);
-		ReceiverBindingService receiverService(soap);
-		ReplayBindingService replayService(soap);
-		ImagingBindingService imagingService(soap);
-		SearchBindingService searchService(soap);
+		MediaBindingService                 mediaService(soap);
+		RecordingBindingService             recordingService(soap);
+		ReceiverBindingService              receiverService(soap);
+		ReplayBindingService                replayService(soap);
+		ImagingBindingService               imagingService(soap);
+		SearchBindingService                searchService(soap);
 		
-		EventBindingService eventService(soap);
+		EventBindingService                 eventService(soap);
 		PullPointSubscriptionBindingService pullPointService(soap);
 
 		if (!soap_valid_socket(soap_bind(soap, NULL, deviceCtx.m_port, 100))) 
