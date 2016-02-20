@@ -119,6 +119,17 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
 	}
 
+	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
+	tds__GetServicesResponse->Service.back()->Namespace  = "http://www.onvif.org/ver10/deviceio/wsdl";
+	tds__GetServicesResponse->Service.back()->XAddr = url;
+	tds__GetServicesResponse->Service.back()->Version = soap_new_req_tt__OnvifVersion(this->soap,2,6);
+	if (tds__GetServices->IncludeCapability)
+	{
+		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
+		tmd__Capabilities *capabilities = ctx->getDeviceIOServiceCapabilities(this->soap);
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+	}
+	
 	
 	return SOAP_OK;
 }
@@ -135,7 +146,9 @@ int DeviceBindingService::GetDeviceInformation(_tds__GetDeviceInformation *tds__
 {
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;	
-	tds__GetDeviceInformationResponse->Manufacturer = "Manufacturer";
+	tds__GetDeviceInformationResponse->Manufacturer    = ctx->Manufacturer;
+	tds__GetDeviceInformationResponse->Model           = ctx->Model;
+	tds__GetDeviceInformationResponse->FirmwareVersion = ctx->FirmwareVersion;
 	return SOAP_OK;
 }
 
@@ -148,6 +161,17 @@ int DeviceBindingService::SetSystemDateAndTime(_tds__SetSystemDateAndTime *tds__
 int DeviceBindingService::GetSystemDateAndTime(_tds__GetSystemDateAndTime *tds__GetSystemDateAndTime, _tds__GetSystemDateAndTimeResponse *tds__GetSystemDateAndTimeResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	const time_t timestamp = time(NULL);
+	struct tm * tm = gmtime(&timestamp);
+	tds__GetSystemDateAndTimeResponse->SystemDateAndTime = soap_new_tt__SystemDateTime(this->soap);
+	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->DateTimeType = tt__SetDateTimeType__Manual;
+	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->DaylightSavings = tm->tm_isdst;
+	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->TimeZone = soap_new_tt__TimeZone(this->soap);
+	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->TimeZone->TZ = tm->tm_zone;
+	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->UTCDateTime = soap_new_tt__DateTime(this->soap);
+	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->UTCDateTime->Time = soap_new_req_tt__Time(this->soap, tm->tm_hour, tm->tm_min  , tm->tm_sec );
+	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->UTCDateTime->Date = soap_new_req_tt__Date(this->soap, tm->tm_year, tm->tm_mon+1, tm->tm_mday);
+	
 	return SOAP_OK;
 }
 
@@ -366,6 +390,9 @@ int DeviceBindingService::GetCapabilities(_tds__GetCapabilities *tds__GetCapabil
 			tds__GetCapabilitiesResponse->Capabilities->Extension->Display = soap_new_tt__DisplayCapabilities(this->soap);
 			tds__GetCapabilitiesResponse->Capabilities->Extension->Display->XAddr = url;
 			tds__GetCapabilitiesResponse->Capabilities->Extension->Display->FixedLayout = true;
+			tds__GetCapabilitiesResponse->Capabilities->Extension->DeviceIO = soap_new_tt__DeviceIOCapabilities(this->soap);
+			tds__GetCapabilitiesResponse->Capabilities->Extension->DeviceIO->VideoSources = ctx->m_devices.size();
+			tds__GetCapabilitiesResponse->Capabilities->Extension->DeviceIO->VideoOutputs = 1;
 		}
 	}
 

@@ -22,11 +22,11 @@ public:
 	std::string getServerIpFromClientIp(int ip);
 	
 	// V4L2 access
-	int getFormat(const std::string &device, int& width, int& height, int& format);
-	int getCtrlValue(const std::string &device, int idctrl);
-	void setCtrlValue(const std::string &device, int idctrl, int value);
-	std::pair<int,int> getCtrlRange(const std::string &device, int idctrl);
-	void getIdentification(const std::string &device, std::string & card, std::string & driver, std::string & bus);
+	int                getFormat        (const std::string &device, int& width, int& height, int& format);
+	int                getCtrlValue     (const std::string &device, int idctrl);
+	void               setCtrlValue     (const std::string &device, int idctrl, int value);
+	std::pair<int,int> getCtrlRange     (const std::string &device, int idctrl);
+	void               getIdentification(const std::string &device, std::string & card, std::string & driver, std::string & bus);
 
 	// service capabilities
 	tds__DeviceServiceCapabilities* getDeviceServiceCapabilities(struct soap* soap);
@@ -38,6 +38,7 @@ public:
 	trp__Capabilities*  getReplayServiceCapabilities   (struct soap* soap);
 	tev__Capabilities*  getEventServiceCapabilities    (struct soap* soap);
 	tls__Capabilities*  getDisplayServiceCapabilities  (struct soap* soap);
+	tmd__Capabilities*  getDeviceIOServiceCapabilities (struct soap* soap);
 
 	// device
 	tds__StorageConfiguration* getStorageCfg(struct soap* soap, const std::string & path);
@@ -60,6 +61,9 @@ public:
 	int         m_port;
 	std::string m_user;
 	std::string m_password;
+	std::string Manufacturer;
+	std::string Model;
+	std::string FirmwareVersion;
 };
 
 template<typename T>

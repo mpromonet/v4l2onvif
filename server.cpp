@@ -11,6 +11,7 @@
 
 #include "DeviceBinding.nsmap"
 #include "soapDeviceBindingService.h"
+#include "soapDeviceIOBindingService.h"
 
 #include "soapMediaBindingService.h"
 #include "soapImagingBindingService.h"
@@ -63,16 +64,16 @@ int main(int argc, char* argv[])
 	std::string password;	
 	int port = 8080;
 	int c = 0;
-	while ((c = getopt (argc, argv, "hu:p:i:r:")) != -1)
+	while ((c = getopt (argc, argv, "h" "u:p:" "i:I:o:O:")) != -1)
 	{
 		switch (c)
 		{
 			case 'u':	username = optarg; break;
 			case 'p':	password = optarg; break;
 			case 'i':	indevice = optarg; break;
-			case 'r':	path     = optarg; break;
+			case 'I':	path     = optarg; break;
 			case 'h':
-				std::cout << argv[0] << " [-u username] [-p password] [-i v4l2 input device] [-o v4l2 output device]" << std::endl;
+				std::cout << argv[0] << " [-u username] [-p password] [-i v4l2 input device] [-I rtsp server] [-o v4l2 output device] [-O rtsp client]" << std::endl;
 				exit(0);
 			break;
 		}
@@ -80,18 +81,22 @@ int main(int argc, char* argv[])
 	std::cout << "Listening to " << port << std::endl;
 		
 	ServiceContext deviceCtx;
-	deviceCtx.m_port = port;
-	deviceCtx.m_rtspport = "554";
-	deviceCtx.m_user = username;
-	deviceCtx.m_password = password;
 	deviceCtx.m_devices.insert(std::pair<std::string,std::string>(indevice, path));
-	deviceCtx.m_outdevice = outdevice;
+	deviceCtx.m_port          = port;
+	deviceCtx.m_rtspport      = "554";
+	deviceCtx.m_user          = username;
+	deviceCtx.m_password      = password;
+	deviceCtx.m_outdevice     = outdevice;
+	deviceCtx.Manufacturer    = "Manufacturer";
+	deviceCtx.Model           = "Model";
+	deviceCtx.FirmwareVersion = "Model";
 	
 	struct soap *soap = soap_new();
 	soap->user = (void*)&deviceCtx;
 	soap->fget = http_get; 
 	{			
 		DeviceBindingService                deviceService(soap);
+		DeviceIOBindingService              deviceIOService(soap);
 		
 		MediaBindingService                 mediaService(soap);
 		ImagingBindingService               imagingService(soap);
@@ -169,6 +174,11 @@ int main(int argc, char* argv[])
 					soap_send_fault(soap);
 					soap_stream_fault(soap, std::cerr);
 				}
+				else if (deviceIOService.dispatch() != SOAP_NO_METHOD)
+				{
+					soap_send_fault(soap);
+					soap_stream_fault(soap, std::cerr);
+				}				
 			}
 		}
 	}

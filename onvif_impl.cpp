@@ -380,3 +380,9 @@ tls__Capabilities* ServiceContext::getDisplayServiceCapabilities(struct soap* so
 	return capabilities;
 }
 
+tmd__Capabilities* ServiceContext::getDeviceIOServiceCapabilities(struct soap* soap)
+{
+	tmd__Capabilities *capabilities = soap_new_tmd__Capabilities(soap);
+	return capabilities;
+}
+
