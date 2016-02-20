@@ -13,11 +13,15 @@
 #include "soapDeviceBindingService.h"
 
 #include "soapMediaBindingService.h"
-#include "soapRecordingBindingService.h"
-#include "soapReceiverBindingService.h"
-#include "soapReplayBindingService.h"
 #include "soapImagingBindingService.h"
+
+#include "soapReceiverBindingService.h"
+
+#include "soapRecordingBindingService.h"
+#include "soapReplayBindingService.h"
 #include "soapSearchBindingService.h"
+
+#include "soapDisplayBindingService.h"
 
 #include "soapEventBindingService.h"
 #include "soapPullPointSubscriptionBindingService.h"
@@ -52,22 +56,23 @@ int http_get(struct soap *soap)
 
 int main(int argc, char* argv[])
 {		
-	std::string device = "/dev/video0";
-	std::string path    = "unicast";
+	std::string indevice  = "/dev/video0";
+	std::string path      = "unicast";
+	std::string outdevice = "/dev/video10";
 	std::string username;
 	std::string password;	
 	int port = 8080;
 	int c = 0;
-	while ((c = getopt (argc, argv, "hu:p:d:r:")) != -1)
+	while ((c = getopt (argc, argv, "hu:p:i:r:")) != -1)
 	{
 		switch (c)
 		{
 			case 'u':	username = optarg; break;
 			case 'p':	password = optarg; break;
-			case 'd':	device   = optarg; break;
+			case 'i':	indevice = optarg; break;
 			case 'r':	path     = optarg; break;
 			case 'h':
-				std::cout << argv[0] << " [-u username] [-p password] [-d v4l2 device] [-r rtsp uri]" << std::endl;
+				std::cout << argv[0] << " [-u username] [-p password] [-i v4l2 input device] [-o v4l2 output device]" << std::endl;
 				exit(0);
 			break;
 		}
@@ -79,7 +84,8 @@ int main(int argc, char* argv[])
 	deviceCtx.m_rtspport = "554";
 	deviceCtx.m_user = username;
 	deviceCtx.m_password = password;
-	deviceCtx.m_devices.insert(std::pair<std::string,std::string>(device, path));
+	deviceCtx.m_devices.insert(std::pair<std::string,std::string>(indevice, path));
+	deviceCtx.m_outdevice = outdevice;
 	
 	struct soap *soap = soap_new();
 	soap->user = (void*)&deviceCtx;
@@ -88,11 +94,15 @@ int main(int argc, char* argv[])
 		DeviceBindingService                deviceService(soap);
 		
 		MediaBindingService                 mediaService(soap);
-		RecordingBindingService             recordingService(soap);
-		ReceiverBindingService              receiverService(soap);
-		ReplayBindingService                replayService(soap);
 		ImagingBindingService               imagingService(soap);
+		
+		RecordingBindingService             recordingService(soap);
+		ReplayBindingService                replayService(soap);
 		SearchBindingService                searchService(soap);
+		
+		ReceiverBindingService              receiverService(soap);
+
+		DisplayBindingService               displayService(soap);
 		
 		EventBindingService                 eventService(soap);
 		PullPointSubscriptionBindingService pullPointService(soap);
@@ -150,6 +160,11 @@ int main(int argc, char* argv[])
 					soap_stream_fault(soap, std::cerr);
 				}
 				else if (searchService.dispatch() != SOAP_NO_METHOD)
+				{
+					soap_send_fault(soap);
+					soap_stream_fault(soap, std::cerr);
+				}
+				else if (displayService.dispatch() != SOAP_NO_METHOD)
 				{
 					soap_send_fault(soap);
 					soap_stream_fault(soap, std::cerr);

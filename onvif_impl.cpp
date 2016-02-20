@@ -371,3 +371,9 @@ tev__Capabilities* ServiceContext::getEventServiceCapabilities(struct soap* soap
 	return capabilities;
 }
 
+tls__Capabilities* ServiceContext::getDisplayServiceCapabilities(struct soap* soap)
+{
+	tls__Capabilities *capabilities = soap_new_tls__Capabilities(soap);
+	return capabilities;
+}
+

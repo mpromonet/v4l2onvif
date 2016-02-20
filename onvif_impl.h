@@ -37,6 +37,7 @@ public:
 	trv__Capabilities*  getReceiverServiceCapabilities (struct soap* soap);
 	trp__Capabilities*  getReplayServiceCapabilities   (struct soap* soap);
 	tev__Capabilities*  getEventServiceCapabilities    (struct soap* soap);
+	tls__Capabilities*  getDisplayServiceCapabilities  (struct soap* soap);
 
 	// device
 	tds__StorageConfiguration* getStorageCfg(struct soap* soap, const std::string & path);
@@ -55,6 +56,7 @@ public:
 public:
 	std::map<std::string,std::string> m_devices;
 	std::string m_rtspport;
+	std::string m_outdevice;
 	int         m_port;
 	std::string m_user;
 	std::string m_password;

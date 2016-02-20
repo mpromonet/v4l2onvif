@@ -12,15 +12,24 @@ WSSE_SRC=$(GSOAP_PLUGINS)/wsseapi.c $(GSOAP_PLUGINS)/smdevp.c $(GSOAP_PLUGINS)/m
 SOAP_SRC=$(wildcard gen/soapC_*.cpp)
 SOAP_OBJ=$(SOAP_SRC:%.cpp=%.o)
 
-SERVER_OBJ=gen/soapDeviceBindingService.o gen/soapMediaBindingService.o gen/soapRecordingBindingService.o gen/soapReplayBindingService.o gen/soapEventBindingService.o gen/soapPullPointSubscriptionBindingService.o gen/soapReceiverBindingService.o gen/soapImagingBindingService.o gen/soapSearchBindingService.o
-CLIENT_OBJ=gen/soapDeviceBindingProxy.o gen/soapMediaBindingProxy.o gen/soapRecordingBindingProxy.o gen/soapReplayBindingProxy.o gen/soapEventBindingProxy.o gen/soapPullPointSubscriptionBindingProxy.o gen/soapReceiverBindingProxy.o gen/soapImagingBindingProxy.o gen/soapSearchBindingProxy.o 
+SERVER_OBJ=gen/soapDeviceBindingService.o 
+SERVER_OBJ+=gen/soapMediaBindingService.o gen/soapImagingBindingService.o 
+SERVER_OBJ+=gen/soapEventBindingService.o gen/soapPullPointSubscriptionBindingService.o 
+SERVER_OBJ+=gen/soapRecordingBindingService.o gen/soapReplayBindingService.o gen/soapSearchBindingService.o gen/soapReceiverBindingService.o 
+SERVER_OBJ+=gen/soapDisplayBindingService.o
+
+CLIENT_OBJ=gen/soapDeviceBindingProxy.o
+CLIENT_OBJ+=gen/soapMediaBindingProxy.o gen/soapImagingBindingProxy.o
+CLIENT_OBJ+=gen/soapEventBindingProxy.o gen/soapPullPointSubscriptionBindingProxy.o 
+CLIENT_OBJ+=gen/soapRecordingBindingProxy.o gen/soapReplayBindingProxy.o gen/soapReceiverBindingProxy.o gen/soapSearchBindingProxy.o 
+CLIENT_OBJ+=gen/soapDisplayBindingProxy.o
 
 all: gen server.exe client.exe
 
 gen:
 	mkdir gen
 	
-gen/onvif.h: devicemgmt.wsdl media.wsdl recording.wsdl replay.wsdl receiver.wsdl search.wsdl event.wsdl imaging.wsdl onvif.xsd b-2.xsd include bf-2.xsd t-1.xsd 
+gen/onvif.h: devicemgmt.wsdl media.wsdl recording.wsdl replay.wsdl receiver.wsdl search.wsdl event.wsdl imaging.wsdl display.wsdl onvif.xsd b-2.xsd include bf-2.xsd t-1.xsd 
 	$(GSOAP_PREFIX)/bin/wsdl2h -d -Ntev -z6 -o $@ $^
 
 gen/soapDeviceBindingService.cpp: gen/onvif.h
@@ -35,7 +44,7 @@ libserver.a: $(SERVER_OBJ)
 libclient.a: $(CLIENT_OBJ) 
 	ar rcs $@ $^
 
-server.exe: $(SOAP_OBJ) $(SERVER_OBJ) serverDevice.o serverMedia.o serverRecording.o serverReplay.o serverEvent.o serverPullPointSubscription.o serverReceiver.o  serverImaging.o server.o serverSearch.o onvif_impl.o $(WSSE_SRC)
+server.exe: $(SOAP_OBJ) $(SERVER_OBJ) serverDevice.o serverMedia.o serverRecording.o serverReplay.o serverEvent.o serverPullPointSubscription.o serverReceiver.o  serverImaging.o serverSearch.o serverDisplay.o server.o onvif_impl.o $(WSSE_SRC)
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS)
 
 client.exe: $(SOAP_OBJ) $(CLIENT_OBJ) client.o $(WSSE_SRC)
