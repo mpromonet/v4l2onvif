@@ -92,6 +92,7 @@ int ServiceContext::getCtrlValue(const std::string &device, int idctrl)
 	struct v4l2_control control;
 	memset(&control, 0, sizeof(control));
 	control.id = idctrl;
+	errno = 0;
 	if (ioctl (fd, VIDIOC_G_CTRL, &control) == 0) 
 	{
 		value = control.value;
@@ -109,6 +110,7 @@ void ServiceContext::setCtrlValue(const std::string &device, int idctrl, int val
 	memset(&control, 0, sizeof(control));
 	control.id = idctrl;
 	control.value = value;
+	errno = 0;
 	if (ioctl (fd, VIDIOC_S_CTRL, &control) == 0) 
 	{
 	} 	
@@ -138,6 +140,7 @@ std::pair<int,int> ServiceContext::getCtrlRange(const std::string &device, int i
 	struct v4l2_queryctrl queryctrl;
 	memset(&queryctrl, 0, sizeof(queryctrl));
 	queryctrl.id = idctrl;
+	errno = 0;
 	if (ioctl (fd, VIDIOC_QUERYCTRL, &queryctrl) == 0) 
 	{
 		value.first = queryctrl.minimum;
