@@ -42,6 +42,21 @@ std::string printPtr(T* ptr)
 }
 
 template<typename T>
+std::string printMode(T* ptr)
+{
+	std::ostringstream os;
+	if (ptr)
+	{
+		os << ptr->Mode;
+	}
+	else
+	{	
+		os << "(null)";
+	}
+	return os.str();
+}
+
+template<typename T>
 std::string printRangePtr(T* ptr)
 {
 	std::ostringstream os;
@@ -291,10 +306,14 @@ int main(int argc, char* argv[])
 						addSecurity(imagingProxy->soap, username, password);						
 						if (imagingProxy->GetImagingSettings(&timg__GetImagingSettings, &timg__GetImagingSettingsResponse) == SOAP_OK)
 						{
-							std::cout << "\tBrightness:" << printPtr(timg__GetImagingSettingsResponse.ImagingSettings->Brightness)      << std::endl;
-							std::cout << "\tContrast  :" << printPtr(timg__GetImagingSettingsResponse.ImagingSettings->Contrast)        << std::endl;
-							std::cout << "\tSaturation:" << printPtr(timg__GetImagingSettingsResponse.ImagingSettings->ColorSaturation) << std::endl;
-							std::cout << "\tSharpness :" << printPtr(timg__GetImagingSettingsResponse.ImagingSettings->Sharpness)       << std::endl;
+							std::cout << "\tBrightness  :" << printPtr (timg__GetImagingSettingsResponse.ImagingSettings->Brightness)            << std::endl;
+							std::cout << "\tContrast    :" << printPtr (timg__GetImagingSettingsResponse.ImagingSettings->Contrast)              << std::endl;
+							std::cout << "\tSaturation  :" << printPtr (timg__GetImagingSettingsResponse.ImagingSettings->ColorSaturation)       << std::endl;
+							std::cout << "\tSharpness   :" << printPtr (timg__GetImagingSettingsResponse.ImagingSettings->Sharpness)             << std::endl;
+							std::cout << "\tBacklight   :" << printMode(timg__GetImagingSettingsResponse.ImagingSettings->BacklightCompensation) << std::endl;
+							std::cout << "\tExposure    :" << printMode(timg__GetImagingSettingsResponse.ImagingSettings->Exposure)              << std::endl;
+							std::cout << "\tWhiteBalance:" << printMode(timg__GetImagingSettingsResponse.ImagingSettings->WhiteBalance)          << std::endl;
+							
 						}
 						
 						_timg__GetOptions timg__GetOptions;
