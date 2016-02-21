@@ -24,7 +24,7 @@ int PullPointSubscriptionBindingService::PullMessages(_tev__PullMessages *tev__P
 		os << "msg:" << i;
 		std::string msg(os.str());
 		tev__PullMessagesResponse->wsnt__NotificationMessage.push_back(soap_new_wsnt__NotificationMessageHolderType(this->soap));
-		tev__PullMessagesResponse->wsnt__NotificationMessage.back()->Message.__any = soap_dom_element(this->soap, NULL, NULL, msg.c_str());
+		tev__PullMessagesResponse->wsnt__NotificationMessage.back()->Message.__any = soap_dom_element(this->soap, (char*)NULL, (char*)NULL, msg.c_str());
 	}
 	return SOAP_OK;
 }

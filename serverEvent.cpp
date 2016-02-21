@@ -33,11 +33,10 @@ int EventBindingService::CreatePullPointSubscription(_tev__CreatePullPointSubscr
 	std::string url(os.str());
 	
 	time_t sec = time(NULL);
-	tev__CreatePullPointSubscriptionResponse->SubscriptionReference.Address = (char*)soap_malloc(this->soap, url.size()+1);
-	strncpy(tev__CreatePullPointSubscriptionResponse->SubscriptionReference.Address, url.c_str(), url.size());
-	tev__CreatePullPointSubscriptionResponse->SubscriptionReference.Address[url.size()]=0;
+	tev__CreatePullPointSubscriptionResponse->SubscriptionReference.Address = strcpy((char*)soap_malloc(this->soap, url.size()+1), url.c_str());
 	tev__CreatePullPointSubscriptionResponse->wsnt__CurrentTime = sec;
 	tev__CreatePullPointSubscriptionResponse->wsnt__CurrentTime = sec+3600;
+		
 	return SOAP_OK;
 }
 

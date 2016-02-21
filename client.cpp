@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <sstream>
+#include <thread>
 
 #include "DeviceBinding.nsmap"
 #include "soapDeviceBindingProxy.h"
@@ -23,6 +24,8 @@
 
 #include "soapEventBindingProxy.h"
 #include "soapPullPointSubscriptionBindingProxy.h"
+#include "soapNotificationProducerBindingProxy.h"
+#include "soapNotificationConsumerBindingService.h"
 
 #include "wsseapi.h"
 
@@ -192,58 +195,44 @@ int main(int argc, char* argv[])
 		std::unique_ptr<ImagingBindingProxy> imagingProxy;
 		if ( (tds__GetCapabilitiesResponse.Capabilities->Extension != NULL) && (tds__GetCapabilitiesResponse.Capabilities->Imaging != NULL) )
 		{
-			std::string imagingUrl(tds__GetCapabilitiesResponse.Capabilities->Imaging->XAddr);
-			std::cout << "\tImaging Url:" << imagingUrl << std::endl;
-			
-			imagingProxy.reset(new ImagingBindingProxy(imagingUrl.c_str()));
+			std::cout << "\tImaging Url:" << tds__GetCapabilitiesResponse.Capabilities->Imaging->XAddr << std::endl;			
+			imagingProxy.reset(new ImagingBindingProxy(tds__GetCapabilitiesResponse.Capabilities->Imaging->XAddr.c_str()));
 		}
 		std::unique_ptr<ReplayBindingProxy> replayProxy;
 		if ( (tds__GetCapabilitiesResponse.Capabilities->Extension != NULL) && (tds__GetCapabilitiesResponse.Capabilities->Extension->Replay != NULL) )
 		{
-			std::string replayUrl(tds__GetCapabilitiesResponse.Capabilities->Extension->Replay->XAddr);
-			std::cout << "\tReplay Url:" << replayUrl << std::endl;
-			
-			replayProxy.reset(new ReplayBindingProxy(replayUrl.c_str()));
+			std::cout << "\tReplay Url:" << tds__GetCapabilitiesResponse.Capabilities->Extension->Replay->XAddr << std::endl;			
+			replayProxy.reset(new ReplayBindingProxy(tds__GetCapabilitiesResponse.Capabilities->Extension->Replay->XAddr.c_str()));
 		}
 		std::unique_ptr<MediaBindingProxy> mediaProxy;
 		if (tds__GetCapabilitiesResponse.Capabilities->Media != NULL)
 		{
-			std::string mediaUrl(tds__GetCapabilitiesResponse.Capabilities->Media->XAddr);
-			std::cout << "\tMedia Url:" << mediaUrl << std::endl;
-			
-			mediaProxy.reset(new MediaBindingProxy(mediaUrl.c_str()));
+			std::cout << "\tMedia Url:" << tds__GetCapabilitiesResponse.Capabilities->Media->XAddr << std::endl;			
+			mediaProxy.reset(new MediaBindingProxy(tds__GetCapabilitiesResponse.Capabilities->Media->XAddr.c_str()));
 		}
 		std::unique_ptr<ReceiverBindingProxy> receiverProxy;
 		if ( (tds__GetCapabilitiesResponse.Capabilities->Extension != NULL) && (tds__GetCapabilitiesResponse.Capabilities->Extension->Receiver != NULL) )
 		{
-			std::string receiverUrl(tds__GetCapabilitiesResponse.Capabilities->Extension->Receiver->XAddr);
-			std::cout << "\tReceiver Url:" << receiverUrl << std::endl;
-			
-			receiverProxy.reset(new ReceiverBindingProxy(receiverUrl.c_str()));
+			std::cout << "\tReceiver Url:" << tds__GetCapabilitiesResponse.Capabilities->Extension->Receiver->XAddr << std::endl;			
+			receiverProxy.reset(new ReceiverBindingProxy(tds__GetCapabilitiesResponse.Capabilities->Extension->Receiver->XAddr.c_str()));
 		}
 		std::unique_ptr<RecordingBindingProxy> recordingProxy;
 		if ( (tds__GetCapabilitiesResponse.Capabilities->Extension != NULL) && (tds__GetCapabilitiesResponse.Capabilities->Extension->Recording != NULL) )
 		{
-			std::string recordingUrl(tds__GetCapabilitiesResponse.Capabilities->Extension->Recording->XAddr);
-			std::cout << "\tRecording Url:" << recordingUrl << std::endl;
-			
-			recordingProxy.reset(new RecordingBindingProxy(recordingUrl.c_str()));
+			std::cout << "\tRecording Url:" << tds__GetCapabilitiesResponse.Capabilities->Extension->Recording->XAddr << std::endl;			
+			recordingProxy.reset(new RecordingBindingProxy(tds__GetCapabilitiesResponse.Capabilities->Extension->Recording->XAddr.c_str()));
 		}		
 		std::unique_ptr<SearchBindingProxy> searchProxy;
 		if ( (tds__GetCapabilitiesResponse.Capabilities->Extension != NULL) && (tds__GetCapabilitiesResponse.Capabilities->Extension->Search != NULL) )
 		{
-			std::string searchUrl(tds__GetCapabilitiesResponse.Capabilities->Extension->Search->XAddr);
-			std::cout << "\tSearch Url:" << searchUrl << std::endl;
-			
-			searchProxy.reset (new SearchBindingProxy(searchUrl.c_str()));
+			std::cout << "\tSearch Url:" << tds__GetCapabilitiesResponse.Capabilities->Extension->Search->XAddr << std::endl;			
+			searchProxy.reset (new SearchBindingProxy(tds__GetCapabilitiesResponse.Capabilities->Extension->Search->XAddr.c_str()));
 		}
 		std::unique_ptr<EventBindingProxy> eventProxy;
 		if (tds__GetCapabilitiesResponse.Capabilities->Events != NULL)
 		{
-			std::string eventUrl(tds__GetCapabilitiesResponse.Capabilities->Events->XAddr);
-			std::cout << "\tEvent Url:" << eventUrl << std::endl;
-			
-			eventProxy.reset(new EventBindingProxy(eventUrl.c_str()));
+			std::cout << "\tEvent Url:" << tds__GetCapabilitiesResponse.Capabilities->Events->XAddr << std::endl;			
+			eventProxy.reset(new EventBindingProxy(tds__GetCapabilitiesResponse.Capabilities->Events->XAddr.c_str()));
 		}
 		
 		
@@ -442,6 +431,8 @@ int main(int argc, char* argv[])
 			if (eventProxy->CreatePullPointSubscription(&tev__CreatePullPointSubscription, &tev__CreatePullPointSubscriptionResponse) == SOAP_OK)
 			{
 				std::cout << "\tPullpoint Url:" << tev__CreatePullPointSubscriptionResponse.SubscriptionReference.Address << std::endl;
+				
+				// pull
 				PullPointSubscriptionBindingProxy pullpoint(tev__CreatePullPointSubscriptionResponse.SubscriptionReference.Address);
 				soap_wsse_add_Security(pullpoint.soap);
 				
@@ -456,6 +447,23 @@ int main(int argc, char* argv[])
 						std::cout << "\tMessage:" << msg->Message.__any << std::endl;
 					}
 				}
+				
+				// subscribe
+				NotificationConsumerBindingService consumer;
+				consumer.bind(NULL,9090,10);
+				std::thread th(&NotificationConsumerBindingService::serve, &consumer);
+				
+				NotificationProducerBindingProxy producer(tev__CreatePullPointSubscriptionResponse.SubscriptionReference.Address);
+				soap_wsse_add_Security(producer.soap);
+				
+				_wsnt__Subscribe         wsnt__Subscribe;
+				std::string url("http://127.0.0.1:9090");
+				wsnt__Subscribe.ConsumerReference.Address = strcpy((char*)soap_malloc(producer.soap, url.size()+1), url.c_str());
+				_wsnt__SubscribeResponse wsnt__SubscribeResponse;
+				if (producer.Subscribe(&wsnt__Subscribe, &wsnt__SubscribeResponse) == SOAP_OK)
+				{
+				}	
+				th.join();
 			}
 		}
 	}

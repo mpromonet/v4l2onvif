@@ -26,6 +26,7 @@
 
 #include "soapEventBindingService.h"
 #include "soapPullPointSubscriptionBindingService.h"
+#include "soapNotificationProducerBindingService.h"
 
 #include "wsseapi.h"
 
@@ -111,6 +112,7 @@ int main(int argc, char* argv[])
 		
 		EventBindingService                 eventService(soap);
 		PullPointSubscriptionBindingService pullPointService(soap);
+		NotificationProducerBindingService  notificationProducerService(soap);
 
 		if (!soap_valid_socket(soap_bind(soap, NULL, deviceCtx.m_port, 100))) 
 		{
@@ -178,7 +180,12 @@ int main(int argc, char* argv[])
 				{
 					soap_send_fault(soap);
 					soap_stream_fault(soap, std::cerr);
-				}				
+				}		
+				else if (notificationProducerService.dispatch() != SOAP_NO_METHOD)
+				{
+					soap_send_fault(soap);
+					soap_stream_fault(soap, std::cerr);
+				}						
 			}
 		}
 	}

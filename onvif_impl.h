@@ -16,6 +16,8 @@
 
 #include "soapH.h"
 
+class NotificationConsumerBindingProxy;
+
 class ServiceContext
 {
 public:
@@ -64,6 +66,7 @@ public:
 	std::string Manufacturer;
 	std::string Model;
 	std::string FirmwareVersion;
+	std::list<NotificationConsumerBindingProxy*> m_subscriber;
 };
 
 template<typename T>
