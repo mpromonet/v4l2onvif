@@ -29,7 +29,7 @@ all: gen server.exe client.exe
 gen:
 	mkdir gen
 	
-gen/onvif.h: devicemgmt.wsdl media.wsdl recording.wsdl replay.wsdl receiver.wsdl search.wsdl event.wsdl imaging.wsdl display.wsdl deviceio.wsdl onvif.xsd b-2.xsd include bf-2.xsd t-1.xsd r-2.xsd
+gen/onvif.h: $(wildcard wsdl/*.wsdl wsdl/*.xsd)
 	$(GSOAP_PREFIX)/bin/wsdl2h -d -Ntev -z6 -o $@ $^
 
 gen/soapDeviceBindingService.cpp: gen/onvif.h
