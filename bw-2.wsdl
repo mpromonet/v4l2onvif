@@ -26,7 +26,7 @@ This document and the information contained herein is provided on an "AS IS" bas
 <!-- ========================== Imports =========================== --> 
  <wsdl:import 
        namespace="http://docs.oasis-open.org/wsrf/rw-2" 
-       location="http://docs.oasis-open.org/wsrf/rw-2.wsdl"/>
+       location="./rw-2.wsdl"/>
  
 <!-- ===================== Types Definitions ====================== -->
    <wsdl:types>

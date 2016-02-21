@@ -1,6 +1,14 @@
 # ONVIF recommended prefixes
 tds	= <http://www.onvif.org/ver10/device/wsdl>
 tev	= <http://www.onvif.org/ver10/events/wsdl>
+teve    = <http://www.onvif.org/ver10/events/wsdl/EventBinding>
+tevpps  = <http://www.onvif.org/ver10/events/wsdl/PullPointSubscriptionBinding>
+tevs    = <http://www.onvif.org/ver10/events/wsdl/SubscriptionManagerBinding>
+tevnp   = <http://www.onvif.org/ver10/events/wsdl/NotificationProducerBinding>
+tevnc   = <http://www.onvif.org/ver10/events/wsdl/NotificationConsumerBinding>
+tevpp   = <http://www.onvif.org/ver10/events/wsdl/PullPointBinding>
+tevcpp  = <http://www.onvif.org/ver10/events/wsdl/CreatePullPointBinding>
+tevps   = <http://www.onvif.org/ver10/events/wsdl/PausableSubscriptionManagerBinding>
 tls	= <http://www.onvif.org/ver10/display/wsdl>
 tmd	= <http://www.onvif.org/ver10/deviceIO/wsdl>
 timg	= <http://www.onvif.org/ver20/imaging/wsdl>
@@ -17,10 +25,10 @@ tt      = <http://www.onvif.org/ver10/schema>
 
 # OASIS recommended prefixes
 wsnt    = <http://docs.oasis-open.org/wsn/b-2>
-wsntw   = <http://docs.oasis-open.org/wsn/bw-2>
+wsntw   = "http://docs.oasis-open.org/wsn/bw-2"
 wsrfbf  = <http://docs.oasis-open.org/wsrf/bf-2>
 wsrfr   = <http://docs.oasis-open.org/wsrf/r-2>
-wsrfrw  = <http://docs.oasis-open.org/wsrf/rw-2>
+wsrfrw  = "http://docs.oasis-open.org/wsrf/rw-2"
 wstop   = <http://docs.oasis-open.org/wsn/t-1>
 xop     = <http://www.w3.org/2004/08/xop/include>
 wsa5    = <http://www.w3.org/2005/08/addressing>
