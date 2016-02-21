@@ -12,6 +12,7 @@
 #ifndef SERVICE_CONTEXT_H
 #define SERVICE_CONTEXT_H
 
+#include <list>
 #include <map>
 
 #include "soapH.h"
