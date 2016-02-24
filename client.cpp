@@ -300,7 +300,12 @@ int main(int argc, char* argv[])
 							std::cout << "\tSaturation  :" << printPtr (timg__GetImagingSettingsResponse.ImagingSettings->ColorSaturation)       << std::endl;
 							std::cout << "\tSharpness   :" << printPtr (timg__GetImagingSettingsResponse.ImagingSettings->Sharpness)             << std::endl;
 							std::cout << "\tBacklight   :" << printMode(timg__GetImagingSettingsResponse.ImagingSettings->BacklightCompensation) << std::endl;
+							std::cout << "\tWideDynamic :" << printMode(timg__GetImagingSettingsResponse.ImagingSettings->WideDynamicRange) << std::endl;
 							std::cout << "\tExposure    :" << printMode(timg__GetImagingSettingsResponse.ImagingSettings->Exposure)              << std::endl;
+                                                        if (timg__GetImagingSettingsResponse.ImagingSettings->Exposure)
+                                                                std::cout << "\t\tExposureTime :" << printPtr(timg__GetImagingSettingsResponse.ImagingSettings->Exposure->ExposureTime)          << std::
+endl;
+
 							std::cout << "\tWhiteBalance:" << printMode(timg__GetImagingSettingsResponse.ImagingSettings->WhiteBalance)          << std::endl;
 							
 						}

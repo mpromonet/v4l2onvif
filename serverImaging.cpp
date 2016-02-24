@@ -62,8 +62,15 @@ int ImagingBindingService::GetImagingSettings(_timg__GetImagingSettings *timg__G
 			timg__GetImagingSettingsResponse->ImagingSettings->BacklightCompensation = soap_new_tt__BacklightCompensation20(this->soap);
 			timg__GetImagingSettingsResponse->ImagingSettings->BacklightCompensation->Mode = backlightCompensation ? tt__BacklightCompensationMode__ON : tt__BacklightCompensationMode__OFF;
 		}
+
+		int wideDynamicRange = ctx->getCtrlValue(it->first, V4L2_CID_WIDE_DYNAMIC_RANGE);
+		if ( errno == 0 )
+		{
+			timg__GetImagingSettingsResponse->ImagingSettings->WideDynamicRange = soap_new_tt__WideDynamicRange20(this->soap);
+			timg__GetImagingSettingsResponse->ImagingSettings->WideDynamicRange->Mode = wideDynamicRange ? tt__WideDynamicMode__ON : tt__WideDynamicMode__OFF;
+		}
 		
-		int exposure = ctx->getCtrlValue(it->first, V4L2_CID_EXPOSURE);		
+		int exposure = ctx->getCtrlValue(it->first, V4L2_CID_EXPOSURE_AUTO);		
 		if ( errno == 0 )
 		{
 			timg__GetImagingSettingsResponse->ImagingSettings->Exposure = soap_new_tt__Exposure20(this->soap);
@@ -128,10 +135,15 @@ int ImagingBindingService::SetImagingSettings(_timg__SetImagingSettings *timg__S
 			int backlightCompensation = (timg__SetImagingSettings->ImagingSettings->BacklightCompensation->Mode == tt__BacklightCompensationMode__ON);
 			ctx->setCtrlValue(it->first, V4L2_CID_BACKLIGHT_COMPENSATION, backlightCompensation);
 		}
+		if (timg__SetImagingSettings->ImagingSettings->WideDynamicRange)
+		{
+			int wideDynamicMode = (timg__SetImagingSettings->ImagingSettings->WideDynamicRange->Mode == tt__WideDynamicMode__ON);
+			ctx->setCtrlValue(it->first, V4L2_CID_WIDE_DYNAMIC_RANGE, wideDynamicMode);
+		}
 		if (timg__SetImagingSettings->ImagingSettings->Exposure)
 		{
 			int exposure = (timg__SetImagingSettings->ImagingSettings->Exposure->Mode == tt__ExposureMode__AUTO);
-			ctx->setCtrlValue(it->first, V4L2_CID_EXPOSURE, exposure);
+			ctx->setCtrlValue(it->first, V4L2_CID_EXPOSURE_AUTO, exposure);
 			if (timg__SetImagingSettings->ImagingSettings->Exposure->ExposureTime)
 			{
 				int exposureTime = *timg__SetImagingSettings->ImagingSettings->Exposure->ExposureTime;
@@ -228,6 +240,13 @@ int ImagingBindingService::Move(_timg__Move *timg__Move, _timg__MoveResponse *ti
 int ImagingBindingService::Stop(_timg__Stop *timg__Stop, _timg__StopResponse *timg__StopResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
+	auto it = ctx->m_devices.find(timg__Stop->VideoSourceToken);
+	if (it != ctx->m_devices.end())
+	{	
+		ctx->setCtrlValue(it->first, V4L2_CID_AUTO_FOCUS_STOP, 0);
+	}
 	return SOAP_OK;
 }
 
@@ -243,7 +262,14 @@ int ImagingBindingService::GetStatus(_timg__GetStatus *timg__GetStatus, _timg__G
 		timg__GetStatusResponse->Status->FocusStatus20 = soap_new_tt__FocusStatus20(this->soap);
 		
 		timg__GetStatusResponse->Status->FocusStatus20->Position = ctx->getCtrlValue(it->first, V4L2_CID_FOCUS_ABSOLUTE);
-		timg__GetStatusResponse->Status->FocusStatus20->MoveStatus = tt__MoveStatus__UNKNOWN;
+		int status = ctx->getCtrlValue(it->first,V4L2_CID_AUTO_FOCUS_STATUS);
+		tt__MoveStatus moveStatus = tt__MoveStatus__UNKNOWN;
+		switch (status)
+		{
+			case V4L2_AUTO_FOCUS_STATUS_IDLE: moveStatus = tt__MoveStatus__IDLE  ; break;
+			case V4L2_AUTO_FOCUS_STATUS_BUSY: moveStatus = tt__MoveStatus__MOVING; break;
+		}
+		timg__GetStatusResponse->Status->FocusStatus20->MoveStatus = moveStatus;
 	}
 	
 	return SOAP_OK;
