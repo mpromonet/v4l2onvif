@@ -1,13 +1,21 @@
-/* ---------------------------------------------------------------------------
-** This software is in the public domain, furnished "as is", without technical
-** support, and with no warranty, express or implied, as to its usefulness for
-** any purpose.
-**
-** client.cpp
-** 
-** onvif client
-**
-** -------------------------------------------------------------------------*/
+/* --------------------------------------------------------------------------
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-----------------------------------------------------------------------------
+ client.cpp
+ 
+ onvif client
+----------------------------------------------------------------------------- */
 
 #include <memory>
 #include <sstream>
@@ -302,10 +310,8 @@ int main(int argc, char* argv[])
 							std::cout << "\tBacklight   :" << printMode(timg__GetImagingSettingsResponse.ImagingSettings->BacklightCompensation) << std::endl;
 							std::cout << "\tWideDynamic :" << printMode(timg__GetImagingSettingsResponse.ImagingSettings->WideDynamicRange) << std::endl;
 							std::cout << "\tExposure    :" << printMode(timg__GetImagingSettingsResponse.ImagingSettings->Exposure)              << std::endl;
-                                                        if (timg__GetImagingSettingsResponse.ImagingSettings->Exposure)
-                                                                std::cout << "\t\tExposureTime :" << printPtr(timg__GetImagingSettingsResponse.ImagingSettings->Exposure->ExposureTime)          << std::
-endl;
-
+							if (timg__GetImagingSettingsResponse.ImagingSettings->Exposure)
+								std::cout << "\t\tExposureTime :" << printPtr(timg__GetImagingSettingsResponse.ImagingSettings->Exposure->ExposureTime)          << std::endl;
 							std::cout << "\tWhiteBalance:" << printMode(timg__GetImagingSettingsResponse.ImagingSettings->WhiteBalance)          << std::endl;
 							
 						}
@@ -455,8 +461,9 @@ endl;
 				
 				// subscribe
 				NotificationConsumerBindingService consumer;
+				consumer.soap->accept_timeout=5;
 				consumer.bind(NULL,9090,10);
-				std::thread th(&NotificationConsumerBindingService::serve, &consumer);
+				std::thread th(&NotificationConsumerBindingService::run, &consumer, 0);
 				
 				NotificationProducerBindingProxy producer(tev__CreatePullPointSubscriptionResponse.SubscriptionReference.Address);
 				soap_wsse_add_Security(producer.soap);
