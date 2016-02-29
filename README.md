@@ -9,16 +9,13 @@
    Web services glue is generated using [gSOAP](http://www.genivia.com/).
 
 ## License
------
 
    [GNU General Public License](http://www.gnu.org/licenses/#GPL)
 
-# Build
------
+## Build
 
     make ; make
 
-# Usage
------
+## Usage
 
     server.exe [-u username] [-p password] [-i v4l2 input device] [-I rtsp server] [-o v4l2 output device] [-O rtsp client]
