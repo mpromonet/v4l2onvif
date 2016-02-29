@@ -1,11 +1,11 @@
 # v4l2-onvif
 
-   This implement a ONVIF server :
+   It implements an ONVIF server :
    
-   * NVT/NVS for V4L2 capture devices,
-   * NVD server for V4L2 output devices.
+   * for V4L2 capture devices (NVT/NVS),
+   * for V4L2 output devices (NVD).
    
-   Web services glue is generated using [gSOAP](http://www.genivia.com/).
+   The web services data binding is generated using [gSOAP](http://www.genivia.com/).
 
 ## License
 
