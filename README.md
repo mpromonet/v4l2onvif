@@ -1,5 +1,4 @@
 # v4l2-onvif
-==========
 
    This implement a ONVIF server :
    
