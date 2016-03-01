@@ -128,7 +128,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	}
 
 	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
-	tds__GetServicesResponse->Service.back()->Namespace  = "http://www.onvif.org/ver10/deviceio/wsdl";
+	tds__GetServicesResponse->Service.back()->Namespace  = "http://www.onvif.org/ver10/deviceIO/wsdl";
 	tds__GetServicesResponse->Service.back()->XAddr = url;
 	tds__GetServicesResponse->Service.back()->Version = soap_new_req_tt__OnvifVersion(this->soap,2,6);
 	if (tds__GetServices->IncludeCapability)
@@ -400,6 +400,8 @@ int DeviceBindingService::GetCapabilities(_tds__GetCapabilities *tds__GetCapabil
 			tds__GetCapabilitiesResponse->Capabilities->Extension  = soap_new_tt__CapabilitiesExtension(this->soap);
 			tds__GetCapabilitiesResponse->Capabilities->Extension->Recording  = soap_new_tt__RecordingCapabilities(this->soap);
 			tds__GetCapabilitiesResponse->Capabilities->Extension->Recording->XAddr = url;
+			tds__GetCapabilitiesResponse->Capabilities->Extension->Recording->MediaProfileSource = true;
+			tds__GetCapabilitiesResponse->Capabilities->Extension->Recording->ReceiverSource = true;
 			tds__GetCapabilitiesResponse->Capabilities->Extension->Replay  = soap_new_tt__ReplayCapabilities(this->soap);
 			tds__GetCapabilitiesResponse->Capabilities->Extension->Replay->XAddr = url;
 			tds__GetCapabilitiesResponse->Capabilities->Extension->Receiver = soap_new_tt__ReceiverCapabilities(this->soap);
@@ -410,6 +412,7 @@ int DeviceBindingService::GetCapabilities(_tds__GetCapabilities *tds__GetCapabil
 			tds__GetCapabilitiesResponse->Capabilities->Extension->Display->XAddr = url;
 			tds__GetCapabilitiesResponse->Capabilities->Extension->Display->FixedLayout = true;
 			tds__GetCapabilitiesResponse->Capabilities->Extension->DeviceIO = soap_new_tt__DeviceIOCapabilities(this->soap);
+			tds__GetCapabilitiesResponse->Capabilities->Extension->DeviceIO->XAddr = url;
 			tds__GetCapabilitiesResponse->Capabilities->Extension->DeviceIO->VideoSources = ctx->m_devices.size();
 			tds__GetCapabilitiesResponse->Capabilities->Extension->DeviceIO->VideoOutputs = 1;
 		}
