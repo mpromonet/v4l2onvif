@@ -5,7 +5,7 @@ GSOAP_PLUGINS=$(GSOAP_BASE)/plugin
 GSOAP_CFLAGS=-I gen -I $(GSOAP_PREFIX)/include -I $(GSOAP_PLUGINS) -DSOAP_PURE_VIRTUAL -DWITH_OPENSSL -fpermissive 
 GSOAP_LDFLAGS=-L $(GSOAP_PREFIX)/lib/ -lgsoapssl++ -lssl -lcrypto -lz 
 
-CXXFLAGS+=$(GSOAP_CFLAGS) -std=c++11 -g
+CXXFLAGS+=$(GSOAP_CFLAGS) -std=c++11 -g -Iinc
 
 WSSE_SRC=$(GSOAP_PLUGINS)/wsseapi.c $(GSOAP_PLUGINS)/smdevp.c $(GSOAP_PLUGINS)/mecevp.c $(GSOAP_PLUGINS)/wsaapi.c
 
@@ -44,10 +44,10 @@ libserver.a: $(SERVER_OBJ)
 libclient.a: $(CLIENT_OBJ) 
 	ar rcs $@ $^
 
-server.exe: $(SOAP_OBJ) $(SERVER_OBJ) serverDevice.o serverMedia.o serverRecording.o serverReplay.o serverEvent.o serverPullPointSubscription.o serverNotificationProducer.o serverReceiver.o serverImaging.o serverSearch.o serverDisplay.o serverDeviceIO.o  server.o onvif_impl.o $(WSSE_SRC)
+server.exe: $(SOAP_OBJ) $(SERVER_OBJ) src/serverDevice.o src/serverMedia.o src/serverRecording.o src/serverReplay.o src/serverEvent.o src/serverPullPointSubscription.o src/serverNotificationProducer.o src/serverReceiver.o src/serverImaging.o src/serverSearch.o src/serverDisplay.o src/serverDeviceIO.o  src/server.o src/onvif_impl.o $(WSSE_SRC)
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS)
 
-client.exe: $(SOAP_OBJ) $(CLIENT_OBJ) client.o serverNotificationConsumer.o $(WSSE_SRC)
+client.exe: $(SOAP_OBJ) $(CLIENT_OBJ) src/client.o src/serverNotificationConsumer.o $(WSSE_SRC)
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) -pthread
 
 clean:
