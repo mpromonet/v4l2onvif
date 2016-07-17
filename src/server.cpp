@@ -64,11 +64,41 @@ int http_get(struct soap *soap)
 	return retCode;
 } 
 
+#define FOREACH_SERVICE(APPLY,soap) \
+		APPLY(DeviceBindingService,soap)    \
+		APPLY(DeviceIOBindingService,soap)  \
+		\
+		APPLY(MediaBindingService,soap)     \
+		APPLY(ImagingBindingService,soap)   \
+                \
+		APPLY(RecordingBindingService,soap) \
+		APPLY(ReplayBindingService,soap)    \
+		APPLY(SearchBindingService,soap)    \
+		\
+		APPLY(ReceiverBindingService,soap)  \
+		\
+		APPLY(DisplayBindingService,soap)   \
+		\
+		APPLY(EventBindingService,soap)                 \
+		APPLY(PullPointSubscriptionBindingService,soap) \
+		APPLY(NotificationProducerBindingService,soap)  \
+/**/
+
+#define DECLARE_SERVICE(service,soap) service service ## _inst(soap);
+
+#define DISPATCH_SERVICE(service,soap) \
+				else if (service ## _inst.dispatch() != SOAP_NO_METHOD) {\
+					soap_send_fault(soap); \
+					soap_stream_fault(soap, std::cerr); \
+				}
+
+
 int main(int argc, char* argv[])
 {		
 	std::string indevice  = "/dev/video0";
-	std::string path      = "unicast";
+	std::string inpath    = "unicast";
 	std::string outdevice = "/dev/video10";
+	std::string outpath   = "rtsp://127.0.0.1:8554/unicast";
 	std::string username;
 	std::string password;	
 	int port = 8080;
@@ -77,10 +107,15 @@ int main(int argc, char* argv[])
 	{
 		switch (c)
 		{
-			case 'u':	username = optarg; break;
-			case 'p':	password = optarg; break;
-			case 'i':	indevice = optarg; break;
-			case 'I':	path     = optarg; break;
+			case 'u':	username  = optarg; break;
+			case 'p':	password  = optarg; break;
+			
+			case 'i':	indevice  = optarg; break;
+			case 'I':	inpath    = optarg; break;
+			
+			case 'o':	outdevice = optarg; break;
+			case 'O':	outpath   = optarg; break;
+			
 			case 'h':
 				std::cout << argv[0] << " [-u username] [-p password] [-i v4l2 input device] [-I rtsp server] [-o v4l2 output device] [-O rtsp client]" << std::endl;
 				exit(0);
@@ -90,7 +125,7 @@ int main(int argc, char* argv[])
 	std::cout << "Listening to " << port << std::endl;
 		
 	ServiceContext deviceCtx;
-	deviceCtx.m_devices.insert(std::pair<std::string,std::string>(indevice, path));
+	deviceCtx.m_devices.insert(std::pair<std::string,std::string>(indevice, inpath));
 	deviceCtx.m_port          = port;
 	deviceCtx.m_rtspport      = "554";
 	deviceCtx.m_user          = username;
@@ -104,23 +139,7 @@ int main(int argc, char* argv[])
 	soap->user = (void*)&deviceCtx;
 	soap->fget = http_get; 
 	{			
-		DeviceBindingService                deviceService(soap);
-		DeviceIOBindingService              deviceIOService(soap);
-		
-		MediaBindingService                 mediaService(soap);
-		ImagingBindingService               imagingService(soap);
-		
-		RecordingBindingService             recordingService(soap);
-		ReplayBindingService                replayService(soap);
-		SearchBindingService                searchService(soap);
-		
-		ReceiverBindingService              receiverService(soap);
-
-		DisplayBindingService               displayService(soap);
-		
-		EventBindingService                 eventService(soap);
-		PullPointSubscriptionBindingService pullPointService(soap);
-		NotificationProducerBindingService  notificationProducerService(soap);
+		FOREACH_SERVICE(DECLARE_SERVICE,soap)
 
 		if (!soap_valid_socket(soap_bind(soap, NULL, deviceCtx.m_port, 100))) 
 		{
@@ -134,66 +153,12 @@ int main(int argc, char* argv[])
 				{
 					soap_stream_fault(soap, std::cerr);
 				}
-				else if (deviceService.dispatch() != SOAP_NO_METHOD)
+				FOREACH_SERVICE(DISPATCH_SERVICE,soap)
+				else 
 				{
-					soap_send_fault(soap);
-					soap_stream_fault(soap, std::cerr);
+					std::cout << "Unknown service" << std::endl;				
 				}
-				else if (recordingService.dispatch() != SOAP_NO_METHOD)
-				{
-					soap_send_fault(soap);
-					soap_stream_fault(soap, std::cerr);
-				}
-				else if (receiverService.dispatch() != SOAP_NO_METHOD)
-				{
-					soap_send_fault(soap);
-					soap_stream_fault(soap, std::cerr);
-				}
-				else if (replayService.dispatch() != SOAP_NO_METHOD)
-				{
-					soap_send_fault(soap);
-					soap_stream_fault(soap, std::cerr);
-				}
-				else if (imagingService.dispatch() != SOAP_NO_METHOD)
-				{
-					soap_send_fault(soap);
-					soap_stream_fault(soap, std::cerr);
-				}
-				else if (eventService.dispatch() != SOAP_NO_METHOD)
-				{
-					soap_send_fault(soap);
-					soap_stream_fault(soap, std::cerr);
-				}
-				else if (pullPointService.dispatch() != SOAP_NO_METHOD)
-				{
-					soap_send_fault(soap);
-					soap_stream_fault(soap, std::cerr);
-				}
-				else if (mediaService.dispatch() != SOAP_NO_METHOD)
-				{
-					soap_send_fault(soap);
-					soap_stream_fault(soap, std::cerr);
-				}
-				else if (searchService.dispatch() != SOAP_NO_METHOD)
-				{
-					soap_send_fault(soap);
-					soap_stream_fault(soap, std::cerr);
-				}
-				else if (displayService.dispatch() != SOAP_NO_METHOD)
-				{
-					soap_send_fault(soap);
-					soap_stream_fault(soap, std::cerr);
-				}
-				else if (deviceIOService.dispatch() != SOAP_NO_METHOD)
-				{
-					soap_send_fault(soap);
-					soap_stream_fault(soap, std::cerr);
-				}		
-				else if (notificationProducerService.dispatch() != SOAP_NO_METHOD)
-				{
-					soap_send_fault(soap);
-					soap_stream_fault(soap, std::cerr);
-				}						
+					
 			}
 		}
 	}
