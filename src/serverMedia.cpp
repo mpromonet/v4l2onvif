@@ -561,6 +561,7 @@ int MediaBindingService::SetSynchronizationPoint(_trt__SetSynchronizationPoint *
 int MediaBindingService::GetSnapshotUri(_trt__GetSnapshotUri *trt__GetSnapshotUri, _trt__GetSnapshotUriResponse *trt__GetSnapshotUriResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	trt__GetSnapshotUriResponse->MediaUri = soap_new_tt__MediaUri(soap);
 	return SOAP_OK;
 }
 

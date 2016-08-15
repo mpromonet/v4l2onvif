@@ -462,31 +462,33 @@ int DeviceBindingService::SetHostname(_tds__SetHostname *tds__SetHostname, _tds_
 int DeviceBindingService::SetHostnameFromDHCP(_tds__SetHostnameFromDHCP *tds__SetHostnameFromDHCP, _tds__SetHostnameFromDHCPResponse *tds__SetHostnameFromDHCPResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
-	return SOAP_OK;
+	return SOAP_FAULT;
 }
 
 int DeviceBindingService::GetDNS(_tds__GetDNS *tds__GetDNS, _tds__GetDNSResponse *tds__GetDNSResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	tds__GetDNSResponse->DNSInformation = soap_new_tt__DNSInformation(soap);
 	return SOAP_OK;
 }
 
 int DeviceBindingService::SetDNS(_tds__SetDNS *tds__SetDNS, _tds__SetDNSResponse *tds__SetDNSResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
-	return SOAP_OK;
+	return SOAP_FAULT;
 }
 
 int DeviceBindingService::GetNTP(_tds__GetNTP *tds__GetNTP, _tds__GetNTPResponse *tds__GetNTPResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	tds__GetNTPResponse->NTPInformation = soap_new_tt__NTPInformation(soap);
 	return SOAP_OK;
 }
 
 int DeviceBindingService::SetNTP(_tds__SetNTP *tds__SetNTP, _tds__SetNTPResponse *tds__SetNTPResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
-	return SOAP_OK;
+	return SOAP_FAULT;
 }
 
 int DeviceBindingService::GetDynamicDNS(_tds__GetDynamicDNS *tds__GetDynamicDNS, _tds__GetDynamicDNSResponse *tds__GetDynamicDNSResponse) 
@@ -498,7 +500,7 @@ int DeviceBindingService::GetDynamicDNS(_tds__GetDynamicDNS *tds__GetDynamicDNS,
 int DeviceBindingService::SetDynamicDNS(_tds__SetDynamicDNS *tds__SetDynamicDNS, _tds__SetDynamicDNSResponse *tds__SetDynamicDNSResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
-	return SOAP_OK;
+	return SOAP_FAULT;
 }
 
 int DeviceBindingService::GetNetworkInterfaces(_tds__GetNetworkInterfaces *tds__GetNetworkInterfaces, _tds__GetNetworkInterfacesResponse *tds__GetNetworkInterfacesResponse) 
@@ -585,6 +587,7 @@ int DeviceBindingService::SetNetworkProtocols(_tds__SetNetworkProtocols *tds__Se
 int DeviceBindingService::GetNetworkDefaultGateway(_tds__GetNetworkDefaultGateway *tds__GetNetworkDefaultGateway, _tds__GetNetworkDefaultGatewayResponse *tds__GetNetworkDefaultGatewayResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	tds__GetNetworkDefaultGatewayResponse->NetworkGateway = soap_new_tt__NetworkGateway(soap);
 	return SOAP_OK;
 }
 
@@ -596,6 +599,7 @@ int DeviceBindingService::SetNetworkDefaultGateway(_tds__SetNetworkDefaultGatewa
 
 int DeviceBindingService::GetZeroConfiguration(_tds__GetZeroConfiguration *tds__GetZeroConfiguration, _tds__GetZeroConfigurationResponse *tds__GetZeroConfigurationResponse) 
 {
+	tds__GetZeroConfigurationResponse->ZeroConfiguration =  soap_new_tt__NetworkZeroConfiguration(soap);
 	std::cout << __FUNCTION__ << std::endl;
 	return SOAP_OK;
 }
@@ -603,7 +607,7 @@ int DeviceBindingService::GetZeroConfiguration(_tds__GetZeroConfiguration *tds__
 int DeviceBindingService::SetZeroConfiguration(_tds__SetZeroConfiguration *tds__SetZeroConfiguration, _tds__SetZeroConfigurationResponse *tds__SetZeroConfigurationResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
-	return SOAP_OK;
+	return SOAP_FAULT;
 }
 
 int DeviceBindingService::GetIPAddressFilter(_tds__GetIPAddressFilter *tds__GetIPAddressFilter, _tds__GetIPAddressFilterResponse *tds__GetIPAddressFilterResponse) 
@@ -615,7 +619,7 @@ int DeviceBindingService::GetIPAddressFilter(_tds__GetIPAddressFilter *tds__GetI
 int DeviceBindingService::SetIPAddressFilter(_tds__SetIPAddressFilter *tds__SetIPAddressFilter, _tds__SetIPAddressFilterResponse *tds__SetIPAddressFilterResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
-	return SOAP_OK;
+	return SOAP_FAULT;
 }
 
 int DeviceBindingService::AddIPAddressFilter(_tds__AddIPAddressFilter *tds__AddIPAddressFilter, _tds__AddIPAddressFilterResponse *tds__AddIPAddressFilterResponse) 
