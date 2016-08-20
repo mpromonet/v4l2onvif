@@ -127,7 +127,6 @@ int main(int argc, char* argv[])
 	ServiceContext deviceCtx;
 	deviceCtx.m_devices.insert(std::pair<std::string,std::string>(indevice, inpath));
 	deviceCtx.m_port          = port;
-	deviceCtx.m_rtspport      = "554";
 	deviceCtx.m_user          = username;
 	deviceCtx.m_password      = password;
 	deviceCtx.m_outdevice     = outdevice;

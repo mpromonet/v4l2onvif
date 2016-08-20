@@ -171,9 +171,21 @@ tt__H264Profile getH264Profile(int h264profile)
 	return profile;
 }
 
+tt__Profile* ServiceContext::getProfile(struct soap* soap, const std::string & token)
+{
+	tt__Profile* profile = soap_new_tt__Profile(soap);
+	profile->Name = token;
+	profile->token = token;
+	profile->VideoSourceConfiguration = getVideoSourceCfg(soap, token);
+	profile->VideoEncoderConfiguration = getVideoEncoderCfg(soap, token);
+	return profile;
+}
+
 tt__VideoEncoderConfiguration* ServiceContext::getVideoEncoderCfg(struct soap* soap, const std::string & token)
 {
 	tt__VideoEncoderConfiguration* cfg = soap_new_tt__VideoEncoderConfiguration(soap);
+	cfg->Name = token;
+	cfg->token = token;
 	int width;
 	int height;
 	int format;	

@@ -55,6 +55,7 @@ public:
 	tds__StorageConfiguration* getStorageCfg(struct soap* soap, const std::string & path);
 
 	// media 
+	tt__Profile*                          getProfile               (struct soap* soap, const std::string & token);
 	tt__VideoSourceConfiguration*         getVideoSourceCfg        (struct soap* soap, const std::string & token);
 	tt__VideoSourceConfigurationOptions*  getVideoSourceCfgOptions (struct soap* soap, const std::string & token);
 	tt__VideoEncoderConfiguration*        getVideoEncoderCfg       (struct soap* soap, const std::string & token);
@@ -67,7 +68,6 @@ public:
 	
 public:
 	std::map<std::string,std::string> m_devices;
-	std::string m_rtspport;
 	std::string m_outdevice;
 	int         m_port;
 	std::string m_user;

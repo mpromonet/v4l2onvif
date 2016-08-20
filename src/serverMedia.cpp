@@ -72,16 +72,18 @@ int MediaBindingService::GetProfile(_trt__GetProfile *trt__GetProfile, _trt__Get
 {
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	int ret = SOAP_FAULT;
 	
+	std::cout << __FUNCTION__ << " search for profile:" << trt__GetProfile->ProfileToken << std::endl;
+
 	auto it = ctx->m_devices.find(trt__GetProfile->ProfileToken);
 	if (it != ctx->m_devices.end())
 	{
-		trt__GetProfileResponse->Profile = soap_new_tt__Profile(this->soap);
-		trt__GetProfileResponse->Profile->Name = it->first;
-		trt__GetProfileResponse->Profile->token = it->first;
+		trt__GetProfileResponse->Profile = ctx->getProfile(this->soap, it->first);
+		ret = SOAP_OK;
 	}
 	
-	return SOAP_OK;
+	return ret;
 }
 
 int MediaBindingService::GetProfiles(_trt__GetProfiles *trt__GetProfiles, _trt__GetProfilesResponse *trt__GetProfilesResponse) 
@@ -91,9 +93,7 @@ int MediaBindingService::GetProfiles(_trt__GetProfiles *trt__GetProfiles, _trt__
 	
 	for (auto it: ctx->m_devices) 
 	{
-		trt__GetProfilesResponse->Profiles.push_back(soap_new_tt__Profile(this->soap));
-		trt__GetProfilesResponse->Profiles.back()->Name = it.first;
-		trt__GetProfilesResponse->Profiles.back()->token = it.first;
+		trt__GetProfilesResponse->Profiles.push_back(ctx->getProfile(this->soap, it.first));
 	}
 	
 	return SOAP_OK;
@@ -522,22 +522,20 @@ int MediaBindingService::GetStreamUri(_trt__GetStreamUri *trt__GetStreamUri, _tr
 {
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	int ret = SOAP_FAULT;
 	
 	trt__GetStreamUriResponse->MediaUri = soap_new_tt__MediaUri(this->soap);
-	trt__GetStreamUriResponse->MediaUri->Uri = "rtsp://";
-	trt__GetStreamUriResponse->MediaUri->Uri.append(ctx->getServerIpFromClientIp(htonl(this->soap->ip)));	
-	trt__GetStreamUriResponse->MediaUri->Uri.append(":");
-	trt__GetStreamUriResponse->MediaUri->Uri.append(ctx->m_rtspport);
-	trt__GetStreamUriResponse->MediaUri->Uri.append("/");
 	if (trt__GetStreamUri != NULL)
 	{
+		std::cout << __FUNCTION__ << " search for profile:" << trt__GetStreamUri->ProfileToken << std::endl;
 		auto it = ctx->m_devices.find(trt__GetStreamUri->ProfileToken);
 		if (it != ctx->m_devices.end())
 		{
-			trt__GetStreamUriResponse->MediaUri->Uri.append(it->second);
+			trt__GetStreamUriResponse->MediaUri->Uri.assign(it->second);
+			ret = SOAP_OK;
 		}
 	}	
-	return SOAP_OK;
+	return ret;
 }
 
 int MediaBindingService::StartMulticastStreaming(_trt__StartMulticastStreaming *trt__StartMulticastStreaming, _trt__StartMulticastStreamingResponse *trt__StartMulticastStreamingResponse) 
