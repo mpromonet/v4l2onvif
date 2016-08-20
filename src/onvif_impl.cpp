@@ -192,6 +192,7 @@ tt__VideoEncoderConfiguration* ServiceContext::getVideoEncoderCfg(struct soap* s
 	if (getFormat(token, width, height, format))
 	{		
 		cfg->Resolution = soap_new_req_tt__VideoResolution(soap, width, height);
+		cfg->RateControl = soap_new_req_tt__VideoRateControl(soap, 0, 0, 0);
 		cfg->Multicast = soap_new_tt__MulticastConfiguration(soap);
 		cfg->Multicast->Address = soap_new_tt__IPAddress(soap);
 		cfg->SessionTimeout = "PT10S";

@@ -184,6 +184,7 @@ int ImagingBindingService::SetImagingSettings(_timg__SetImagingSettings *timg__S
 
 int ImagingBindingService::GetOptions(_timg__GetOptions *timg__GetOptions, _timg__GetOptionsResponse *timg__GetOptionsResponse) 
 {
+	int ret = SOAP_FAULT;
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
 	
@@ -215,8 +216,10 @@ int ImagingBindingService::GetOptions(_timg__GetOptions *timg__GetOptions, _timg
 		timg__GetOptionsResponse->ImagingOptions->Focus = soap_new_tt__FocusOptions20(this->soap);
 		timg__GetOptionsResponse->ImagingOptions->Focus->AutoFocusModes.push_back(tt__AutoFocusMode__AUTO);
 		timg__GetOptionsResponse->ImagingOptions->Focus->AutoFocusModes.push_back(tt__AutoFocusMode__MANUAL);		
+
+		ret = SOAP_OK;
 	}
-	return SOAP_OK;
+	return ret;
 }
 
 int ImagingBindingService::Move(_timg__Move *timg__Move, _timg__MoveResponse *timg__MoveResponse) 

@@ -82,6 +82,36 @@ std::string printRangePtr(T* ptr)
 	return os.str();
 }
 
+template<typename T>
+std::string printResolution(T* ptr)
+{
+	std::ostringstream os;
+	if (ptr)
+	{
+		os << ptr->Width << "x" << ptr->Height;
+	}
+	else
+	{	
+		os << "(null)";
+	}
+	return os.str();
+}
+
+template<typename T>
+std::string printRectangle(T* ptr)
+{
+	std::ostringstream os;
+	if (ptr)
+	{
+		os << ptr->x << "x" << ptr->y << " " << ptr->width << "x" << ptr->height;
+	}
+	else
+	{	
+		os << "(null)";
+	}
+	return os.str();
+}
+
 void addSecurity(struct soap* soap, const std::string& username, const std::string & password)
 {
 	if (!username.empty())
@@ -290,7 +320,7 @@ int main(int argc, char* argv[])
 						{
 							for (auto res : trt__GetVideoEncoderConfigurationOptionsResponse.Options->H264->ResolutionsAvailable)
 							{
-								std::cout << "\tResolution:" << res->Width << "x" << res->Height << std::endl;
+								std::cout << "\tResolution:" << printResolution(res) << std::endl;
 							}
 						}
 					}
@@ -342,6 +372,23 @@ int main(int argc, char* argv[])
 				{
 					std::string token(profile->token);
 					std::cout << "\tMediaProfile:" << token << std::endl;
+					if (profile->VideoSourceConfiguration)
+					{ 
+						std::cout << "\ttoken:" << profile->VideoSourceConfiguration->token                              << std::endl;
+						std::cout << "\tSourceToken:" << profile->VideoSourceConfiguration->SourceToken                  << std::endl;
+						std::cout << "\tBounds:"      << printRectangle(profile->VideoSourceConfiguration->Bounds)       << std::endl;
+					}
+					if (profile->VideoEncoderConfiguration)
+					{
+						std::cout << "\ttoken:" << profile->VideoEncoderConfiguration->token                             << std::endl;
+						std::cout << "\tQuality:"    << profile->VideoEncoderConfiguration->Quality                      << std::endl;
+						std::cout << "\tResolution:" << printResolution(profile->VideoEncoderConfiguration->Resolution)  << std::endl;
+						if (profile->VideoEncoderConfiguration->H264)
+						{
+							std::cout << "\tGovLength:"   << profile->VideoEncoderConfiguration->H264->GovLength     << std::endl;
+							std::cout << "\tH264Profile:" << profile->VideoEncoderConfiguration->H264->H264Profile   << std::endl;
+						}
+					}
 					
 					_trt__GetStreamUri         trt__GetStreamUri;
 					_trt__GetStreamUriResponse trt__GetStreamUriResponse;
