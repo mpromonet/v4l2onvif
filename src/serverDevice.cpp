@@ -169,6 +169,8 @@ int DeviceBindingService::GetDeviceInformation(_tds__GetDeviceInformation *tds__
 	tds__GetDeviceInformationResponse->Manufacturer    = ctx->Manufacturer;
 	tds__GetDeviceInformationResponse->Model           = ctx->Model;
 	tds__GetDeviceInformationResponse->FirmwareVersion = ctx->FirmwareVersion;
+	tds__GetDeviceInformationResponse->SerialNumber    = ctx->SerialNumber;
+	tds__GetDeviceInformationResponse->HardwareId      = ctx->HardwareId;
 	return SOAP_OK;
 }
 
@@ -240,6 +242,12 @@ int DeviceBindingService::GetSystemSupportInformation(_tds__GetSystemSupportInfo
 int DeviceBindingService::GetScopes(_tds__GetScopes *tds__GetScopes, _tds__GetScopesResponse *tds__GetScopesResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
+	for (auto scope : ctx->m_scope)
+	{
+		tds__GetScopesResponse->Scopes.push_back(soap_new_req_tt__Scope(soap,tt__ScopeDefinition__Fixed,scope));
+	}
 	return SOAP_OK;
 }
 

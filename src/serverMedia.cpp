@@ -559,8 +559,21 @@ int MediaBindingService::SetSynchronizationPoint(_trt__SetSynchronizationPoint *
 int MediaBindingService::GetSnapshotUri(_trt__GetSnapshotUri *trt__GetSnapshotUri, _trt__GetSnapshotUriResponse *trt__GetSnapshotUriResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	int ret = SOAP_FAULT;
+	
 	trt__GetSnapshotUriResponse->MediaUri = soap_new_tt__MediaUri(soap);
-	return SOAP_OK;
+	if (trt__GetSnapshotUri != NULL)
+	{
+		std::cout << __FUNCTION__ << " search for profile:" << trt__GetSnapshotUri->ProfileToken << std::endl;
+		auto it = ctx->m_devices.find(trt__GetSnapshotUri->ProfileToken);
+		if (it != ctx->m_devices.end())
+		{
+			trt__GetSnapshotUriResponse->MediaUri->Uri.assign(it->second);
+			ret = SOAP_OK;
+		}
+	}	
+	return ret;
 }
 
 int MediaBindingService::GetVideoSourceModes(_trt__GetVideoSourceModes *trt__GetVideoSourceModes, _trt__GetVideoSourceModesResponse *trt__GetVideoSourceModesResponse) 

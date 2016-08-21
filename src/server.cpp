@@ -132,7 +132,13 @@ int main(int argc, char* argv[])
 	deviceCtx.m_outdevice     = outdevice;
 	deviceCtx.Manufacturer    = "Manufacturer";
 	deviceCtx.Model           = "Model";
-	deviceCtx.FirmwareVersion = "Model";
+	deviceCtx.FirmwareVersion = "FirmwareVersion";
+	deviceCtx.SerialNumber    = "SerialNumber";
+	deviceCtx.HardwareId      = "HardwareId";
+	deviceCtx.m_scope.push_back("onvif://www.onvif.org/name/Name");
+	deviceCtx.m_scope.push_back("onvif://www.onvif.org/location/Here");
+	deviceCtx.m_scope.push_back("onvif://www.onvif.org/Profile/Streaming");
+	deviceCtx.m_scope.push_back("onvif://www.onvif.org/Profile/G");
 	
 	struct soap *soap = soap_new();
 	soap->user = (void*)&deviceCtx;

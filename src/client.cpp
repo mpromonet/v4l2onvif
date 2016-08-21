@@ -121,6 +121,29 @@ void addSecurity(struct soap* soap, const std::string& username, const std::stri
 	}
 }
 
+std::string getLocalIp()
+{
+	std::string serverAddress;
+	char hostname[HOST_NAME_MAX];
+	if (gethostname(hostname, sizeof(hostname)) == 0)
+	{
+		struct addrinfo hints;
+		struct addrinfo *result;
+		memset(&hints, 0, sizeof(struct addrinfo));
+		hints.ai_family = AF_INET;
+		if (getaddrinfo(hostname, NULL, &hints, &result) == 0)
+		{
+			if (result != NULL) 
+			{
+				struct sockaddr_in* addr = (struct sockaddr_in *) result->ai_addr;
+				serverAddress.assign(inet_ntoa( addr->sin_addr ));
+				freeaddrinfo(result); 
+			}
+		}
+	}
+	return serverAddress;
+}
+
 int main(int argc, char* argv[])
 {
 	std::string url = "http://127.0.0.1:8080";
@@ -527,16 +550,21 @@ int main(int argc, char* argv[])
 				}
 				
 				// subscribe
+				const char* notifPort = "9090";
 				NotificationConsumerBindingService consumer;
 				consumer.soap->accept_timeout=5;
-				consumer.bind(NULL,9090,10);
+				consumer.bind(NULL,atoi(notifPort),10);
 				std::thread th(&NotificationConsumerBindingService::run, &consumer, 0);
 				
 				NotificationProducerBindingProxy producer(tev__CreatePullPointSubscriptionResponse.SubscriptionReference.Address);
 				soap_wsse_add_Security(producer.soap);
 				
+				std::string url("http://");
+				url.append(getLocalIp());
+				url.append(":");
+				url.append(notifPort);
+				
 				_wsnt__Subscribe         wsnt__Subscribe;
-				std::string url("http://127.0.0.1:9090");
 				wsnt__Subscribe.ConsumerReference.Address = strcpy((char*)soap_malloc(producer.soap, url.size()+1), url.c_str());
 				_wsnt__SubscribeResponse wsnt__SubscribeResponse;
 				if (producer.Subscribe(&wsnt__Subscribe, &wsnt__SubscribeResponse) == SOAP_OK)
