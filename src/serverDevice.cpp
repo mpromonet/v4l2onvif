@@ -20,6 +20,7 @@
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <netpacket/packet.h>
+#include <resolv.h>
 
 #include <map>
 #include <sstream>
@@ -469,6 +470,17 @@ int DeviceBindingService::GetDNS(_tds__GetDNS *tds__GetDNS, _tds__GetDNSResponse
 {
 	std::cout << __FUNCTION__ << std::endl;
 	tds__GetDNSResponse->DNSInformation = soap_new_tt__DNSInformation(soap);
+	struct __res_state state;
+	res_ninit(&state);
+	for (int i=0; i < state.nscount; i++)
+	{
+		tt__IPAddress* address = soap_new_tt__IPAddress(soap);
+		address->Type = tt__IPType__IPv4;
+		address->IPv4Address = soap_new_std__string(soap);
+		address->IPv4Address->assign(inet_ntoa(state.nsaddr_list[i].sin_addr));
+		tds__GetDNSResponse->DNSInformation->DNSManual.push_back(address);
+	}
+	
 	return SOAP_OK;
 }
 
@@ -574,7 +586,12 @@ int DeviceBindingService::SetNetworkInterfaces(_tds__SetNetworkInterfaces *tds__
 
 int DeviceBindingService::GetNetworkProtocols(_tds__GetNetworkProtocols *tds__GetNetworkProtocols, _tds__GetNetworkProtocolsResponse *tds__GetNetworkProtocolsResponse) 
 {
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
 	std::cout << __FUNCTION__ << std::endl;
+	tds__GetNetworkProtocolsResponse->NetworkProtocols.push_back(soap_new_tt__NetworkProtocol(soap));
+	tds__GetNetworkProtocolsResponse->NetworkProtocols.back()->Name = tt__NetworkProtocolType__HTTP;
+	tds__GetNetworkProtocolsResponse->NetworkProtocols.back()->Enabled = true;
+	tds__GetNetworkProtocolsResponse->NetworkProtocols.back()->Port.push_back(ctx->m_port);
 	return SOAP_OK;
 }
 

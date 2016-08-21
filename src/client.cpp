@@ -178,6 +178,26 @@ int main(int argc, char* argv[])
 		deviceProxy.soap_stream_fault(std::cerr);
 	}
 
+        // call Device::GetDNS
+        std::cout << "=>Device::GetDNS" << std::endl;
+        _tds__GetDNS         tds__GetDNS;
+        _tds__GetDNSResponse tds__GetDNSResponse;
+        addSecurity(deviceProxy.soap, username, password);
+        if (deviceProxy.GetDNS(&tds__GetDNS, &tds__GetDNSResponse) == SOAP_OK)
+        {
+		for (auto dns : tds__GetDNSResponse.DNSInformation->DNSManual)
+		{
+			if (dns->IPv4Address)
+			{
+		                std::cout << "\tDNS:" << dns->IPv4Address->c_str() << std::endl;
+			}
+		}
+        }
+        else
+        {
+                deviceProxy.soap_stream_fault(std::cerr);
+        }
+
 	// call Device::GetNetworkInterfaces
 	std::cout << "=>Device::GetNetworkInterfaces" << std::endl;	
 	_tds__GetNetworkInterfaces         tds__GetNetworkInterfaces;
