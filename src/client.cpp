@@ -553,22 +553,29 @@ int main(int argc, char* argv[])
 				const char* notifPort = "9090";
 				NotificationConsumerBindingService consumer;
 				consumer.soap->accept_timeout=5;
-				consumer.bind(NULL,atoi(notifPort),10);
+				consumer.bind(NULL,0,10);
 				std::thread th(&NotificationConsumerBindingService::run, &consumer, 0);
 				
 				NotificationProducerBindingProxy producer(tev__CreatePullPointSubscriptionResponse.SubscriptionReference.Address);
 				soap_wsse_add_Security(producer.soap);
-				
-				std::string url("http://");
-				url.append(getLocalIp());
-				url.append(":");
-				url.append(notifPort);
+
+				// build url to the server
+				struct sockaddr_in sin;
+				socklen_t len = sizeof(sin);
+				std::ostringstream os;
+				os << "http://" << getLocalIp() ;
+				if (getsockname(consumer.soap->master, (struct sockaddr *)&sin, &len) != -1)
+				{
+					os << ":" << ntohs(sin.sin_port);
+				}				
+				std::string url(os.str());
 				
 				_wsnt__Subscribe         wsnt__Subscribe;
 				wsnt__Subscribe.ConsumerReference.Address = strcpy((char*)soap_malloc(producer.soap, url.size()+1), url.c_str());
 				_wsnt__SubscribeResponse wsnt__SubscribeResponse;
 				if (producer.Subscribe(&wsnt__Subscribe, &wsnt__SubscribeResponse) == SOAP_OK)
 				{
+					std::cout << "SubscriptionReference:" << wsnt__SubscribeResponse.SubscriptionReference.Address << std::endl;
 				}	
 				th.join();
 			}

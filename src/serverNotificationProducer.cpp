@@ -17,6 +17,8 @@
  bw-2.wsdl server
 ----------------------------------------------------------------------------- */
 
+#include <sstream>
+
 #include "soapNotificationProducerBindingService.h"
 #include "soapNotificationConsumerBindingProxy.h"
 #include "onvif_impl.h"
@@ -37,7 +39,16 @@ int NotificationProducerBindingService::Subscribe(_wsnt__Subscribe *wsnt__Subscr
 	}
 	
 	ctx->m_subscriber.push_back(subcriberProxy);
-	std::cout << __FUNCTION__ << "nb subscriber:" << ctx->m_subscriber.size() << std::endl;	
+	std::cout << __FUNCTION__ << " nb subscriber:" << ctx->m_subscriber.size() << std::endl;	
+	
+	std::ostringstream os;
+	os << "http://" << ctx->getServerIpFromClientIp(htonl(this->soap->ip)) << ":" << ctx->m_port;
+	std::string url(os.str());
+	
+	time_t sec = time(NULL);
+	wsnt__SubscribeResponse->SubscriptionReference.Address = strcpy((char*)soap_malloc(this->soap, url.size()+1), url.c_str());
+	wsnt__SubscribeResponse->CurrentTime = soap_new_ptr(this->soap,sec);
+	wsnt__SubscribeResponse->TerminationTime = soap_new_ptr(this->soap,sec+3600);
 	
 	return SOAP_OK;
 }

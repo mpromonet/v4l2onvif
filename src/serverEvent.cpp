@@ -43,7 +43,7 @@ int EventBindingService::CreatePullPointSubscription(_tev__CreatePullPointSubscr
 	time_t sec = time(NULL);
 	tev__CreatePullPointSubscriptionResponse->SubscriptionReference.Address = strcpy((char*)soap_malloc(this->soap, url.size()+1), url.c_str());
 	tev__CreatePullPointSubscriptionResponse->wsnt__CurrentTime = sec;
-	tev__CreatePullPointSubscriptionResponse->wsnt__CurrentTime = sec+3600;
+	tev__CreatePullPointSubscriptionResponse->wsnt__TerminationTime = sec+3600;
 		
 	return SOAP_OK;
 }
