@@ -46,7 +46,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		tds__DeviceServiceCapabilities *capabilities = ctx->getDeviceServiceCapabilities(this->soap);
-		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, NULL, "tds:Capabilities", capabilities, capabilities->soap_type());
 	}
 
 	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
@@ -57,7 +57,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		trt__Capabilities *capabilities = ctx->getMediaServiceCapabilities(this->soap);
-		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, NULL, "trt:Capabilities", capabilities, capabilities->soap_type());
 	}
 
 
@@ -69,7 +69,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		timg__Capabilities *capabilities = ctx->getImagingServiceCapabilities(this->soap);
-		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, NULL, "timg:Capabilities", capabilities, capabilities->soap_type());
 	}
 
 	
@@ -81,7 +81,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		tev__Capabilities *capabilities = ctx->getEventServiceCapabilities(this->soap);
-		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, NULL, "tev:Capabilities", capabilities, capabilities->soap_type());
 	}
 
 	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
@@ -92,7 +92,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		trc__Capabilities *capabilities = ctx->getRecordingServiceCapabilities(this->soap);
-		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, NULL, "trc:Capabilities", capabilities, capabilities->soap_type());
 	}
 
 	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
@@ -103,7 +103,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		trp__Capabilities *capabilities = ctx->getReplayServiceCapabilities(this->soap);
-		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, NULL, "trp:Capabilities", capabilities, capabilities->soap_type());
 	}
 
 	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
@@ -114,7 +114,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		tse__Capabilities *capabilities = ctx->getSearchServiceCapabilities(this->soap);
-		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, NULL, "trs:Capabilities", capabilities, capabilities->soap_type());
 	}
 
 	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
@@ -125,7 +125,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		tls__Capabilities *capabilities = ctx->getDisplayServiceCapabilities(this->soap);
-		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, NULL, "tls:Capabilities", capabilities, capabilities->soap_type());
 	}
 
 	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
@@ -136,7 +136,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		tmd__Capabilities *capabilities = ctx->getDeviceIOServiceCapabilities(this->soap);
-		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, NULL, "tmd:Capabilities", capabilities, capabilities->soap_type());
 	}
 	
 	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
@@ -147,7 +147,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
 		trv__Capabilities *capabilities = ctx->getReceiverServiceCapabilities(this->soap);
-		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap,tds__GetServicesResponse->Service.back()->Namespace.c_str(), "Capabilities", capabilities, capabilities->soap_type());
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, NULL, "trv:Capabilities", capabilities, capabilities->soap_type());
 	}
 	
 	
