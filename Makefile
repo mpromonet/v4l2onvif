@@ -24,7 +24,7 @@ CLIENT_OBJ+=gen/soapEventBindingProxy.o gen/soapPullPointSubscriptionBindingProx
 CLIENT_OBJ+=gen/soapRecordingBindingProxy.o gen/soapReplayBindingProxy.o gen/soapReceiverBindingProxy.o gen/soapSearchBindingProxy.o 
 CLIENT_OBJ+=gen/soapDisplayBindingProxy.o
 
-all: gen server.exe client.exe
+all: gen onvif-server.exe onvif-client.exe
 
 gen:
 	mkdir gen
@@ -44,12 +44,14 @@ libserver.a: $(SERVER_OBJ)
 libclient.a: $(CLIENT_OBJ) 
 	ar rcs $@ $^
 
-server.exe: $(SOAP_OBJ) $(SERVER_OBJ) src/serverDevice.o src/serverMedia.o src/serverRecording.o src/serverReplay.o src/serverEvent.o src/serverPullPointSubscription.o src/serverNotificationProducer.o src/serverReceiver.o src/serverImaging.o src/serverSearch.o src/serverDisplay.o src/serverDeviceIO.o  src/server.o src/onvif_impl.o $(WSSE_SRC)
+onvif-server.exe: $(SOAP_OBJ) $(SERVER_OBJ) src/serverDevice.o src/serverMedia.o src/serverRecording.o src/serverReplay.o src/serverEvent.o src/serverPullPointSubscription.o src/serverNotificationProducer.o src/serverReceiver.o src/serverImaging.o src/serverSearch.o src/serverDisplay.o src/serverDeviceIO.o  src/server.o src/onvif_impl.o $(WSSE_SRC)
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS)
 
-client.exe: $(SOAP_OBJ) $(CLIENT_OBJ) src/client.o src/serverNotificationConsumer.o $(WSSE_SRC)
+onvif-client.exe: $(SOAP_OBJ) $(CLIENT_OBJ) src/client.o src/serverNotificationConsumer.o $(WSSE_SRC)
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) -pthread
 
 clean:
 	rm -rf gen *.o
 
+install:
+	cp *.exe /usr/local/bin
