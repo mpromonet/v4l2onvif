@@ -576,7 +576,12 @@ int main(int argc, char* argv[])
 				if (producer.Subscribe(&wsnt__Subscribe, &wsnt__SubscribeResponse) == SOAP_OK)
 				{
 					std::cout << "SubscriptionReference:" << wsnt__SubscribeResponse.SubscriptionReference.Address << std::endl;
-				}	
+				}
+				else
+				{
+					producer.soap_stream_fault(std::cerr);
+				}
+
 				th.join();
 			}
 		}

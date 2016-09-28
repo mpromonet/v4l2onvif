@@ -35,6 +35,8 @@
 #include "soapEventBindingService.h"
 #include "soapPullPointSubscriptionBindingService.h"
 #include "soapNotificationProducerBindingService.h"
+#include "soapSubscriptionManagerBindingService.h"
+
 
 #include "wsseapi.h"
 
@@ -82,6 +84,7 @@ int http_get(struct soap *soap)
 		APPLY(EventBindingService,soap)                 \
 		APPLY(PullPointSubscriptionBindingService,soap) \
 		APPLY(NotificationProducerBindingService,soap)  \
+		APPLY(SubscriptionManagerBindingService,soap)  \
 /**/
 
 #define DECLARE_SERVICE(service,soap) service service ## _inst(soap);
