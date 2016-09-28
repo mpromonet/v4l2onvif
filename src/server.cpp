@@ -30,6 +30,8 @@
 #include "soapReplayBindingService.h"
 #include "soapSearchBindingService.h"
 
+#include "soapPTZBindingService.h"
+
 #include "soapDisplayBindingService.h"
 
 #include "soapEventBindingService.h"
@@ -72,6 +74,8 @@ int http_get(struct soap *soap)
 		\
 		APPLY(MediaBindingService,soap)     \
 		APPLY(ImagingBindingService,soap)   \
+                \
+		APPLY(PTZBindingService,soap)   \
                 \
 		APPLY(RecordingBindingService,soap) \
 		APPLY(ReplayBindingService,soap)    \
