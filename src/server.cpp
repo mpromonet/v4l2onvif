@@ -103,10 +103,12 @@ int main(int argc, char* argv[])
 	std::string password;	
 	int port = 8080;
 	int c = 0;
-	while ((c = getopt (argc, argv, "h" "u:p:" "i:I:o:O:")) != -1)
+	while ((c = getopt (argc, argv, "h" "u:p:" "P:" "i:I:o:O:")) != -1)
 	{
 		switch (c)
 		{
+			case 'P':	port      = atoi(optarg); break;
+
 			case 'u':	username  = optarg; break;
 			case 'p':	password  = optarg; break;
 			
