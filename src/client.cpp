@@ -569,7 +569,6 @@ int main(int argc, char* argv[])
 				}
 				
 				// subscribe
-				const char* notifPort = "9090";
 				NotificationConsumerBindingService consumer;
 				consumer.soap->accept_timeout=5;
 				consumer.bind(NULL,0,10);
@@ -588,6 +587,7 @@ int main(int argc, char* argv[])
 					os << ":" << ntohs(sin.sin_port);
 				}				
 				std::string url(os.str());
+				std::cout << "notification endpoint:" << url << std::endl;
 				
 				_wsnt__Subscribe         wsnt__Subscribe;
 				wsnt__Subscribe.ConsumerReference.Address = strcpy((char*)soap_malloc(producer.soap, url.size()+1), url.c_str());
