@@ -318,3 +318,21 @@ int ImagingBindingService::GetMoveOptions(_timg__GetMoveOptions *timg__GetMoveOp
 	return SOAP_OK;
 }
 
+int ImagingBindingService::GetPresets(_timg__GetPresets *timg__GetPresets, _timg__GetPresetsResponse *timg__GetPresetsResponse) 
+{
+	std::cout << __FUNCTION__ << std::endl;
+	return SOAP_OK;
+}
+
+int ImagingBindingService::GetCurrentPreset(_timg__GetCurrentPreset *timg__GetCurrentPreset, _timg__GetCurrentPresetResponse *timg__GetCurrentPresetResponse) 
+{
+	std::cout << __FUNCTION__ << std::endl;
+	return SOAP_OK;
+}
+
+int ImagingBindingService::SetCurrentPreset(_timg__SetCurrentPreset *timg__SetCurrentPreset, _timg__SetCurrentPresetResponse *timg__SetCurrentPresetResponse) 
+{
+	std::cout << __FUNCTION__ << std::endl;
+	return SOAP_OK;
+}
+

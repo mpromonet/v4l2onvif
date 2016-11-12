@@ -10,7 +10,7 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 -->
 <wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:timg="http://www.onvif.org/ver20/imaging/wsdl" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tt="http://www.onvif.org/ver10/schema" name="ImagingService" targetNamespace="http://www.onvif.org/ver20/imaging/wsdl">
 	<wsdl:types>
-		<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tt="http://www.onvif.org/ver10/schema" xmlns:timg="http://www.onvif.org/ver20/imaging/wsdl" targetNamespace="http://www.onvif.org/ver20/imaging/wsdl" elementFormDefault="qualified" version="2.5">
+		<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tt="http://www.onvif.org/ver10/schema" xmlns:timg="http://www.onvif.org/ver20/imaging/wsdl" targetNamespace="http://www.onvif.org/ver20/imaging/wsdl" elementFormDefault="qualified" version="16.09">
 			<xs:import namespace="http://www.onvif.org/ver10/schema" schemaLocation="../../../ver10/schema/onvif.xsd"/>
 			<!--  Message Request/Responses elements  -->
 			<!--===============================-->
@@ -33,11 +33,16 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 			<!--===============================-->
 			<xs:complexType name="Capabilities">
 				<xs:sequence>
-					<xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>   <!-- first Vendor then ONVIF -->
 				</xs:sequence>
 				<xs:attribute name="ImageStabilization" type="xs:boolean">
 					<xs:annotation>
 						<xs:documentation>Indicates whether or not Image Stabilization feature is supported.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="Presets" type="xs:boolean">
+					<xs:annotation>
+						<xs:documentation>Indicates whether or not Imaging Presets feature is supported.</xs:documentation>
 					</xs:annotation>
 				</xs:attribute>
 				<xs:anyAttribute processContents="lax"/>
@@ -211,6 +216,138 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 				</xs:complexType>
 			</xs:element>
 			<!--===============================-->
+			<xs:simpleType name="ImagingPresetType">
+				<xs:annotation>
+					<xs:documentation>Describes standard Imaging Preset types, used to facilitate Multi-language support and client display.
+					"Custom" Type shall be used when Imaging Preset Name does not match any of the types included in the standard classification.
+					</xs:documentation>
+				</xs:annotation>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="Custom"/>
+					<xs:enumeration value="ClearWeather"/>
+					<xs:enumeration value="Cloudy"/>
+					<xs:enumeration value="Fog"/>
+					<xs:enumeration value="Rain"/>
+					<xs:enumeration value="Snowing"/>
+					<xs:enumeration value="Snow"/>
+					<xs:enumeration value="WDR"/>
+					<xs:enumeration value="Shade"/>
+					<xs:enumeration value="Night"/>
+					<xs:enumeration value="Indoor"/>
+					<xs:enumeration value="Fluorescent"/>
+					<xs:enumeration value="Incandescent"/>
+					<xs:enumeration value="Sodium(Natrium)"/>
+					<xs:enumeration value="Sunrise(Horizon)"/>
+					<xs:enumeration value="Sunset(Rear)"/>
+					<xs:enumeration value="ExtremeHot"/>
+					<xs:enumeration value="ExtremeCold"/>
+					<xs:enumeration value="Underwater"/>
+					<xs:enumeration value="CloseUp"/>
+					<xs:enumeration value="Motion"/>
+					<xs:enumeration value="FlickerFree50"/>
+					<xs:enumeration value="FlickerFree60"/>
+				</xs:restriction>
+			</xs:simpleType>
+			<!--===============================-->
+			<xs:complexType name="ImagingPreset">
+				<xs:annotation>
+					<xs:documentation>Type describing the Imaging Preset settings.</xs:documentation>
+				</xs:annotation>
+				<xs:sequence>
+					<xs:element name="Name" type="tt:Name">
+						<xs:annotation>
+							<xs:documentation>Human readable name of the Imaging Preset.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+				<xs:attribute name="token" type="tt:ReferenceToken" use="required">
+					<xs:annotation>
+						<xs:documentation>Unique identifier of this Imaging Preset.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="type" type="xs:string" use="required">
+					<xs:annotation>
+						<xs:documentation>Indicates Imaging Preset Type. Use timg:ImagingPresetType. 
+						Used for multi-language support and display.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:anyAttribute processContents="lax"/>
+			</xs:complexType>
+			<!--===============================-->
+			<xs:element name="GetPresets">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="VideoSourceToken" type="tt:ReferenceToken">
+							<xs:annotation>
+								<xs:documentation>
+									A reference to the VideoSource where the operation should take place.
+								</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="GetPresetsResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Preset" type="timg:ImagingPreset" maxOccurs="unbounded">
+							<xs:annotation>
+								<xs:documentation> 
+									List of Imaging Presets which are available for the requested VideoSource.
+								</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<!--===============================-->
+			<xs:element name="GetCurrentPreset">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="VideoSourceToken" type="tt:ReferenceToken">
+							<xs:annotation>
+								<xs:documentation> Reference token to the VideoSource where the current Imaging Preset should be requested.</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="GetCurrentPresetResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Preset" type="timg:ImagingPreset" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation> Current Imaging Preset in use for the specified Video Source.</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<!--===============================-->
+			<xs:element name="SetCurrentPreset">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="VideoSourceToken" type="tt:ReferenceToken">
+							<xs:annotation>
+								<xs:documentation>
+								Reference token to the VideoSource to which the specified Imaging Preset should be applied.
+						</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+						<xs:element name="PresetToken" type="tt:ReferenceToken">
+							<xs:annotation>
+								<xs:documentation> Reference token to the Imaging Preset to be applied to the specified Video Source. </xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="SetCurrentPresetResponse">
+				<xs:complexType>
+					<xs:sequence/>
+				</xs:complexType>
+			</xs:element>
+			<!--===============================-->
 		</xs:schema>
 	</wsdl:types>
 	<wsdl:message name="GetServiceCapabilitiesRequest">
@@ -261,6 +398,24 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 	<wsdl:message name="GetStatusResponse">
 		<wsdl:part name="parameters" element="timg:GetStatusResponse"/>
 	</wsdl:message>
+	<wsdl:message name="GetPresetsRequest">
+		<wsdl:part name="parameters" element="timg:GetPresets"/>
+	</wsdl:message>
+	<wsdl:message name="GetPresetsResponse">
+		<wsdl:part name="parameters" element="timg:GetPresetsResponse"/>
+	</wsdl:message>	
+	<wsdl:message name="GetCurrentPresetRequest">
+		<wsdl:part name="parameters" element="timg:GetCurrentPreset"/>
+	</wsdl:message>
+	<wsdl:message name="GetCurrentPresetResponse">
+		<wsdl:part name="parameters" element="timg:GetCurrentPresetResponse"/>
+	</wsdl:message>	
+	<wsdl:message name="SetCurrentPresetRequest">
+		<wsdl:part name="parameters" element="timg:SetCurrentPreset"/>
+	</wsdl:message>
+	<wsdl:message name="SetCurrentPresetResponse">
+		<wsdl:part name="parameters" element="timg:SetCurrentPresetResponse"/>
+	</wsdl:message>		
 	<wsdl:portType name="ImagingPort">
 		<wsdl:operation name="GetServiceCapabilities">
 			<wsdl:documentation>Returns the capabilities of the imaging service. The result is returned in a typed answer.</wsdl:documentation>
@@ -315,6 +470,26 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 			<wsdl:documentation>Via this command the current status of the Move operation can be requested. Supported for this command is available if the support for the Move operation is signalled via GetMoveOptions.</wsdl:documentation>
 			<wsdl:input message="timg:GetStatusRequest"/>
 			<wsdl:output message="timg:GetStatusResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="GetPresets">
+			<wsdl:documentation>Via this command the list of available Imaging Presets can be requested.</wsdl:documentation>
+			<wsdl:input message="timg:GetPresetsRequest"/>
+			<wsdl:output message="timg:GetPresetsResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="GetCurrentPreset">
+			<wsdl:documentation>Via this command the last Imaging Preset applied can be requested. 
+			If the camera configuration does not match any of the existing Imaging Presets, the output of GetCurrentPreset shall be Empty.
+			GetCurrentPreset shall return 0 if Imaging Presets are not supported by the Video Source.</wsdl:documentation>
+			<wsdl:input message="timg:GetCurrentPresetRequest"/>
+			<wsdl:output message="timg:GetCurrentPresetResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="SetCurrentPreset">
+			<wsdl:documentation>The SetCurrentPreset command shall request a given Imaging Preset to be applied to the specified Video Source.
+			SetCurrentPreset shall only be available for Video Sources with Imaging Presets Capability. 
+			Imaging Presets are defined by the Manufacturer, and offered as a tool to simplify Imaging Settings adjustments for specific scene content.
+			When the new Imaging Preset is applied by SetCurrentPreset, the Device shall adjust the Video Source settings to match those defined by the specified Imaging Preset.</wsdl:documentation>
+			<wsdl:input message="timg:SetCurrentPresetRequest"/>
+			<wsdl:output message="timg:SetCurrentPresetResponse"/>
 		</wsdl:operation>
 	</wsdl:portType>
 	<wsdl:binding name="ImagingBinding" type="timg:ImagingPort">
@@ -384,6 +559,33 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 		</wsdl:operation>
 		<wsdl:operation name="GetMoveOptions">
 			<soap:operation soapAction="http://www.onvif.org/ver20/imaging/wsdl/GetMoveOptions"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetPresets">
+			<soap:operation soapAction="http://www.onvif.org/ver20/imaging/wsdl/GetPresets"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetCurrentPreset">
+			<soap:operation soapAction="http://www.onvif.org/ver20/imaging/wsdl/GetCurrentPreset"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="SetCurrentPreset">
+			<soap:operation soapAction="http://www.onvif.org/ver20/imaging/wsdl/SetCurrentPreset"/>
 			<wsdl:input>
 				<soap:body use="literal"/>
 			</wsdl:input>
