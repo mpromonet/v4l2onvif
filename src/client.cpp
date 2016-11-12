@@ -447,6 +447,25 @@ int main(int argc, char* argv[])
 				}
 			}
 		}	
+
+
+                if (searchProxy.get() != NULL)
+                {
+                        std::cout << "=>Search::GetRecordingSummary" << std::endl;
+			_tse__GetRecordingSummary         tse__GetRecordingSummary;
+			_tse__GetRecordingSummaryResponse tse__GetRecordingSummaryResponse;
+                        addSecurity(searchProxy->soap, username, password);
+                        if (searchProxy->GetRecordingSummary(&tse__GetRecordingSummary, &tse__GetRecordingSummaryResponse) == SOAP_OK)
+                        {
+				if (tse__GetRecordingSummaryResponse.Summary)
+				{
+					std::cout << "\tNumberRecordings:" << tse__GetRecordingSummaryResponse.Summary->NumberRecordings << std::endl;
+					std::cout << "\tDataFrom:"         << tse__GetRecordingSummaryResponse.Summary->DataFrom         << std::endl;
+					std::cout << "\tDataUntil:"        << tse__GetRecordingSummaryResponse.Summary->DataUntil        << std::endl;
+				}
+			}
+		}
+
 		
 		if (recordingProxy.get() != NULL)
 		{
