@@ -5,7 +5,7 @@ LABEL maintainer=michel.promonet@free.fr
 WORKDIR /v4l2onvif
 COPY . /v4l2onvif
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates g++ make gsoap libgsoap-dev libssl-dev zlib-dev \
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates g++ make gsoap libgsoap-dev libssl-dev zlib1g-dev \
 	&& ( make || make ) \
 	&& make install \
 	&& apt-get clean && rm -rf /var/lib/apt/lists/
@@ -17,7 +17,7 @@ WORKDIR /app
 COPY --from=builder /usr/locel/bin/ /app/
 
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libssl1.0
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libssl1.0 zlib1g
 
 
 EXPOSE 8080
