@@ -1,4 +1,5 @@
 [![Build status](https://travis-ci.org/mpromonet/v4l2onvif.png)](https://travis-ci.org/mpromonet/v4l2onvif)
+[![CirusCI](https://api.cirrus-ci.com/github/mpromonet/v4l2onvif.svg)](https://cirrus-ci.com/github/mpromonet/v4l2onvif)
 
 # v4l2-onvif
 
