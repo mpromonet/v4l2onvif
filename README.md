@@ -9,14 +9,10 @@
    
    The web services data binding is generated using [gSOAP](http://www.genivia.com/).
 
-## License
-
-   [GNU General Public License](http://www.gnu.org/licenses/#GPL)
-
 ## Build
 
     make ; make
 
 ## Usage
 
-    server.exe [-u username] [-p password] [-i v4l2 input device] [-I rtsp server] [-o v4l2 output device] [-O rtsp client]
+    onvif-server.exe [-u username] [-p password] [-i v4l2 input device] [-I rtsp server] [-o v4l2 output device] [-O rtsp client]
