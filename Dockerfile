@@ -14,10 +14,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 FROM ubuntu:18.04
 
 WORKDIR /app
-COPY --from=builder /usr/locel/bin/ /app/
+COPY --from=builder /usr/local/bin/ /app/
 
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libssl1.0 zlib1g
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libssl1.0 zlib1g \
+    && ./onvif-server.exe -h
 
 
 EXPOSE 8080
