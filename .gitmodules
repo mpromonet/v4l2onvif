@@ -1,0 +1,3 @@
+[submodule "ws-discovery"]
+	path = ws-discovery
+	url = https://github.com/mpromonet/ws-discovery

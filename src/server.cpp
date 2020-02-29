@@ -17,6 +17,9 @@
  onvif server
 ----------------------------------------------------------------------------- */
 
+#include <sstream>
+#include <thread>
+
 #include "DeviceBinding.nsmap"
 #include "soapDeviceBindingService.h"
 #include "soapDeviceIOBindingService.h"
@@ -41,6 +44,7 @@
 
 
 #include "wsseapi.h"
+#include "wsd-server.h"
 
 #include "onvif_impl.h"
 
@@ -131,6 +135,8 @@ int main(int argc, char* argv[])
 			break;
 		}
 	}
+
+
 	std::cout << "Listening to " << port << std::endl;
 		
 	ServiceContext deviceCtx;
@@ -149,6 +155,8 @@ int main(int argc, char* argv[])
 	deviceCtx.m_scope.push_back("onvif://www.onvif.org/Profile/Streaming");
 	deviceCtx.m_scope.push_back("onvif://www.onvif.org/Profile/G");
 	
+
+	// start WS server
 	struct soap *soap = soap_new();
 	soap->user = (void*)&deviceCtx;
 	soap->fget = http_get; 
@@ -161,6 +169,16 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
+			// start WS-Discovery
+			std::ostringstream os;
+			os << "http://" << "localhost" << ":" << deviceCtx.m_port << "/onvif/device_service";
+			std::string url(os.str());
+			std::cout << "Published URL:" << url << std::endl;
+			wsdconf conf(url.c_str(),"\"http://www.onvif.org/ver10/network/wsdl\":NetworkVideoTransmitter", "onvif://www.onvif.org/Profile/Streaming" );
+			std::thread wsdd( [&conf] { 
+				wsd_server(conf); 
+			});
+
 			while (soap_accept(soap) != SOAP_OK) 
 			{
 				if (soap_begin_serve(soap))
@@ -171,9 +189,11 @@ int main(int argc, char* argv[])
 				else 
 				{
 					std::cout << "Unknown service" << std::endl;				
-				}
-					
+				}				
 			}
+
+			conf.m_stop = true;
+			wsdd.join();
 		}
 	}
 	

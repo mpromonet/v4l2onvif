@@ -3,9 +3,9 @@ GSOAP_BASE=$(GSOAP_PREFIX)/share/gsoap
 GSOAP_IMPORT=$(GSOAP_BASE)/import
 GSOAP_PLUGINS=$(GSOAP_BASE)/plugin
 GSOAP_CFLAGS=-I gen -I $(GSOAP_PREFIX)/include -I $(GSOAP_PLUGINS) -DSOAP_PURE_VIRTUAL -DWITH_OPENSSL -fpermissive 
-GSOAP_LDFLAGS=-L $(GSOAP_PREFIX)/lib/ -lgsoapssl++ -lssl -lcrypto -lz 
+GSOAP_LDFLAGS=-L $(GSOAP_PREFIX)/lib/ -lgsoapssl++ -lssl -lcrypto -lz  -pthread
 
-CXXFLAGS+=$(GSOAP_CFLAGS) -std=c++11 -g -Iinc
+CXXFLAGS+=$(GSOAP_CFLAGS) -pthread -std=c++11 -g -Iinc -I ws-discovery/gsoap/
 
 WSSE_SRC=$(GSOAP_PLUGINS)/wsseapi.c $(GSOAP_PLUGINS)/smdevp.c $(GSOAP_PLUGINS)/mecevp.c $(GSOAP_PLUGINS)/wsaapi.c
 
@@ -48,14 +48,19 @@ libserver.a: $(SERVER_OBJ)
 libclient.a: $(CLIENT_OBJ) 
 	ar rcs $@ $^
 
-onvif-server.exe: $(SOAP_OBJ) $(SERVER_OBJ) src/serverDevice.o src/serverMedia.o src/serverPTZ.o src/serverRecording.o src/serverReplay.o src/serverEvent.o src/serverPullPointSubscription.o src/serverNotificationProducer.o src/serverSubscriptionManager.o src/serverReceiver.o src/serverImaging.o src/serverSearch.o src/serverDisplay.o src/serverDeviceIO.o  src/server.o src/onvif_impl.o $(WSSE_SRC)
-	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS)
+libwsdd.a: ws-discovery/gsoap
+	git submodule update --init ws-discovery
+	make -C ws-discovery/gsoap libwsdd.a
+	cp ws-discovery/gsoap/libwsdd.a .
+
+onvif-server.exe: $(SOAP_OBJ) $(SERVER_OBJ) src/serverDevice.o src/serverMedia.o src/serverPTZ.o src/serverRecording.o src/serverReplay.o src/serverEvent.o src/serverPullPointSubscription.o src/serverNotificationProducer.o src/serverSubscriptionManager.o src/serverReceiver.o src/serverImaging.o src/serverSearch.o src/serverDisplay.o src/serverDeviceIO.o  src/server.o src/onvif_impl.o $(WSSE_SRC) libwsdd.a
+	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) 
 
 onvif-client.exe: $(SOAP_OBJ) $(CLIENT_OBJ) src/client.o src/serverNotificationConsumer.o $(WSSE_SRC)
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) -pthread
 
 clean:
-	rm -rf gen *.o
+	rm -rf gen *.o *.a
 
 install:
 	cp *.exe /usr/local/bin
