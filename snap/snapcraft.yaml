@@ -9,7 +9,7 @@
   confinement: strict
 
   parts:
-    v4l2tools:
+    v4l2onvif:
       plugin: make
       source: .
       source-type: git
