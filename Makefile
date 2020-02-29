@@ -2,10 +2,10 @@ GSOAP_PREFIX=/usr
 GSOAP_BASE=$(GSOAP_PREFIX)/share/gsoap
 GSOAP_IMPORT=$(GSOAP_BASE)/import
 GSOAP_PLUGINS=$(GSOAP_BASE)/plugin
-GSOAP_CFLAGS=-I gen -I $(GSOAP_PREFIX)/include -I $(GSOAP_PLUGINS) -DSOAP_PURE_VIRTUAL -DWITH_OPENSSL -fpermissive 
+GSOAP_CFLAGS=-I gen -I $(GSOAP_PREFIX)/include -I $(GSOAP_PLUGINS) -DSOAP_PURE_VIRTUAL -DWITH_OPENSSL -fpermissive -pthread
 GSOAP_LDFLAGS=-L $(GSOAP_PREFIX)/lib/ -lgsoapssl++ -lssl -lcrypto -lz  -pthread
 
-CXXFLAGS+=$(GSOAP_CFLAGS) -pthread -std=c++11 -g -Iinc -I ws-discovery/gsoap/
+CXXFLAGS+=$(GSOAP_CFLAGS) -std=c++11 -g -Iinc -I ws-discovery/gsoap/
 
 WSSE_SRC=$(GSOAP_PLUGINS)/wsseapi.c $(GSOAP_PLUGINS)/smdevp.c $(GSOAP_PLUGINS)/mecevp.c $(GSOAP_PLUGINS)/wsaapi.c
 
@@ -28,7 +28,6 @@ CLIENT_OBJ+=gen/soapNotificationConsumerBindingService.o
 CLIENT_OBJ+=gen/soapRecordingBindingProxy.o gen/soapReplayBindingProxy.o gen/soapReceiverBindingProxy.o gen/soapSearchBindingProxy.o 
 CLIENT_OBJ+=gen/soapDisplayBindingProxy.o
 
-#all: gen/onvif.h $(foreach src, $(SERVER_OBJ), $(src:.o=.cpp))  onvif-server.exe onvif-client.exe
 all: gen/onvif.h onvif-server.exe onvif-client.exe
 
 gen/onvif.h: $(wildcard wsdl/*)
@@ -47,7 +46,8 @@ libclient.a: $(CLIENT_OBJ)
 	ar rcs $@ $^
 
 libwsdd.a: ws-discovery/gsoap
-	git submodule update --init ws-discovery
+	git submodule init ws-discovery
+	git submodule update ws-discovery
 	make -C ws-discovery/gsoap libwsdd.a
 	cp ws-discovery/gsoap/libwsdd.a .
 
@@ -55,7 +55,7 @@ onvif-server.exe: src/serverDevice.o src/serverMedia.o src/serverPTZ.o src/serve
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) 
 
 onvif-client.exe: $(SOAP_OBJ) $(CLIENT_OBJ) src/client.o src/serverNotificationConsumer.o $(WSSE_SRC)
-	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) -pthread
+	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) 
 
 clean:
 	rm -rf gen *.o *.a
