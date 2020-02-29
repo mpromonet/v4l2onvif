@@ -1,0 +1,36 @@
+  name: v4l2onvif
+  version: git
+  summary: v4l2 ONVIF 
+  description: |
+    * v4l2onvif :
+    read from a V4L2 capture device and write to a V4L2 output device
+
+  grade: stable 
+  confinement: strict
+
+  parts:
+    v4l2tools:
+      plugin: make
+      source: .
+      source-type: git
+      build-packages:
+      - g++
+      - make
+      - pkg-config
+      - autoconf 
+      - automake 
+      - libtool
+      - gsoap 
+      - libgsoap-dev 
+      - libssl-dev
+      - zlib1g-dev
+      stage-packages:
+      - libssl1.0.0
+
+  apps:
+    v4l2onvif:
+      command: v4l2onvif 
+      daemon: simple
+      plugs: [network-bind]
+
+
