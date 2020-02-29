@@ -13,7 +13,7 @@
 
 ## Build
 
-    make ; make
+    make 
 
 ## Usage
 

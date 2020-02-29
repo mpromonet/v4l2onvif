@@ -34,5 +34,6 @@ xop     = <http://www.w3.org/2004/08/xop/include>
 wsa5    = <http://www.w3.org/2005/08/addressing>
 
 [
+#import "wsdd10.h"
 #import "wsse.h"
 ]
