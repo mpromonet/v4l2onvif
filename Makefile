@@ -34,7 +34,7 @@ gen/onvif.h: $(wildcard wsdl/*)
 	mkdir -p gen
 	$(GSOAP_PREFIX)/bin/wsdl2h -d -Ntev -z6 -o $@ $^
 	$(GSOAP_PREFIX)/bin/soapcpp2 -2jx $@ -I $(GSOAP_IMPORT) -d gen -f250 || :
-	make libwsdd.a libsoap.a libserver.a libclient.a
+	make
 
 libsoap.a: $(SOAP_OBJ)
 	ar rcs $@ $^
@@ -45,16 +45,16 @@ libserver.a: $(SERVER_OBJ)
 libclient.a: $(CLIENT_OBJ) 
 	ar rcs $@ $^
 
-libwsdd.a: ws-discovery/gsoap
+libwsdd.a:
 	git submodule init ws-discovery
 	git submodule update ws-discovery
 	make -C ws-discovery/gsoap libwsdd.a
 	cp ws-discovery/gsoap/libwsdd.a .
 
-onvif-server.exe: src/serverDevice.o src/serverMedia.o src/serverPTZ.o src/serverRecording.o src/serverReplay.o src/serverEvent.o src/serverPullPointSubscription.o src/serverNotificationProducer.o src/serverSubscriptionManager.o src/serverReceiver.o src/serverImaging.o src/serverSearch.o src/serverDisplay.o src/serverDeviceIO.o src/server.o src/onvif_impl.o $(WSSE_SRC) libwsdd.a libserver.a libsoap.a
+onvif-server.exe: libwsdd.a libserver.a libsoap.a src/serverDevice.o src/serverMedia.o src/serverPTZ.o src/serverRecording.o src/serverReplay.o src/serverEvent.o src/serverPullPointSubscription.o src/serverNotificationProducer.o src/serverSubscriptionManager.o src/serverReceiver.o src/serverImaging.o src/serverSearch.o src/serverDisplay.o src/serverDeviceIO.o src/server.o src/onvif_impl.o $(WSSE_SRC)
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) 
 
-onvif-client.exe: $(SOAP_OBJ) $(CLIENT_OBJ) src/client.o src/serverNotificationConsumer.o $(WSSE_SRC)
+onvif-client.exe: libclient.a libsoap.a src/client.o src/serverNotificationConsumer.o $(WSSE_SRC)
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) 
 
 clean:
