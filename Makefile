@@ -30,19 +30,19 @@ CLIENT_OBJ+=gen/soapDisplayBindingProxy.o
 
 all: gen/onvif.h onvif-server.exe onvif-client.exe
 
-gen/onvif.h: $(wildcard wsdl/*)
+gen/onvif.h: $(wildcard wsdl/*) | libwsdd.a
 	mkdir -p gen
 	$(GSOAP_PREFIX)/bin/wsdl2h -d -Ntev -z6 -o $@ $^
 	$(GSOAP_PREFIX)/bin/soapcpp2 -2jx $@ -I $(GSOAP_IMPORT) -d gen -f250 || :
 	make
 
-libsoap.a: $(SOAP_OBJ)
+libsoap.a: $(SOAP_OBJ) | gen/onvif.h
 	ar rcs $@ $^
 
-libserver.a: $(SERVER_OBJ) 
+libserver.a: $(SERVER_OBJ) | gen/onvif.h
 	ar rcs $@ $^
 
-libclient.a: $(CLIENT_OBJ) 
+libclient.a: $(CLIENT_OBJ) | gen/onvif.h
 	ar rcs $@ $^
 
 libwsdd.a:
@@ -51,10 +51,14 @@ libwsdd.a:
 	make -C ws-discovery/gsoap libwsdd.a
 	cp ws-discovery/gsoap/libwsdd.a .
 
-onvif-server.exe: libwsdd.a libserver.a libsoap.a src/serverDevice.o src/serverMedia.o src/serverPTZ.o src/serverRecording.o src/serverReplay.o src/serverEvent.o src/serverPullPointSubscription.o src/serverNotificationProducer.o src/serverSubscriptionManager.o src/serverReceiver.o src/serverImaging.o src/serverSearch.o src/serverDisplay.o src/serverDeviceIO.o src/server.o src/onvif_impl.o $(WSSE_SRC)
+ONVIF_SRC=$(wildcard src/server*.cpp)
+libonvif.a: $(ONVIF_SRC:%.cpp=%.o)
+	ar rcs $@ $^
+
+onvif-server.exe: src/onvif-server.o src/onvif_impl.o $(WSSE_SRC) libserver.a libonvif.a gen/soapNotificationConsumerBindingProxy.o libsoap.a libwsdd.a
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) 
 
-onvif-client.exe: libclient.a libsoap.a src/client.o src/serverNotificationConsumer.o $(WSSE_SRC)
+onvif-client.exe: src/onvif-client.o $(WSSE_SRC) libclient.a libsoap.a libonvif.a
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) 
 
 clean:
