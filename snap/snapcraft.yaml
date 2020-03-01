@@ -30,7 +30,7 @@
 
   apps:
     v4l2onvif:
-      command: v4l2onvif 
+      command: onvif-server.exe 
       daemon: simple
       plugs: [network-bind]
 
