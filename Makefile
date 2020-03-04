@@ -37,13 +37,13 @@ gen/onvif.h: $(wildcard wsdl/*) | libwsdd.a
 	make
 
 libsoap.a: $(SOAP_OBJ) | gen/onvif.h
-	ar rcs $@ $^
+	$(AR) rcs $@ $^
 
 libserver.a: $(SERVER_OBJ) | gen/onvif.h
-	ar rcs $@ $^
+	$(AR) rcs $@ $^
 
 libclient.a: $(CLIENT_OBJ) | gen/onvif.h
-	ar rcs $@ $^
+	$(AR) rcs $@ $^
 
 libwsdd.a:
 	git submodule init ws-discovery
@@ -53,7 +53,7 @@ libwsdd.a:
 
 ONVIF_SRC=$(wildcard src/server*.cpp)
 libonvif.a: $(ONVIF_SRC:%.cpp=%.o)
-	ar rcs $@ $^
+	$(AR) rcs $@ $^
 
 onvif-server.exe: src/onvif-server.o src/onvif_impl.o $(WSSE_SRC) libserver.a libonvif.a gen/soapNotificationConsumerBindingProxy.o libsoap.a libwsdd.a
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) 
