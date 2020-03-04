@@ -6,7 +6,7 @@ WORKDIR /v4l2onvif
 COPY . /v4l2onvif
 
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git g++ make gsoap libgsoap-dev libssl-dev zlib1g-dev \
-	&& ( make || make ) \
+	&& make \
 	&& make install \
 	&& apt-get clean && rm -rf /var/lib/apt/lists/
 
