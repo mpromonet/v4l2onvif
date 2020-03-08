@@ -9,5 +9,7 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
+    - name: apt
+      run: sudo apt-get install -y --no-install-recommends gsoap libgsoap-dev libssl-dev zlib1g-dev
     - name: make 
       run: make 
