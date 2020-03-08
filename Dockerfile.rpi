@@ -13,8 +13,8 @@ COPY . /v4l2onvif
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git wget make gsoap libgsoap-dev libssl-dev \
         && wget -qO- ${CROSSCOMPILER} | tar xz -C /opt \
         && export PATH=$(ls -d /opt/cross-pi-gcc-*/bin):$PATH \
-	&& export CXX=arm-linux-gnueabihf-g++ \
-        && ( make || make ) \
+	&& export CXX=arm-linux-gnueabihf-g++ AR=arm-linux-gnueabihf-ar \
+        && make \
         && make install \
         && apt-get clean && rm -rf /var/lib/apt/lists/
 
