@@ -2,8 +2,17 @@ GSOAP_PREFIX=/usr
 GSOAP_BASE=$(GSOAP_PREFIX)/share/gsoap
 GSOAP_IMPORT=$(GSOAP_BASE)/import
 GSOAP_PLUGINS=$(GSOAP_BASE)/plugin
-GSOAP_CFLAGS=-I gen -I $(GSOAP_PREFIX)/include -I $(GSOAP_PLUGINS) -DSOAP_PURE_VIRTUAL -DWITH_OPENSSL -fpermissive -pthread
-GSOAP_LDFLAGS=-L $(GSOAP_PREFIX)/lib/ -lgsoapssl++ -lssl -lcrypto -lz  -pthread
+GSOAP_CFLAGS=-I gen -I $(GSOAP_PREFIX)/include -I $(GSOAP_PLUGINS) -DSOAP_PURE_VIRTUAL -fpermissive -pthread
+GSOAP_LDFLAGS=-L $(GSOAP_PREFIX)/lib/ -lgsoapssl++ -lz  -pthread
+
+PREFIX?=/usr
+SYSROOT?=$(shell $(CXX) --print-sysroot)
+$(info SYSROOT=$(SYSROOT))
+ifneq ($(wildcard $(SYSROOT)$(PREFIX)/include/openssl/bio.h),)
+$(info WITH_OPENSSL)
+GSOAP_CFLAGS+=-DWITH_OPENSSL
+GSOAP_LDFLAGS+=-lssl -lcrypto
+endif
 
 CXXFLAGS+=$(GSOAP_CFLAGS) -std=c++11 -g -Iinc -I ws-discovery/gsoap/
 
