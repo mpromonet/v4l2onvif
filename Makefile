@@ -16,7 +16,7 @@ endif
 
 CXXFLAGS+=$(GSOAP_CFLAGS) -std=c++11 -g -Iinc -I ws-discovery/gsoap/
 
-WSSE_SRC=$(GSOAP_PLUGINS)/wsseapi.c $(GSOAP_PLUGINS)/smdevp.c $(GSOAP_PLUGINS)/mecevp.c $(GSOAP_PLUGINS)/wsaapi.c
+WSSE_SRC=$(GSOAP_PLUGINS)/wsseapi.c $(GSOAP_PLUGINS)/smdevp.c $(GSOAP_PLUGINS)/mecevp.c
 
 SOAP_SRC=$(wildcard gen/soapC_*.cpp)
 SOAP_OBJ=$(SOAP_SRC:%.cpp=%.o)
@@ -67,7 +67,7 @@ libonvif.a: $(ONVIF_SRC:%.cpp=%.o)
 onvif-server.exe: src/onvif-server.o src/onvif_impl.o $(WSSE_SRC) libserver.a libonvif.a gen/soapNotificationConsumerBindingProxy.o libsoap.a libwsdd.a
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) 
 
-onvif-client.exe: src/onvif-client.o $(WSSE_SRC) libclient.a libsoap.a libonvif.a
+onvif-client.exe: src/onvif-client.o $(WSSE_SRC) $(GSOAP_PLUGINS)/wsaapi.c libclient.a libsoap.a libonvif.a
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) 
 
 clean:
