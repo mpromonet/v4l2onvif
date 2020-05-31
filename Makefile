@@ -6,6 +6,7 @@ GSOAP_CFLAGS=-I gen -I $(GSOAP_PREFIX)/include -I $(GSOAP_PLUGINS) -DSOAP_PURE_V
 GSOAP_LDFLAGS=-L $(GSOAP_PREFIX)/lib/ -lgsoapssl++ -lz  -pthread
 
 PREFIX?=/usr
+DESTDIR?=$(PREFIX)/bin
 SYSROOT?=$(shell $(CXX) --print-sysroot)
 $(info SYSROOT=$(SYSROOT))
 ifneq ($(wildcard $(SYSROOT)$(PREFIX)/include/openssl/bio.h),)
@@ -91,4 +92,5 @@ clean:
 	rm -rf gen *.o *.a
 
 install:
-	cp *.exe /usr/local/bin
+	mkdir -p $(DESTDIR)
+	install -D -m 0755 onvif-server.exe $(DESTDIR)
