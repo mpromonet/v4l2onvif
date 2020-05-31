@@ -25,7 +25,7 @@
 
 #include "onvif_impl.h"
 
-std::string getLocalIp()
+std::string ServiceContext::getLocalIp()
 {
 	std::string serverAddress;
 	char hostname[HOST_NAME_MAX];
@@ -145,6 +145,17 @@ void ServiceContext::getIdentification(const std::string &device, std::string & 
 		bus    = (const char*)cap.bus_info;
 	}
 	close(fd);	
+}
+
+std::list<std::string> ServiceContext::getScopes() {
+	std::list<std::string> scopes;
+	char hostname[HOST_NAME_MAX];
+	gethostname(hostname, sizeof(hostname));
+	scopes.push_back("onvif://www.onvif.org/name/" + std::string(hostname));
+	scopes.push_back("onvif://www.onvif.org/location/Here");
+	scopes.push_back("onvif://www.onvif.org/Profile/Streaming");
+	scopes.push_back("onvif://www.onvif.org/Profile/G");	
+	return scopes;
 }
 
 std::pair<int,int> ServiceContext::getCtrlRange(const std::string &device, int idctrl)

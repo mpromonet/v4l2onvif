@@ -150,10 +150,6 @@ int main(int argc, char* argv[])
 	deviceCtx.FirmwareVersion = "FirmwareVersion";
 	deviceCtx.SerialNumber    = "SerialNumber";
 	deviceCtx.HardwareId      = "HardwareId";
-	deviceCtx.m_scope.push_back("onvif://www.onvif.org/name/Name");
-	deviceCtx.m_scope.push_back("onvif://www.onvif.org/location/Here");
-	deviceCtx.m_scope.push_back("onvif://www.onvif.org/Profile/Streaming");
-	deviceCtx.m_scope.push_back("onvif://www.onvif.org/Profile/G");
 	
 
 	// start WS server
@@ -171,10 +167,17 @@ int main(int argc, char* argv[])
 		{
 			// start WS-Discovery
 			std::ostringstream os;
-			os << "http://" << "localhost" << ":" << deviceCtx.m_port << "/onvif/device_service";
+			os << "http://" << deviceCtx.getLocalIp() << ":" << deviceCtx.m_port << "/onvif/device_service";
 			std::string url(os.str());
 			std::cout << "Published URL:" << url << std::endl;
-			wsdconf conf(url.c_str(),"\"http://www.onvif.org/ver10/network/wsdl\":NetworkVideoTransmitter", "onvif://www.onvif.org/type/video_encoder onvif://www.onvif.org/type/ptz onvif://www.onvif.org/hardware/RaspberryPI onvif://www.onvif.org/name/PI onvif://www.onvif.org/location/" , "urn:uuid:75293377-1768-439d-880b-f5d098e690c6", 1 );
+			std::string scopes;
+			for (std::string scope : deviceCtx.getScopes()) {
+				scopes += scope + " ";
+			}
+			wsdconf conf(url.c_str()
+							,"\"http://www.onvif.org/ver10/network/wsdl\":NetworkVideoTransmitter"
+							, scopes.c_str()
+							, "urn:uuid:75293377-1768-439d-880b-f5d098e690c6", 1 );
 			std::thread wsdd( [&conf] { 
 				wsd_server(conf); 
 			});

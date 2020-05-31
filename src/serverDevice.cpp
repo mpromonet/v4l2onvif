@@ -244,7 +244,7 @@ int DeviceBindingService::GetScopes(_tds__GetScopes *tds__GetScopes, _tds__GetSc
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
 	
-	for (auto scope : ctx->m_scope)
+	for (auto scope : ctx->getScopes())
 	{
 		tds__GetScopesResponse->Scopes.push_back(soap_new_req_tt__Scope(soap,tt__ScopeDefinition__Fixed,scope));
 	}
