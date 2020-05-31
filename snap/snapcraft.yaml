@@ -30,7 +30,7 @@
       - libssl1.0.0
 
   apps:
-    v4l2onvif:
+    onvif-server.exe:
       command: onvif-server.exe 
       daemon: simple
       plugs: [network-bind]
