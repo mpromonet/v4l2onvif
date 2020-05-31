@@ -17,6 +17,7 @@
       build-packages:
       - g++
       - make
+      - cmake
       - pkg-config
       - autoconf 
       - automake 
