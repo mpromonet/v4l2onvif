@@ -94,3 +94,4 @@ clean:
 install:
 	mkdir -p $(DESTDIR)
 	install -D -m 0755 onvif-server.exe $(DESTDIR)
+	install -D -m 0755 onvif-client.exe $(DESTDIR)
