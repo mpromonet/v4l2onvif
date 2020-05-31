@@ -1,3 +1,6 @@
 [submodule "ws-discovery"]
 	path = ws-discovery
 	url = https://github.com/mpromonet/ws-discovery
+[submodule "v4l2rtspserver"]
+	path = v4l2rtspserver
+	url = https://github.com/mpromonet/v4l2rtspserver

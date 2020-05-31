@@ -42,9 +42,16 @@
 #include "soapNotificationProducerBindingService.h"
 #include "soapSubscriptionManagerBindingService.h"
 
-
+// ws-discovery
 #include "wsseapi.h"
 #include "wsd-server.h"
+
+// v4l2rstp
+#include "logger.h"
+#include "V4l2Capture.h"
+#include "DeviceSourceFactory.h"
+#include "V4l2RTSPServer.h"
+
 
 #include "onvif_impl.h"
 
@@ -107,14 +114,13 @@ int http_get(struct soap *soap)
 int main(int argc, char* argv[])
 {		
 	std::string indevice  = "/dev/video0";
-	std::string inpath    = "unicast";
 	std::string outdevice = "/dev/video10";
-	std::string outpath   = "rtsp://127.0.0.1:8554/unicast";
 	std::string username;
 	std::string password;	
+	std::string rtspport = "8554";
 	int port = 8080;
 	int c = 0;
-	while ((c = getopt (argc, argv, "h" "u:p:" "P:" "i:I:o:O:")) != -1)
+	while ((c = getopt (argc, argv, "h" "u:p:" "P:" "i:o:")) != -1)
 	{
 		switch (c)
 		{
@@ -124,23 +130,25 @@ int main(int argc, char* argv[])
 			case 'p':	password  = optarg; break;
 			
 			case 'i':	indevice  = optarg; break;
-			case 'I':	inpath    = optarg; break;
 			
 			case 'o':	outdevice = optarg; break;
-			case 'O':	outpath   = optarg; break;
 			
 			case 'h':
-				std::cout << argv[0] << " [-u username] [-p password] [-i v4l2 input device] [-I rtsp server] [-o v4l2 output device] [-O rtsp client]" << std::endl;
+				std::cout << argv[0] << " [-u username] [-p password] [-i v4l2 input device] [-o v4l2 output device]" << std::endl;
 				exit(0);
 			break;
 		}
 	}
 
+	V4L2DeviceParameters param(indevice.c_str(), 0, 0, 0, 0);
+	V4l2Capture* videoCapture = V4l2Capture::create(param, V4l2Access::IOTYPE_MMAP);
 
 	std::cout << "Listening to " << port << std::endl;
 		
 	ServiceContext deviceCtx;
-	deviceCtx.m_devices.insert(std::pair<std::string,std::string>(indevice, inpath));
+	std::string rtspurl;
+	rtspurl = "rtsp://" + deviceCtx.getLocalIp() + ":" + rtspport + "/";
+	deviceCtx.m_devices.insert(std::pair<std::string,std::string>(indevice, rtspurl));
 	deviceCtx.m_port          = port;
 	deviceCtx.m_user          = username;
 	deviceCtx.m_password      = password;
@@ -182,6 +190,21 @@ int main(int argc, char* argv[])
 				wsd_server(conf); 
 			});
 
+			// start RTSP
+			V4l2RTSPServer rtspserver(atoi(rtspport.c_str()));
+			if (videoCapture) {
+				StreamReplicator* videoReplicator = DeviceSourceFactory::createStreamReplicator(rtspserver.env(), videoCapture->getFormat(), new DeviceCaptureAccess<V4l2Capture>(videoCapture));
+				if (videoReplicator)
+				{
+					rtspserver.addSession("", UnicastServerMediaSubsession::createNew(*rtspserver.env(), videoReplicator, V4l2RTSPServer::getVideoRtpFormat(videoCapture->getFormat())));			
+				}
+			}
+			char rtspstop = 0; 
+			std::thread rtsp( [&rtspserver,&rtspstop] {
+				rtspserver.eventLoop(&rtspstop); 
+			});		
+
+			// SOAP services
 			while (soap_accept(soap) != SOAP_OK) 
 			{
 				if (soap_begin_serve(soap))
@@ -194,6 +217,8 @@ int main(int argc, char* argv[])
 					std::cout << "Unknown service" << std::endl;				
 				}				
 			}
+			rtspstop = 1;
+			rtsp.join();
 
 			conf.m_stop = true;
 			wsdd.join();
