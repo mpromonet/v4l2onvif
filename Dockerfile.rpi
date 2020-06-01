@@ -10,10 +10,14 @@ ARG CROSSCOMPILER=https://sourceforge.net/projects/raspberry-pi-cross-compilers/
 WORKDIR /v4l2onvif
 COPY . /v4l2onvif
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git wget make gsoap libgsoap-dev libssl-dev \
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git wget make gsoap \
+        # cross-compiler \
         && wget -qO- ${CROSSCOMPILER} | tar xz -C /opt \
         && export PATH=$(ls -d /opt/cross-pi-gcc-*/bin):$PATH \
 	&& export CXX=arm-linux-gnueabihf-g++ AR=arm-linux-gnueabihf-ar \
+        # openssl \
+        && wget -qO- https://www.openssl.org/source/openssl-1.1.1g.tar.gz | tar xz \
+        && pushd openssl* && ./Configure linux-armv4 --cross-compile-prefix=arm-linux-gnueabihf- no-shared --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr && make && make install && popd \
         && make \
         && make install \
         && apt-get clean && rm -rf /var/lib/apt/lists/
