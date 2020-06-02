@@ -5,7 +5,7 @@ LABEL maintainer=michel.promonet@free.fr
 WORKDIR /v4l2onvif
 COPY . /v4l2onvif
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git g++ make gsoap libgsoap-dev libssl-dev zlib1g-dev \
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git g++ make cmake gsoap libgsoap-dev libssl-dev zlib1g-dev \
 	&& make \
 	&& make install \
 	&& apt-get clean && rm -rf /var/lib/apt/lists/

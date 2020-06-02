@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 	&& export CXX=arm-linux-gnueabihf-g++ AR=arm-linux-gnueabihf-ar \
         # openssl \
         && wget -qO- https://www.openssl.org/source/openssl-1.1.1g.tar.gz | tar xz \
-        && pushd openssl* && ./Configure linux-armv4 --cross-compile-prefix=arm-linux-gnueabihf- no-shared --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr && make && make install && popd \
+        && cd openssl* && ./Configure linux-armv4 --cross-compile-prefix=arm-linux-gnueabihf- no-shared --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr && make && make install && cd .. \
         && make \
         && make install \
         && apt-get clean && rm -rf /var/lib/apt/lists/
