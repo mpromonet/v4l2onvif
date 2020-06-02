@@ -10,7 +10,7 @@ ARG CROSSCOMPILER=https://sourceforge.net/projects/raspberry-pi-cross-compilers/
 WORKDIR /v4l2onvif
 COPY . /v4l2onvif
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git wget g++ make cmake libssl-dev autoconf automake flex bison busybox \
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git wget g++ make cmake libssl-dev perl autoconf automake flex bison busybox \
         # gsoap native \
         && wget -qO- https://sourceforge.net/projects/gsoap2/files/gsoap-2.8/gsoap_2.8.103.zip | busybox unzip - \
         && cd gsoap* && autoconf && ./configure --without-zlib && make install && make clean && cd .. \
