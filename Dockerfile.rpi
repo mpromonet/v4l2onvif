@@ -10,26 +10,22 @@ ARG CROSSCOMPILER=https://sourceforge.net/projects/raspberry-pi-cross-compilers/
 WORKDIR /v4l2onvif
 COPY . /v4l2onvif
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git wget make cmake libssl-dev autoconf automake flex bison \
-        # cross-compiler \
-        && wget -qO- ${CROSSCOMPILER} | tar xz -C /opt \
-        && export PATH=$(ls -d /opt/cross-pi-gcc-*/bin):$PATH \
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git wget make cmake libssl-dev autoconf automake flex bison busybox \
         # gsoap native \
         && wget -qO- https://sourceforge.net/projects/gsoap2/files/gsoap-2.8/gsoap_2.8.103.zip | busybox unzip - \
         && cd gsoap* && autoconf && ./configure --without-zlib && make install && make clean && cd .. \
-        # cross \
+        # cross-compiler \
+        && wget -qO- ${CROSSCOMPILER} | tar xz -C /opt \
+        && export PATH=$(ls -d /opt/cross-pi-gcc-*/bin):$PATH \
         && export CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ AR=arm-linux-gnueabihf-ar LD=arm-linux-gnueabihf-ld RANLIB=arm-linux-gnueabihf-ranlib \
         # openssl \
         && wget -qO- https://www.openssl.org/source/openssl-1.1.1g.tar.gz | tar xz \
-        && cd openssl* && ./Configure linux-armv4 no-shared --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr && make && make install && cd .. \
+        && cd openssl* && ./Configure linux-armv4 no-shared no-tests --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr && make install && cd .. \
         # gsoap \
         && cd gsoap* \
                 && cd gsoap/wsdl && soapcpp2 -SC -pwsdl -I../import ./wsdl.h && cd ../.. \
-                && ac_cv_func_malloc_0_nonnull=yes ./configure --host arm --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr --without-zlib && make install \
+                && ac_cv_func_malloc_0_nonnull=yes ./configure --host arm --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr --without-zlib && make install LDFLAGS="-ldl" \
         && cd .. \
-        # openssl \
-        && wget -qO- https://www.openssl.org/source/openssl-1.1.1g.tar.gz | tar xz \
-        && cd openssl* && ./Configure linux-armv4 no-shared --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr && make && make install && cd .. \
         # build \
         && make \
         && make install \
