@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 FROM ubuntu:18.04
 
 WORKDIR /app
-COPY --from=builder /usr/local/bin/ /app/
+COPY --from=builder /usr/bin/ /app/
 
 
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libgsoap-2.8 libssl1.0 zlib1g \
