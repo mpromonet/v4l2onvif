@@ -1,9 +1,10 @@
-GSOAP_PREFIX=/usr
+GSOAP_PREFIX?=/usr
 GSOAP_BASE=$(GSOAP_PREFIX)/share/gsoap
 GSOAP_IMPORT=$(GSOAP_BASE)/import
 GSOAP_PLUGINS=$(GSOAP_BASE)/plugin
 GSOAP_CFLAGS=-I gen -I $(GSOAP_PREFIX)/include -I $(GSOAP_PLUGINS) -DSOAP_PURE_VIRTUAL -fpermissive -pthread
 GSOAP_LDFLAGS=-L $(GSOAP_PREFIX)/lib/ -lgsoapssl++ -lz  -pthread
+GSOAP_BIN?=$(GSOAP_PREFIX)/bin
 
 PREFIX?=/usr
 DESTDIR?=$(PREFIX)/bin
@@ -42,8 +43,8 @@ all: gen/onvif.h onvif-server.exe onvif-client.exe
 
 gen/onvif.h: $(wildcard wsdl/*) | libwsdd.a
 	mkdir -p gen
-	$(GSOAP_PREFIX)/bin/wsdl2h -d -Ntev -z6 -o $@ $^
-	$(GSOAP_PREFIX)/bin/soapcpp2 -2jx $@ -I $(GSOAP_IMPORT) -d gen -f250 || :
+	$(GSOAP_BIN)/wsdl2h -d -Ntev -z6 -o $@ $^
+	$(GSOAP_BIN)/soapcpp2 -2jx $@ -I $(GSOAP_IMPORT) -d gen -f250 || :
 	make
 
 libsoap.a: $(SOAP_OBJ) | gen/onvif.h

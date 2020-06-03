@@ -30,7 +30,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
                 && ac_cv_func_malloc_0_nonnull=yes ./configure --host arm --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr && make install LDFLAGS="-ldl" \
         && cd .. \
         # build \
-        && make \
+        && make GSOAP_BIN=/usr/bin GSOAP_PREFIX=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr \
         && make install \
         && apt-get clean && rm -rf /var/lib/apt/lists/
 
