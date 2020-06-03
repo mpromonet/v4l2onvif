@@ -21,10 +21,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
         # openssl \
         && wget -qO- https://www.openssl.org/source/openssl-1.1.1g.tar.gz | tar xz \
         && cd openssl* && ./Configure linux-armv4 no-shared no-tests --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr && make install && cd .. \
+        # zilb \
+        && wget -qO- https://zlib.net/zlib-1.2.11.tar.gz | tar xz \
+        && cd zlib* && ./configure --static --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr && make install && cd .. \
         # gsoap \
         && cd gsoap* \
                 && cd gsoap/wsdl && soapcpp2 -SC -pwsdl -I../import ./wsdl.h && cd ../.. \
-                && ac_cv_func_malloc_0_nonnull=yes ./configure --host arm --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr --without-zlib && make install LDFLAGS="-ldl" \
+                && ac_cv_func_malloc_0_nonnull=yes ./configure --host arm --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr && make install LDFLAGS="-ldl" \
         && cd .. \
         # build \
         && make \
