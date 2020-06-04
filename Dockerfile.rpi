@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
         && wget -qO- https://sourceforge.net/projects/gsoap2/files/gsoap-2.8/gsoap_2.8.103.zip | busybox unzip - \
         && cd gsoap* && autoreconf -i && ./configure --prefix=/usr && make install && make clean && cd .. \
         # cross-compiler \
+        && echo "CROSSCOMPILER=${CROSSCOMPILER}" \
         && wget -qO- ${CROSSCOMPILER} | tar xz -C /opt \
         && export PATH=$(ls -d /opt/cross-pi-gcc-*/bin):$PATH \
         && export CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ AR=arm-linux-gnueabihf-ar LD=arm-linux-gnueabihf-ld RANLIB=arm-linux-gnueabihf-ranlib \

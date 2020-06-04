@@ -12,8 +12,9 @@ linuxarmv7_docker_builder:
   env:
     DOCKERHUB_USER: ENCRYPTED[d141f69cf141cb769cc02c110baa2cfb6e316535dfa7d24f0a93ae00629c386e7f77286660adec8887823aa409447cd1]
     DOCKERHUB_PASS: ENCRYPTED[983a4ca342215a298198297c542adfec147321c65142cd03a8eaf1f71f530a8d133be2dfa67eb0d4f81337b968340e7d]
-    CROSSCOMPILER: https://sourceforge.net/projects/raspberry-pi-cross-compilers/files/Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/Buster/GCC%209.2.0/Raspberry%20Pi%202%2C%203/cross-gcc-9.2.0-pi_2-3.tar.gz 
+    CROSSCOMPILER: https://sourceforge.net/projects/raspberry-pi-cross-compilers/files/Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/Buster/GCC%209.2.0/Raspberry%20Pi%202%2C%203/cross-gcc-9.2.0-pi_2-3.tar.gz
   script: |
+    echo CROSSCOMPILER=$CROSSCOMPILER
     export TAG=${CIRRUS_TAG:-latest}-armv7
     docker build -t $CIRRUS_REPO_FULL_NAME:${TAG} . -f Dockerfile.rpi --build-arg ARCH=armv7l --build-arg CROSSCOMPILER=$CROSSCOMPILER --build-arg IMAGE=balenalib/raspberry-pi2
     docker login --username=$DOCKERHUB_USER --password=$DOCKERHUB_PASS 
@@ -23,9 +24,10 @@ linuxarmv6_docker_builder:
   env:
     DOCKERHUB_USER: ENCRYPTED[d141f69cf141cb769cc02c110baa2cfb6e316535dfa7d24f0a93ae00629c386e7f77286660adec8887823aa409447cd1]
     DOCKERHUB_PASS: ENCRYPTED[983a4ca342215a298198297c542adfec147321c65142cd03a8eaf1f71f530a8d133be2dfa67eb0d4f81337b968340e7d]
-    CROSSCOMPILER: https://sourceforge.net/projects/raspberry-pi-cross-compilers/files/Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/Buster/GCC%209.2.0/Raspberry%20Pi%201%2C%20Zero/cross-gcc-9.2.0-pi_0-1.tar.gz 
+    CROSSCOMPILER: https://sourceforge.net/projects/raspberry-pi-cross-compilers/files/Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/Buster/GCC%209.2.0/Raspberry%20Pi%201%2C%20Zero/cross-gcc-9.2.0-pi_0-1.tar.gz
   script: |
     export TAG=${CIRRUS_TAG:-latest}-armv6
+    echo CROSSCOMPILER=$CROSSCOMPILER
     docker build -t $CIRRUS_REPO_FULL_NAME:${TAG} . -f Dockerfile.rpi --build-arg CROSSCOMPILER=$CROSSCOMPILER 
     docker login --username=$DOCKERHUB_USER --password=$DOCKERHUB_PASS 
     docker push $CIRRUS_REPO_FULL_NAME:${TAG} 
