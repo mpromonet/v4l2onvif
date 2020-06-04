@@ -38,8 +38,8 @@ all: gen/onvif.h onvif-server.exe onvif-client.exe
 
 gen/onvif.h: $(wildcard wsdl/*) | libwsdd.a
 	mkdir -p gen
-	$(GSOAP_BIN)/wsdl2h -d -Ntev -z6 -o $@ $^
-	$(GSOAP_BIN)/soapcpp2 -2jx $@ -I $(GSOAP_BASE)/import -I $(GSOAP_BASE) -d gen -f250 || :
+	$(GSOAP_BIN)/wsdl2h -P -d -Ntev -z6 -o $@ $^
+	$(GSOAP_BIN)/soapcpp2 -2jx $@ -I $(GSOAP_BASE)/import -I $(GSOAP_BASE) -d gen -f250
 	make
 
 libsoap.a: $(SOAP_OBJ) | gen/onvif.h
