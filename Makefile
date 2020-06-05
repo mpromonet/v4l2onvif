@@ -13,7 +13,7 @@ DESTDIR?=$(PREFIX)/bin
 
 CXXFLAGS+=$(GSOAP_CFLAGS) -std=c++11 -g -Iinc -I ws-discovery/gsoap/
 
-WSSE_SRC=$(GSOAP_PLUGINS)/wsseapi.c $(GSOAP_PLUGINS)/smdevp.c $(GSOAP_PLUGINS)/mecevp.c
+WSSE_SRC=$(GSOAP_PLUGINS)/wsseapi.c $(GSOAP_PLUGINS)/smdevp.c $(GSOAP_PLUGINS)/mecevp.c $(GSOAP_BASE)/custom/struct_timeval.c
 
 SOAP_SRC=$(wildcard gen/soapC_*.cpp)
 SOAP_OBJ=$(SOAP_SRC:%.cpp=%.o)
@@ -85,7 +85,7 @@ onvif-client.exe: src/onvif-client.o $(WSSE_SRC) $(GSOAP_PLUGINS)/wsaapi.c libcl
 	$(CXX) -g -o $@ $^ $(GSOAP_LDFLAGS) $(GSOAP_CFLAGS) 
 
 clean:
-	rm -rf gen *.o *.a
+	rm -rf gen src/*.o *.a
 
 install:
 	mkdir -p $(DESTDIR)

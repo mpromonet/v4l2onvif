@@ -572,7 +572,10 @@ int main(int argc, char* argv[])
 				NotificationConsumerBindingService consumer;
 				consumer.soap->accept_timeout=5;
 				consumer.bind(NULL,0,10);
-				std::thread th(&NotificationConsumerBindingService::run, &consumer, 0);
+
+				std::thread th([&consumer]() {
+					consumer.run(0);
+				});
 				
 				NotificationProducerBindingProxy producer(tev__CreatePullPointSubscriptionResponse.SubscriptionReference.Address);
 				soap_wsse_add_Security(producer.soap);

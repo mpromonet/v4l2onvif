@@ -164,6 +164,7 @@ int main(int argc, char* argv[])
 	struct soap *soap = soap_new();
 	soap->user = (void*)&deviceCtx;
 	soap->fget = http_get; 
+	soap->bind_flags |= SO_REUSEADDR;
 	{			
 		FOREACH_SERVICE(DECLARE_SERVICE,soap)
 
