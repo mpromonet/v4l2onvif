@@ -3,6 +3,8 @@
 [![Snap Status](https://build.snapcraft.io/badge/mpromonet/v4l2onvif.svg)](https://build.snapcraft.io/user/mpromonet/v4l2onvif)
 [![C/C++ CI](https://github.com/mpromonet/v4l2onvif/workflows/C/C++%20CI/badge.svg)](https://github.com/mpromonet/v4l2onvif/actions)
 
+[![Docker Pulls](https://img.shields.io/docker/pulls/mpromonet/v4l2onvif.svg)](https://hub.docker.com/r/mpromonet/v4l2onvif/)
+
 # v4l2-onvif
 
    It is a try to implements an ONVIF server :
@@ -18,4 +20,4 @@
 
 ## Usage
 
-    onvif-server.exe [-u username] [-p password] [-i v4l2 input device] [-I rtsp server] [-o v4l2 output device] [-O rtsp client]
+    onvif-server.exe [-u username] [-p password] [-i v4l2 input device] [-o v4l2 output device]
