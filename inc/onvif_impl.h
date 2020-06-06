@@ -74,11 +74,6 @@ public:
 	int         m_port;
 	std::string m_user;
 	std::string m_password;
-	std::string Manufacturer;
-	std::string Model;
-	std::string FirmwareVersion;
-	std::string SerialNumber;
-	std::string HardwareId;
 	std::list<NotificationConsumerBindingProxy*> m_subscriber;
 };
 

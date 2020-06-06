@@ -153,11 +153,6 @@ int main(int argc, char* argv[])
 	deviceCtx.m_user          = username;
 	deviceCtx.m_password      = password;
 	deviceCtx.m_outdevice     = outdevice;
-	deviceCtx.Manufacturer    = "Manufacturer";
-	deviceCtx.Model           = "Model";
-	deviceCtx.FirmwareVersion = "FirmwareVersion";
-	deviceCtx.SerialNumber    = "SerialNumber";
-	deviceCtx.HardwareId      = "HardwareId";
 	
 
 	// start WS server

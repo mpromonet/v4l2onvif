@@ -21,6 +21,7 @@
 #include <net/if.h>
 #include <netpacket/packet.h>
 #include <resolv.h>
+#include <sys/utsname.h>
 
 #include <map>
 #include <sstream>
@@ -165,12 +166,15 @@ int DeviceBindingService::GetServiceCapabilities(_tds__GetServiceCapabilities *t
 int DeviceBindingService::GetDeviceInformation(_tds__GetDeviceInformation *tds__GetDeviceInformation, _tds__GetDeviceInformationResponse *tds__GetDeviceInformationResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
-	ServiceContext* ctx = (ServiceContext*)this->soap->user;	
-	tds__GetDeviceInformationResponse->Manufacturer    = ctx->Manufacturer;
-	tds__GetDeviceInformationResponse->Model           = ctx->Model;
-	tds__GetDeviceInformationResponse->FirmwareVersion = ctx->FirmwareVersion;
-	tds__GetDeviceInformationResponse->SerialNumber    = ctx->SerialNumber;
-	tds__GetDeviceInformationResponse->HardwareId      = ctx->HardwareId;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	struct utsname info;	
+	if (uname(&info) == 0) {
+		tds__GetDeviceInformationResponse->Manufacturer    = info.release;
+		tds__GetDeviceInformationResponse->Model           = info.sysname;
+		tds__GetDeviceInformationResponse->HardwareId      = info.machine;
+		tds__GetDeviceInformationResponse->FirmwareVersion = VERSION;
+		tds__GetDeviceInformationResponse->SerialNumber    = info.version;
+	}	
 	return SOAP_OK;
 }
 

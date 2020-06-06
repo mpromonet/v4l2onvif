@@ -1,10 +1,12 @@
 SYSROOT?=$(shell $(CXX) --print-sysroot)
 $(info SYSROOT=$(SYSROOT))
 
+VERSION=$(shell git describe --tags --always --dirty)
+
 GSOAP_PREFIX?=$(SYSROOT)/usr
 GSOAP_BASE=$(GSOAP_PREFIX)/share/gsoap
 GSOAP_PLUGINS=$(GSOAP_BASE)/plugin
-GSOAP_CFLAGS=-I gen -I $(GSOAP_PREFIX)/include -I $(GSOAP_PLUGINS) -DWITH_OPENSSL -DSOAP_PURE_VIRTUAL -fpermissive -pthread
+GSOAP_CFLAGS=-I gen -I $(GSOAP_PREFIX)/include -I $(GSOAP_PLUGINS) -DWITH_OPENSSL -DSOAP_PURE_VIRTUAL -fpermissive -pthread -DVERSION=\"$(VERSION)\"
 GSOAP_LDFLAGS=-L $(GSOAP_PREFIX)/lib/ -lgsoapssl++ -lz -pthread -lssl -lcrypto -ldl
 GSOAP_BIN?=$(GSOAP_PREFIX)/bin
 

@@ -186,7 +186,11 @@ int main(int argc, char* argv[])
 	addSecurity(deviceProxy.soap, username, password);	
 	if (deviceProxy.GetDeviceInformation(&tds__GetDeviceInformation, &tds__GetDeviceInformationResponse) == SOAP_OK)
 	{
-		std::cout << "\tManufacturer:" << tds__GetDeviceInformationResponse.Manufacturer << std::endl;
+		std::cout << "\tManufacturer:"     << tds__GetDeviceInformationResponse.Manufacturer    << std::endl;
+		std::cout << "\tModel:"            << tds__GetDeviceInformationResponse.Model           << std::endl;
+		std::cout << "\tFirmwareVersion:"  << tds__GetDeviceInformationResponse.FirmwareVersion << std::endl;
+		std::cout << "\tSerialNumber:"     << tds__GetDeviceInformationResponse.SerialNumber    << std::endl;
+		std::cout << "\tHardwareId:"       << tds__GetDeviceInformationResponse.HardwareId      << std::endl;
 	}
 	else
 	{
