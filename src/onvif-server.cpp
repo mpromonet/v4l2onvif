@@ -150,8 +150,7 @@ int main(int argc, char* argv[])
 	rtspurl = "rtsp://" + deviceCtx.getLocalIp() + ":" + rtspport + "/";
 	deviceCtx.m_devices.insert(std::pair<std::string,std::string>(indevice, rtspurl));
 	deviceCtx.m_port          = port;
-	deviceCtx.m_user          = username;
-	deviceCtx.m_password      = password;
+	deviceCtx.m_userList[username] = User(password,tt__UserLevel__Administrator);
 	deviceCtx.m_outdevice     = outdevice;
 	
 
@@ -181,7 +180,8 @@ int main(int argc, char* argv[])
 			wsdconf conf(url.c_str()
 							,"\"http://www.onvif.org/ver10/network/wsdl\":NetworkVideoTransmitter"
 							, scopes.c_str()
-							, "urn:uuid:75293377-1768-439d-880b-f5d098e690c6", 1 );
+							, soap_wsa_rand_uuid(soap)
+							, 1 );
 			std::thread wsdd( [&conf] { 
 				wsd_server(conf); 
 			});

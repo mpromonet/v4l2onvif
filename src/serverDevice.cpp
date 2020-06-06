@@ -325,10 +325,13 @@ int DeviceBindingService::GetUsers(_tds__GetUsers *tds__GetUsers, _tds__GetUsers
 {
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;	
-	if (!ctx->m_user.empty())
+	if (!ctx->m_userList.empty())
 	{
-		tds__GetUsersResponse->User.push_back(soap_new_tt__User(this->soap));
-		tds__GetUsersResponse->User.back()->Username = ctx->m_user;
+		for (auto it : ctx->m_userList) {
+			tds__GetUsersResponse->User.push_back(soap_new_tt__User(this->soap));
+			tds__GetUsersResponse->User.back()->Username = it.first;
+			tds__GetUsersResponse->User.back()->UserLevel = it.second.m_profile;
+		}
 	}
 	return SOAP_OK;
 }
@@ -336,12 +339,20 @@ int DeviceBindingService::GetUsers(_tds__GetUsers *tds__GetUsers, _tds__GetUsers
 int DeviceBindingService::CreateUsers(_tds__CreateUsers *tds__CreateUsers, _tds__CreateUsersResponse *tds__CreateUsersResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	for (auto it : tds__CreateUsers->User) {
+		ctx->m_userList[it->Username] = User(it->Password->c_str(), it->UserLevel);
+	}	
 	return SOAP_OK;
 }
 
 int DeviceBindingService::DeleteUsers(_tds__DeleteUsers *tds__DeleteUsers, _tds__DeleteUsersResponse *tds__DeleteUsersResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	for (auto it : tds__DeleteUsers->Username) {
+		ctx->m_userList.erase(it);
+	}		
 	return SOAP_OK;
 }
 
@@ -444,15 +455,16 @@ int DeviceBindingService::GetHostname(_tds__GetHostname *tds__GetHostname, _tds_
 {
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
-	if (!ctx->m_user.empty())
+	if (!ctx->m_userList.empty())
 	{
 		// check authentification
 		const char *username = soap_wsse_get_Username(this->soap);
 		if (!username)
 			return this->soap->error; 
-		if (ctx->m_user != username)
+		if (ctx->m_userList.find(username) != ctx->m_userList.end())
 			return SOAP_FAULT;
-		if (soap_wsse_verify_Password(this->soap, ctx->m_password.c_str()))
+		User user = ctx->m_userList[username];
+		if (soap_wsse_verify_Password(this->soap, user.m_password.c_str()))
 			return this->soap->error; 
 	}
       

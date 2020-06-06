@@ -27,6 +27,15 @@
 
 class NotificationConsumerBindingProxy;
 
+class User 
+{
+	public:
+		User () {}
+		User (const std::string & password, enum tt__UserLevel profile) : m_password(password), m_profile(profile) {}
+		std::string        m_password;
+		enum tt__UserLevel m_profile;
+};
+
 class ServiceContext
 {
 public:
@@ -72,8 +81,7 @@ public:
 	std::map<std::string,std::string> m_devices;
 	std::string m_outdevice;
 	int         m_port;
-	std::string m_user;
-	std::string m_password;
+	std::map<std::string, User> m_userList;
 	std::list<NotificationConsumerBindingProxy*> m_subscriber;
 };
 
