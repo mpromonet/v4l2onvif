@@ -341,7 +341,9 @@ int DeviceBindingService::CreateUsers(_tds__CreateUsers *tds__CreateUsers, _tds_
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
 	for (auto it : tds__CreateUsers->User) {
-		ctx->m_userList[it->Username] = User(it->Password->c_str(), it->UserLevel);
+		if (it->Password) {
+			ctx->m_userList[it->Username] = User(it->Password->c_str(), it->UserLevel);
+		}
 	}	
 	return SOAP_OK;
 }

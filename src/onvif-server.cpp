@@ -116,18 +116,21 @@ int main(int argc, char* argv[])
 	std::string indevice  = "/dev/video0";
 	std::string outdevice = "/dev/video10";
 	std::string username;
-	std::string password;	
+
 	std::string rtspport = "8554";
-	int port = 8080;
+	int httpport = 8080;
+	ServiceContext deviceCtx;
+
 	int c = 0;
-	while ((c = getopt (argc, argv, "h" "u:p:" "P:" "i:o:")) != -1)
+	while ((c = getopt (argc, argv, "h" "u:p:" "H:R:" "i:o:")) != -1)
 	{
 		switch (c)
 		{
-			case 'P':	port      = atoi(optarg); break;
+			case 'H':	httpport      = atoi(optarg); break;
+			case 'R':	rtspport      = optarg; break;
 
 			case 'u':	username  = optarg; break;
-			case 'p':	password  = optarg; break;
+			case 'p':	deviceCtx.m_userList[username] = User(optarg,tt__UserLevel__Administrator); break;
 			
 			case 'i':	indevice  = optarg; break;
 			
@@ -143,17 +146,14 @@ int main(int argc, char* argv[])
 	V4L2DeviceParameters param(indevice.c_str(), 0, 0, 0, 0);
 	V4l2Capture* videoCapture = V4l2Capture::create(param, V4l2Access::IOTYPE_MMAP);
 
-	std::cout << "Listening to " << port << std::endl;
+	std::cout << "Listening to " << httpport << std::endl;
 		
-	ServiceContext deviceCtx;
 	std::string rtspurl;
 	rtspurl = "rtsp://" + deviceCtx.getLocalIp() + ":" + rtspport + "/";
 	deviceCtx.m_devices.insert(std::pair<std::string,std::string>(indevice, rtspurl));
-	deviceCtx.m_port          = port;
-	deviceCtx.m_userList[username] = User(password,tt__UserLevel__Administrator);
+	deviceCtx.m_port          = httpport;
 	deviceCtx.m_outdevice     = outdevice;
 	
-
 	// start WS server
 	struct soap *soap = soap_new();
 	soap->user = (void*)&deviceCtx;
