@@ -45,10 +45,13 @@ int NotificationProducerBindingService::Subscribe(_wsnt__Subscribe *wsnt__Subscr
 	os << "http://" << ctx->getServerIpFromClientIp(htonl(this->soap->ip)) << ":" << ctx->m_port;
 	std::string url(os.str());
 	
-	time_t sec = time(NULL);
+	timeval tv;
+	tv.tv_sec = time(NULL);
+	tv.tv_usec = 0;
 	wsnt__SubscribeResponse->SubscriptionReference.Address = strcpy((char*)soap_malloc(this->soap, url.size()+1), url.c_str());
-	wsnt__SubscribeResponse->CurrentTime = soap_new_ptr(this->soap,sec);
-	wsnt__SubscribeResponse->TerminationTime = soap_new_ptr(this->soap,sec+3600);
+	wsnt__SubscribeResponse->CurrentTime = soap_new_ptr(this->soap,tv);
+	tv.tv_sec += 3600;
+	wsnt__SubscribeResponse->TerminationTime = soap_new_ptr(this->soap,tv);
 	
 	return SOAP_OK;
 }

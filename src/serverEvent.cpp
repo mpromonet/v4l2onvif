@@ -40,10 +40,13 @@ int EventBindingService::CreatePullPointSubscription(_tev__CreatePullPointSubscr
 	os << "http://" << ctx->getServerIpFromClientIp(htonl(this->soap->ip)) << ":" << ctx->m_port;
 	std::string url(os.str());
 	
-	time_t sec = time(NULL);
+	timeval tv;
+	tv.tv_sec = time(NULL);
+	tv.tv_usec = 0;
 	tev__CreatePullPointSubscriptionResponse->SubscriptionReference.Address = strcpy((char*)soap_malloc(this->soap, url.size()+1), url.c_str());
-	tev__CreatePullPointSubscriptionResponse->wsnt__CurrentTime = sec;
-	tev__CreatePullPointSubscriptionResponse->wsnt__TerminationTime = sec+3600;
+	tev__CreatePullPointSubscriptionResponse->wsnt__CurrentTime = tv;
+	tv.tv_sec += 3600;
+	tev__CreatePullPointSubscriptionResponse->wsnt__TerminationTime = tv;
 		
 	return SOAP_OK;
 }

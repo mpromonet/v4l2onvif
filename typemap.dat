@@ -33,7 +33,12 @@ wstop   = <http://docs.oasis-open.org/wsn/t-1>
 xop     = <http://www.w3.org/2004/08/xop/include>
 wsa5    = <http://www.w3.org/2005/08/addressing>
 
+xsd__dateTime = #import "custom/struct_timeval.h" | xsd__dateTime
+
+
 [
 #import "wsdd10.h"
 #import "wsse.h"
 ]
+
+
