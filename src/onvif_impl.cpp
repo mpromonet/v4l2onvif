@@ -25,6 +25,30 @@
 #include <linux/videodev2.h>
 
 #include "onvif_impl.h"
+#include "wsseapi.h"
+
+
+int ServiceContext::isAuthorized(soap* soap)
+{
+	int ret = SOAP_OK;
+	if (!m_userList.empty())
+	{
+		// check authentification
+		const char *username = soap_wsse_get_Username(soap);
+		if (!username) {
+			ret = soap->error;
+		}
+		else if (m_userList.find(username) != m_userList.end()) {
+			ret = SOAP_FAULT;
+		} else {
+			User user = m_userList[username];
+			if (soap_wsse_verify_Password(soap, user.m_password.c_str())) {
+				ret = soap->error;
+			}
+		}
+	}
+	return ret;
+}
 
 std::string ServiceContext::getLocalIp()
 {
@@ -228,9 +252,10 @@ std::list<std::string> ServiceContext::getScopes()
 	char hostname[HOST_NAME_MAX];
 	gethostname(hostname, sizeof(hostname));
 	scopes.push_back("onvif://www.onvif.org/name/" + std::string(hostname));
-	scopes.push_back("onvif://www.onvif.org/location/Here");
+	scopes.push_back("onvif://www.onvif.org/location/somewhere");
 	scopes.push_back("onvif://www.onvif.org/Profile/Streaming");
 	scopes.push_back("onvif://www.onvif.org/Profile/G");
+	scopes.push_back("onvif://www.onvif.org/Profile/S");
 	return scopes;
 }
 
@@ -278,6 +303,9 @@ tt__Profile *ServiceContext::getProfile(struct soap *soap, const std::string &to
 	profile->token = token;
 	profile->VideoSourceConfiguration = getVideoSourceCfg(soap, token);
 	profile->VideoEncoderConfiguration = getVideoEncoderCfg(soap, token);
+	profile->VideoAnalyticsConfiguration = soap_new_tt__VideoAnalyticsConfiguration(soap);
+	profile->PTZConfiguration = soap_new_tt__PTZConfiguration(soap);
+	profile->MetadataConfiguration = soap_new_tt__MetadataConfiguration(soap);
 	return profile;
 }
 

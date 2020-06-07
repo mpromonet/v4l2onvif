@@ -39,10 +39,11 @@ class User
 class ServiceContext
 {
 public:
-	std::string getLocalIp();
-	std::string getServerIpFromClientIp(int ip);
-	std::list<std::string> getScopes();
+	std::string                   getLocalIp();
+	std::string                   getServerIpFromClientIp(int ip);
+	std::list<std::string>        getScopes();
 	std::map<in_addr_t,in_addr_t> getGateways();
+	int                           isAuthorized(soap* soap);
 	
 	// V4L2 access
 	int                getFormat        (const std::string &device, int& width, int& height, int& format);

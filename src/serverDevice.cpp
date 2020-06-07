@@ -29,7 +29,6 @@
 
 #include "soapDeviceBindingService.h"
 #include "onvif_impl.h"
-#include "wsseapi.h"
 
 int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds__GetServicesResponse *tds__GetServicesResponse) 
 {
@@ -150,7 +149,17 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 		trv__Capabilities *capabilities = ctx->getReceiverServiceCapabilities(this->soap);
 		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, NULL, "trv:Capabilities", capabilities, capabilities->soap_type());
 	}
-	
+
+	tds__GetServicesResponse->Service.push_back(soap_new_tds__Service(this->soap));
+	tds__GetServicesResponse->Service.back()->Namespace  = "http://www.onvif.org/ver20/ptz/wsdl";
+	tds__GetServicesResponse->Service.back()->XAddr = url;
+	tds__GetServicesResponse->Service.back()->Version = soap_new_req_tt__OnvifVersion(this->soap,2,1);
+	if (tds__GetServices->IncludeCapability)
+	{
+		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
+		tptz__Capabilities *capabilities = soap_new_tptz__Capabilities(this->soap);
+		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, NULL, "tptz:Capabilities", capabilities, capabilities->soap_type());
+	}
 	
 	return SOAP_OK;
 }
@@ -457,27 +466,19 @@ int DeviceBindingService::GetHostname(_tds__GetHostname *tds__GetHostname, _tds_
 {
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
-	if (!ctx->m_userList.empty())
+	int ret = ctx->isAuthorized(this->soap);
+	if (ret == SOAP_OK)
 	{
-		// check authentification
-		const char *username = soap_wsse_get_Username(this->soap);
-		if (!username)
-			return this->soap->error; 
-		if (ctx->m_userList.find(username) != ctx->m_userList.end())
-			return SOAP_FAULT;
-		User user = ctx->m_userList[username];
-		if (soap_wsse_verify_Password(this->soap, user.m_password.c_str()))
-			return this->soap->error; 
+		char buffer[HOST_NAME_MAX];
+		tds__GetHostnameResponse->HostnameInformation = soap_new_req_tt__HostnameInformation(this->soap, false);
+		tds__GetHostnameResponse->HostnameInformation->Name = soap_new_std__string(this->soap);
+		if (gethostname(buffer, sizeof(buffer)) == 0)
+		{
+			tds__GetHostnameResponse->HostnameInformation->Name->assign(buffer);
+		}
 	}
       
-	char buffer[HOST_NAME_MAX];
-	tds__GetHostnameResponse->HostnameInformation = soap_new_req_tt__HostnameInformation(this->soap, false);
-	tds__GetHostnameResponse->HostnameInformation->Name = soap_new_std__string(this->soap);
-	if (gethostname(buffer, sizeof(buffer)) == 0)
-	{
-		tds__GetHostnameResponse->HostnameInformation->Name->assign(buffer);
-	}
-	return SOAP_OK;
+	return ret;
 }
 
 int DeviceBindingService::SetHostname(_tds__SetHostname *tds__SetHostname, _tds__SetHostnameResponse *tds__SetHostnameResponse) 
