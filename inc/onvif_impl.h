@@ -42,6 +42,7 @@ public:
 	std::string getLocalIp();
 	std::string getServerIpFromClientIp(int ip);
 	std::list<std::string> getScopes();
+	std::map<in_addr_t,in_addr_t> getGateways();
 	
 	// V4L2 access
 	int                getFormat        (const std::string &device, int& width, int& height, int& format);
@@ -81,6 +82,7 @@ public:
 	std::map<std::string,std::string> m_devices;
 	std::string m_outdevice;
 	int         m_port;
+	int         m_rtspport;
 	std::map<std::string, User> m_userList;
 	std::list<NotificationConsumerBindingProxy*> m_subscriber;
 };

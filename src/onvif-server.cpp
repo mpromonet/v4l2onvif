@@ -152,6 +152,7 @@ int main(int argc, char* argv[])
 	rtspurl = "rtsp://" + deviceCtx.getLocalIp() + ":" + rtspport + "/";
 	deviceCtx.m_devices.insert(std::pair<std::string,std::string>(indevice, rtspurl));
 	deviceCtx.m_port          = httpport;
+	deviceCtx.m_rtspport      = atoi(rtspport.c_str());
 	deviceCtx.m_outdevice     = outdevice;
 	
 	// start WS server
@@ -187,7 +188,7 @@ int main(int argc, char* argv[])
 			});
 
 			// start RTSP
-			V4l2RTSPServer rtspserver(atoi(rtspport.c_str()));
+			V4l2RTSPServer rtspserver(deviceCtx.m_rtspport);
 			if (videoCapture) {
 				StreamReplicator* videoReplicator = DeviceSourceFactory::createStreamReplicator(rtspserver.env(), videoCapture->getFormat(), new DeviceCaptureAccess<V4l2Capture>(videoCapture));
 				if (videoReplicator)

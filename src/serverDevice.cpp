@@ -544,6 +544,8 @@ int DeviceBindingService::SetDynamicDNS(_tds__SetDynamicDNS *tds__SetDynamicDNS,
 int DeviceBindingService::GetNetworkInterfaces(_tds__GetNetworkInterfaces *tds__GetNetworkInterfaces, _tds__GetNetworkInterfacesResponse *tds__GetNetworkInterfacesResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;	
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	std::map<in_addr_t,in_addr_t> routeTable = ctx->getGateways();
 	
 	char host[NI_MAXHOST];
 	struct ifaddrs *ifaddr = NULL;
@@ -618,6 +620,11 @@ int DeviceBindingService::GetNetworkProtocols(_tds__GetNetworkProtocols *tds__Ge
 	tds__GetNetworkProtocolsResponse->NetworkProtocols.back()->Name = tt__NetworkProtocolType__HTTP;
 	tds__GetNetworkProtocolsResponse->NetworkProtocols.back()->Enabled = true;
 	tds__GetNetworkProtocolsResponse->NetworkProtocols.back()->Port.push_back(ctx->m_port);
+
+	tds__GetNetworkProtocolsResponse->NetworkProtocols.push_back(soap_new_tt__NetworkProtocol(soap));
+	tds__GetNetworkProtocolsResponse->NetworkProtocols.back()->Name = tt__NetworkProtocolType__RTSP;
+	tds__GetNetworkProtocolsResponse->NetworkProtocols.back()->Enabled = true;
+	tds__GetNetworkProtocolsResponse->NetworkProtocols.back()->Port.push_back(ctx->m_rtspport);
 	return SOAP_OK;
 }
 
@@ -630,7 +637,14 @@ int DeviceBindingService::SetNetworkProtocols(_tds__SetNetworkProtocols *tds__Se
 int DeviceBindingService::GetNetworkDefaultGateway(_tds__GetNetworkDefaultGateway *tds__GetNetworkDefaultGateway, _tds__GetNetworkDefaultGatewayResponse *tds__GetNetworkDefaultGatewayResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	std::map<in_addr_t,in_addr_t> routeTable = ctx->getGateways();
+	struct in_addr defaultGw;
+	defaultGw.s_addr = routeTable[INADDR_ANY];
+
 	tds__GetNetworkDefaultGatewayResponse->NetworkGateway = soap_new_tt__NetworkGateway(soap);
+	tds__GetNetworkDefaultGatewayResponse->NetworkGateway->IPv4Address.push_back(inet_ntoa(defaultGw));
+
 	return SOAP_OK;
 }
 
