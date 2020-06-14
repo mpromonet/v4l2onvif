@@ -224,6 +224,14 @@ int ImagingBindingService::GetOptions(_timg__GetOptions *timg__GetOptions, _timg
 		timg__GetOptionsResponse->ImagingOptions->Focus->AutoFocusModes.push_back(tt__AutoFocusMode__AUTO);
 		timg__GetOptionsResponse->ImagingOptions->Focus->AutoFocusModes.push_back(tt__AutoFocusMode__MANUAL);		
 
+		timg__GetOptionsResponse->ImagingOptions->WideDynamicRange = soap_new_tt__WideDynamicRangeOptions20(this->soap);
+		timg__GetOptionsResponse->ImagingOptions->WideDynamicRange->Mode.push_back(tt__WideDynamicMode__ON);
+		timg__GetOptionsResponse->ImagingOptions->WideDynamicRange->Mode.push_back(tt__WideDynamicMode__OFF);		
+
+		timg__GetOptionsResponse->ImagingOptions->BacklightCompensation = soap_new_tt__BacklightCompensationOptions20(this->soap);
+		timg__GetOptionsResponse->ImagingOptions->BacklightCompensation->Mode.push_back(tt__BacklightCompensationMode__ON);
+		timg__GetOptionsResponse->ImagingOptions->BacklightCompensation->Mode.push_back(tt__BacklightCompensationMode__OFF);	
+
 		ret = SOAP_OK;
 	}
 	return ret;

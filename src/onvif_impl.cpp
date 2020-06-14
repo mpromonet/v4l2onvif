@@ -246,6 +246,20 @@ void ServiceContext::getIdentification(const std::string &device, std::string &c
 	close(fd);
 }
 
+std::string ServiceContext::getName(const std::string &device)
+{
+	std::string name;
+	int fd = open(device.c_str(), O_RDWR | O_NONBLOCK, 0);
+	v4l2_capability cap;
+	memset(&cap, 0, sizeof(cap));
+	if (-1 != ioctl(fd, VIDIOC_QUERYCAP, &cap))
+	{
+		name = (const char *)cap.card;
+	}
+	close(fd);
+	return name;
+}
+
 std::list<std::string> ServiceContext::getScopes()
 {
 	std::list<std::string> scopes;
@@ -256,6 +270,15 @@ std::list<std::string> ServiceContext::getScopes()
 	scopes.push_back("onvif://www.onvif.org/Profile/Streaming");
 	scopes.push_back("onvif://www.onvif.org/Profile/G");
 	scopes.push_back("onvif://www.onvif.org/Profile/S");
+	return scopes;
+}
+
+std::string ServiceContext::getScopesString()
+{
+	std::string scopes;
+	for (std::string scope : this->getScopes()) {
+		scopes += scope + " ";
+	}
 	return scopes;
 }
 
@@ -299,8 +322,8 @@ tt__H264Profile getH264Profile(int h264profile)
 tt__Profile *ServiceContext::getProfile(struct soap *soap, const std::string &token)
 {
 	tt__Profile *profile = soap_new_tt__Profile(soap);
-	profile->Name = token;
 	profile->token = token;
+	profile->Name = getName(token);
 	profile->VideoSourceConfiguration = getVideoSourceCfg(soap, token);
 	profile->VideoEncoderConfiguration = getVideoEncoderCfg(soap, token);
 	profile->VideoAnalyticsConfiguration = soap_new_tt__VideoAnalyticsConfiguration(soap);

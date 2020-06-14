@@ -113,13 +113,13 @@ int http_get(struct soap *soap)
 
 int main(int argc, char* argv[])
 {		
-	std::string indevice  = "/dev/video0";
 	std::string outdevice = "/dev/video10";
 	std::string username;
 
 	std::string rtspport = "8554";
 	int httpport = 8080;
 	ServiceContext deviceCtx;
+	std::map<std::string, V4l2Capture*> deviceList;
 
 	int c = 0;
 	while ((c = getopt (argc, argv, "h" "u:p:" "H:R:" "i:o:")) != -1)
@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
 			case 'u':	username  = optarg; break;
 			case 'p':	deviceCtx.m_userList[username] = User(optarg,tt__UserLevel__Administrator); break;
 			
-			case 'i':	indevice  = optarg; break;
+			case 'i':	deviceList[optarg] = NULL; break;
 			
 			case 'o':	outdevice = optarg; break;
 			
@@ -142,15 +142,18 @@ int main(int argc, char* argv[])
 			break;
 		}
 	}
+	if (deviceList.empty()) {
+		deviceList["/dev/video0"] = NULL;
+	}
 
-	V4L2DeviceParameters param(indevice.c_str(), 0, 0, 0, 0);
-	V4l2Capture* videoCapture = V4l2Capture::create(param, V4l2Access::IOTYPE_MMAP);
-
-	std::cout << "Listening to " << httpport << std::endl;
+	std::cout << "Http:" << httpport << " rtsp:" << rtspport << std::endl;
 		
 	std::string rtspurl;
 	rtspurl = "rtsp://" + deviceCtx.getLocalIp() + ":" + rtspport + "/";
-	deviceCtx.m_devices.insert(std::pair<std::string,std::string>(indevice, rtspurl));
+	for (auto & device : deviceList) {
+		std::string url = basename(device.first.c_str());
+		deviceCtx.m_devices.insert(std::pair<std::string,std::string>(device.first, rtspurl + url));
+	}
 	deviceCtx.m_port          = httpport;
 	deviceCtx.m_rtspport      = atoi(rtspport.c_str());
 	deviceCtx.m_outdevice     = outdevice;
@@ -174,28 +177,34 @@ int main(int argc, char* argv[])
 			os << "http://" << deviceCtx.getLocalIp() << ":" << deviceCtx.m_port << "/onvif/device_service";
 			std::string url(os.str());
 			std::cout << "Published URL:" << url << std::endl;
-			std::string scopes;
-			for (std::string scope : deviceCtx.getScopes()) {
-				scopes += scope + " ";
-			}
+
 			wsdconf conf(url.c_str()
 							,"\"http://www.onvif.org/ver10/network/wsdl\":NetworkVideoTransmitter"
-							, scopes.c_str()
-							, soap_wsa_rand_uuid(soap)
-							, 1 );
+							, deviceCtx.getScopesString().c_str()
+							, soap_wsa_rand_uuid(soap));
+
 			std::thread wsdd( [&conf] { 
 				wsd_server(conf); 
 			});
 
 			// start RTSP
 			V4l2RTSPServer rtspserver(deviceCtx.m_rtspport);
-			if (videoCapture) {
-				StreamReplicator* videoReplicator = DeviceSourceFactory::createStreamReplicator(rtspserver.env(), videoCapture->getFormat(), new DeviceCaptureAccess<V4l2Capture>(videoCapture));
-				if (videoReplicator)
-				{
-					rtspserver.addSession("", UnicastServerMediaSubsession::createNew(*rtspserver.env(), videoReplicator, V4l2RTSPServer::getVideoRtpFormat(videoCapture->getFormat())));			
-				}
+
+			for (auto & device : deviceList) {
+				std::list<unsigned int> videoformatList = {V4L2_PIX_FMT_H264, V4L2_PIX_FMT_MJPEG, V4L2_PIX_FMT_JPEG, 0 };
+				V4l2Capture* videoCapture = V4l2Capture::create(V4L2DeviceParameters(device.first.c_str(), videoformatList, 0, 0, 0), V4l2Access::IOTYPE_MMAP);
+				if (videoCapture) {
+					StreamReplicator* videoReplicator = DeviceSourceFactory::createStreamReplicator(rtspserver.env(), videoCapture->getFormat(), new DeviceCaptureAccess<V4l2Capture>(videoCapture));
+					if (videoReplicator)
+					{
+						std::string url = basename(device.first.c_str());
+						std::cout << "add RTSP session url:" << url << std::endl;
+						rtspserver.addSession(url, UnicastServerMediaSubsession::createNew(*rtspserver.env(), videoReplicator, V4l2RTSPServer::getVideoRtpFormat(videoCapture->getFormat())));			
+					}
+				}				
+				device.second = videoCapture;
 			}
+
 			char rtspstop = 0; 
 			std::thread rtsp( [&rtspserver,&rtspstop] {
 				rtspserver.eventLoop(&rtspstop); 
@@ -216,6 +225,10 @@ int main(int argc, char* argv[])
 			}
 			rtspstop = 1;
 			rtsp.join();
+
+			for (auto & device : deviceList) {
+				delete device.second;
+			}
 
 			conf.m_stop = true;
 			wsdd.join();

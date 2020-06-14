@@ -42,6 +42,7 @@ public:
 	std::string                   getLocalIp();
 	std::string                   getServerIpFromClientIp(int ip);
 	std::list<std::string>        getScopes();
+	std::string                   getScopesString();
 	std::map<in_addr_t,in_addr_t> getGateways();
 	int                           isAuthorized(soap* soap);
 	
@@ -51,6 +52,7 @@ public:
 	void               setCtrlValue     (const std::string &device, int idctrl, int value);
 	std::pair<int,int> getCtrlRange     (const std::string &device, int idctrl);
 	void               getIdentification(const std::string &device, std::string & card, std::string & driver, std::string & bus);
+	std::string        getName          (const std::string &device);
 
 	// service capabilities
 	tds__DeviceServiceCapabilities* getDeviceServiceCapabilities(struct soap* soap);

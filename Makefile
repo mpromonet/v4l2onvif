@@ -84,9 +84,9 @@ onvif-client.exe: src/onvif-client.o $(WSSE_SRC) $(GSOAP_PLUGINS)/wsaapi.c libcl
 	$(CXX) -g -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 clean:
-	make -C v4l2rtspserver clean
-	make -C ws-discovery/gsoap clean
-	rm -rf gen src/*.o *.a
+	make -C v4l2rtspserver clean || :
+	make -C ws-discovery/gsoap clean || :
+	rm -rf gen src/*.o *.a *.exe
 
 install:
 	mkdir -p $(DESTDIR)
