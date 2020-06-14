@@ -497,6 +497,18 @@ int MediaBindingService::GetAudioEncoderConfigurationOptions(_trt__GetAudioEncod
 int MediaBindingService::GetMetadataConfigurationOptions(_trt__GetMetadataConfigurationOptions *trt__GetMetadataConfigurationOptions, _trt__GetMetadataConfigurationOptionsResponse *trt__GetMetadataConfigurationOptionsResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	
+	if (trt__GetMetadataConfigurationOptions->ConfigurationToken)
+	{
+		auto it = ctx->m_devices.find(trt__GetMetadataConfigurationOptions->ConfigurationToken->c_str());
+		if (it != ctx->m_devices.end())
+		{	
+			trt__GetMetadataConfigurationOptionsResponse->Options = ctx->getMetadataCfgOptions(soap, it->first);
+		}
+	}
+
 	return SOAP_OK;
 }
 

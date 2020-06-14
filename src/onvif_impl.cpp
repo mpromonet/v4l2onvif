@@ -198,6 +198,24 @@ int ServiceContext::getFormat(const std::string &device, int &width, int &height
 	return ret;
 }
 
+float ServiceContext::getFrameRate(const std::string &device)
+{
+	float fps = 0;
+        int fd = open(device.c_str(), O_RDWR | O_NONBLOCK, 0);
+
+        struct v4l2_streamparm param;
+        memset(&param, 0, sizeof(param));
+        param.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        if (0 == ioctl(fd, VIDIOC_G_PARM, &param))
+        {
+		if (param.parm.capture.timeperframe.numerator != 0) {
+                	fps = 1.0 * param.parm.capture.timeperframe.denominator / param.parm.capture.timeperframe.numerator;
+		}
+        }
+        close(fd);
+        return fps;
+}
+
 int ServiceContext::getCtrlValue(const std::string &device, int idctrl)
 {
 	int value = 0;
@@ -343,13 +361,16 @@ tt__VideoEncoderConfiguration *ServiceContext::getVideoEncoderCfg(struct soap *s
 	tt__VideoEncoderConfiguration *cfg = soap_new_tt__VideoEncoderConfiguration(soap);
 	cfg->Name = token;
 	cfg->token = token;
+	cfg->Quality = 50.0; 
 	int width;
 	int height;
 	int format;
 	if (getFormat(token, width, height, format))
 	{
 		cfg->Resolution = soap_new_req_tt__VideoResolution(soap, width, height);
-		cfg->RateControl = soap_new_req_tt__VideoRateControl(soap, 0, 0, 0);
+		float frameRate = getFrameRate(token);
+		std::cout << frameRate << std::endl;
+		cfg->RateControl = soap_new_req_tt__VideoRateControl(soap, frameRate, 0, 0);
 		cfg->Multicast = soap_new_tt__MulticastConfiguration(soap);
 		cfg->Multicast->Address = soap_new_tt__IPAddress(soap);
 		cfg->SessionTimeout = "PT10S";
@@ -411,17 +432,41 @@ tt__VideoEncoderConfigurationOptions *ServiceContext::getVideoEncoderCfgOptions(
 				}
 			}
 		}
+
+		struct v4l2_frmivalenum frmival;
+		memset(&frmival,0,sizeof(frmival));
+		frmival.pixel_format = format;
+		frmival.width = width;
+		frmival.height = height;
+		int minFrameRate = 0;
+		int maxFrameRate = 0;
+		for (;ioctl(fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival) == 0; frmival.index++) 
+		{
+			if (frmival.type == V4L2_FRMIVAL_TYPE_DISCRETE) {
+				int frameRate = frmival.discrete.denominator/frmival.discrete.numerator;
+				if (frameRate > maxFrameRate) maxFrameRate = frameRate;
+				if (frameRate < minFrameRate) minFrameRate = frameRate;
+			} else {
+				int frameRate = frmival.stepwise.max.denominator/frmival.stepwise.max.numerator;
+				if (frameRate < minFrameRate) minFrameRate = frameRate;
+				frameRate = frmival.stepwise.min.denominator/frmival.stepwise.min.numerator;
+				if (frameRate > maxFrameRate) maxFrameRate = frameRate;
+			}
+		}
 		close(fd);
+		std::cout << "[" << minFrameRate << "," << maxFrameRate << "]"<< std::endl;
 
 		if (format == V4L2_PIX_FMT_H264)
 		{
 			cfg->H264 = soap_new_tt__H264Options(soap);
 			cfg->H264->ResolutionsAvailable = resolutions;
+			cfg->H264->FrameRateRange = soap_new_req_tt__IntRange(soap, minFrameRate, maxFrameRate);
 		}
 		else if (format == V4L2_PIX_FMT_JPEG)
 		{
 			cfg->JPEG = soap_new_tt__JpegOptions(soap);
 			cfg->JPEG->ResolutionsAvailable = resolutions;
+			cfg->JPEG->FrameRateRange = soap_new_req_tt__IntRange(soap, minFrameRate, maxFrameRate);
 		}
 	}
 	return cfg;
@@ -453,6 +498,12 @@ tt__VideoSourceConfigurationOptions *ServiceContext::getVideoSourceCfgOptions(st
 	cfg->BoundsRange->WidthRange = soap_new_req_tt__IntRange(soap, 0, width);
 	cfg->BoundsRange->HeightRange = soap_new_req_tt__IntRange(soap, 0, height);
 	cfg->VideoSourceTokensAvailable.push_back(token);
+	return cfg;
+}
+
+tt__MetadataConfigurationOptions* ServiceContext::getMetadataCfgOptions(struct soap* soap, const std::string & token)
+{
+	tt__MetadataConfigurationOptions *cfg = soap_new_tt__MetadataConfigurationOptions(soap);
 	return cfg;
 }
 

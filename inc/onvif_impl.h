@@ -48,6 +48,7 @@ public:
 	
 	// V4L2 access
 	int                getFormat        (const std::string &device, int& width, int& height, int& format);
+	float              getFrameRate     (const std::string &device);
 	int                getCtrlValue     (const std::string &device, int idctrl);
 	void               setCtrlValue     (const std::string &device, int idctrl, int value);
 	std::pair<int,int> getCtrlRange     (const std::string &device, int idctrl);
@@ -76,6 +77,7 @@ public:
 	tt__VideoSourceConfigurationOptions*  getVideoSourceCfgOptions (struct soap* soap, const std::string & token);
 	tt__VideoEncoderConfiguration*        getVideoEncoderCfg       (struct soap* soap, const std::string & token);
 	tt__VideoEncoderConfigurationOptions* getVideoEncoderCfgOptions(struct soap* soap, const std::string & token);
+	tt__MetadataConfigurationOptions*     getMetadataCfgOptions    (struct soap* soap, const std::string & token);
 
 	// recording
 	tt__RecordingJobConfiguration* getRecordingJobConfiguration(struct soap* soap, const std::string & token);
