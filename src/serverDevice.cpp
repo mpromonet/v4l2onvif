@@ -157,7 +157,7 @@ int DeviceBindingService::GetServices(_tds__GetServices *tds__GetServices, _tds_
 	if (tds__GetServices->IncludeCapability)
 	{
 		tds__GetServicesResponse->Service.back()->Capabilities = soap_new__tds__Service_Capabilities(this->soap);
-		tptz__Capabilities *capabilities = soap_new_tptz__Capabilities(this->soap);
+		tptz__Capabilities *capabilities = ctx->getPTZServiceCapabilities(this->soap);
 		tds__GetServicesResponse->Service.back()->Capabilities->__any = soap_dom_element(this->soap, NULL, "tptz:Capabilities", capabilities, capabilities->soap_type());
 	}
 	

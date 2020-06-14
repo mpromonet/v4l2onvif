@@ -27,6 +27,7 @@ int PTZBindingService::GetServiceCapabilities(_tptz__GetServiceCapabilities *tpt
 {
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	tptz__GetServiceCapabilitiesResponse->Capabilities = ctx->getPTZServiceCapabilities(this->soap);
 	return SOAP_OK;
 }
 

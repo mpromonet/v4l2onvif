@@ -82,21 +82,22 @@ int ImagingBindingService::GetImagingSettings(_timg__GetImagingSettings *timg__G
 		if ( errno == 0 )
 		{
 			timg__GetImagingSettingsResponse->ImagingSettings->Exposure = soap_new_tt__Exposure20(this->soap);
-			timg__GetImagingSettingsResponse->ImagingSettings->Exposure->Mode = exposure ? tt__ExposureMode__AUTO : tt__ExposureMode__MANUAL;
+			timg__GetImagingSettingsResponse->ImagingSettings->Exposure->Mode = (exposure == V4L2_EXPOSURE_AUTO) ? tt__ExposureMode__AUTO : tt__ExposureMode__MANUAL;
 			float exposureTime = ctx->getCtrlValue(it->first, V4L2_CID_EXPOSURE_ABSOLUTE);
 			timg__GetImagingSettingsResponse->ImagingSettings->Exposure->ExposureTime = soap_new_ptr(this->soap, exposureTime);
 		}
 				
-		int autoWhiteBalance = ctx->getCtrlValue(it->first, V4L2_CID_AUTO_WHITE_BALANCE);		
+		int whiteBalance = ctx->getCtrlValue(it->first, V4L2_CID_AUTO_N_PRESET_WHITE_BALANCE);		
 		if ( errno == 0 )
 		{
 			timg__GetImagingSettingsResponse->ImagingSettings->WhiteBalance = soap_new_tt__WhiteBalance20(this->soap);
-			timg__GetImagingSettingsResponse->ImagingSettings->WhiteBalance->Mode = autoWhiteBalance ? tt__WhiteBalanceMode__AUTO : tt__WhiteBalanceMode__MANUAL;
+			timg__GetImagingSettingsResponse->ImagingSettings->WhiteBalance->Mode = (whiteBalance == V4L2_WHITE_BALANCE_AUTO) ? tt__WhiteBalanceMode__AUTO : tt__WhiteBalanceMode__MANUAL;
 			float redBalance = ctx->getCtrlValue(it->first, V4L2_CID_RED_BALANCE);		
 			timg__GetImagingSettingsResponse->ImagingSettings->WhiteBalance->CrGain = soap_new_ptr(this->soap, redBalance);
 			float blueBalance = ctx->getCtrlValue(it->first, V4L2_CID_BLUE_BALANCE);		
-			timg__GetImagingSettingsResponse->ImagingSettings->WhiteBalance->CrGain = soap_new_ptr(this->soap, blueBalance);
+			timg__GetImagingSettingsResponse->ImagingSettings->WhiteBalance->CbGain = soap_new_ptr(this->soap, blueBalance);
 		}
+		
 
 		int autofocusMode = ctx->getCtrlValue(it->first, V4L2_CID_FOCUS_AUTO);
 		if ( errno == 0 )
@@ -150,8 +151,8 @@ int ImagingBindingService::SetImagingSettings(_timg__SetImagingSettings *timg__S
 		}
 		if (timg__SetImagingSettings->ImagingSettings->Exposure)
 		{
-			int exposure = (timg__SetImagingSettings->ImagingSettings->Exposure->Mode == tt__ExposureMode__AUTO);
-			ctx->setCtrlValue(it->first, V4L2_CID_EXPOSURE_AUTO, exposure);
+			int exposure = timg__SetImagingSettings->ImagingSettings->Exposure->Mode;
+			ctx->setCtrlValue(it->first, V4L2_CID_EXPOSURE_AUTO, (exposure == tt__ExposureMode__AUTO) ? V4L2_EXPOSURE_AUTO : V4L2_EXPOSURE_MANUAL);
 			if (timg__SetImagingSettings->ImagingSettings->Exposure->ExposureTime)
 			{
 				int exposureTime = *timg__SetImagingSettings->ImagingSettings->Exposure->ExposureTime;
@@ -160,8 +161,8 @@ int ImagingBindingService::SetImagingSettings(_timg__SetImagingSettings *timg__S
 		}
 		if (timg__SetImagingSettings->ImagingSettings->WhiteBalance)
 		{
-			int autoWhiteBalance = (timg__SetImagingSettings->ImagingSettings->WhiteBalance->Mode == tt__WhiteBalanceMode__AUTO);
-			ctx->setCtrlValue(it->first, V4L2_CID_AUTO_WHITE_BALANCE, autoWhiteBalance);
+			int whiteBalance = timg__SetImagingSettings->ImagingSettings->WhiteBalance->Mode;
+			ctx->setCtrlValue(it->first, V4L2_CID_AUTO_N_PRESET_WHITE_BALANCE, (whiteBalance == tt__WhiteBalanceMode__AUTO) ? V4L2_WHITE_BALANCE_AUTO : V4L2_WHITE_BALANCE_MANUAL);
 			if (timg__SetImagingSettings->ImagingSettings->WhiteBalance->CrGain)
 			{
 				int redBalance = *timg__SetImagingSettings->ImagingSettings->WhiteBalance->CrGain;
@@ -208,10 +209,16 @@ int ImagingBindingService::GetOptions(_timg__GetOptions *timg__GetOptions, _timg
 		timg__GetOptionsResponse->ImagingOptions->Exposure = soap_new_tt__ExposureOptions20(this->soap);
 		timg__GetOptionsResponse->ImagingOptions->Exposure->Mode.push_back(tt__ExposureMode__AUTO);
 		timg__GetOptionsResponse->ImagingOptions->Exposure->Mode.push_back(tt__ExposureMode__MANUAL);
+		std::pair<int, int> exposureRange = ctx->getCtrlRange(it->first, V4L2_CID_EXPOSURE_ABSOLUTE);
+		timg__GetOptionsResponse->ImagingOptions->Exposure->ExposureTime = soap_new_req_tt__FloatRange(this->soap, exposureRange.first, exposureRange.second);
 		
 		timg__GetOptionsResponse->ImagingOptions->WhiteBalance = soap_new_tt__WhiteBalanceOptions20(this->soap);
 		timg__GetOptionsResponse->ImagingOptions->WhiteBalance->Mode.push_back(tt__WhiteBalanceMode__AUTO);
 		timg__GetOptionsResponse->ImagingOptions->WhiteBalance->Mode.push_back(tt__WhiteBalanceMode__MANUAL);
+		std::pair<int, int> redbalanceRange = ctx->getCtrlRange(it->first, V4L2_CID_RED_BALANCE);
+		timg__GetOptionsResponse->ImagingOptions->WhiteBalance->YrGain = soap_new_req_tt__FloatRange(this->soap, redbalanceRange.first, redbalanceRange.second);
+		std::pair<int, int> bluebalanceRange = ctx->getCtrlRange(it->first, V4L2_CID_BLUE_BALANCE);
+		timg__GetOptionsResponse->ImagingOptions->WhiteBalance->YbGain = soap_new_req_tt__FloatRange(this->soap, bluebalanceRange.first, bluebalanceRange.second);
 		
 		timg__GetOptionsResponse->ImagingOptions->Focus = soap_new_tt__FocusOptions20(this->soap);
 		timg__GetOptionsResponse->ImagingOptions->Focus->AutoFocusModes.push_back(tt__AutoFocusMode__AUTO);

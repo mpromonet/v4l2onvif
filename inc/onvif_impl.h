@@ -63,6 +63,7 @@ public:
 	tev__Capabilities*  getEventServiceCapabilities    (struct soap* soap);
 	tls__Capabilities*  getDisplayServiceCapabilities  (struct soap* soap);
 	tmd__Capabilities*  getDeviceIOServiceCapabilities (struct soap* soap);
+	tptz__Capabilities* getPTZServiceCapabilities      (struct soap* soap);
 
 	// device
 	tds__StorageConfiguration* getStorageCfg(struct soap* soap, const std::string & path);

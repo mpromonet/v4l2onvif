@@ -304,8 +304,14 @@ tt__Profile *ServiceContext::getProfile(struct soap *soap, const std::string &to
 	profile->VideoSourceConfiguration = getVideoSourceCfg(soap, token);
 	profile->VideoEncoderConfiguration = getVideoEncoderCfg(soap, token);
 	profile->VideoAnalyticsConfiguration = soap_new_tt__VideoAnalyticsConfiguration(soap);
+	profile->VideoAnalyticsConfiguration->Name = token;
+	profile->VideoAnalyticsConfiguration->token = token;	
 	profile->PTZConfiguration = soap_new_tt__PTZConfiguration(soap);
+	profile->PTZConfiguration->Name = token;
+	profile->PTZConfiguration->token = token;
 	profile->MetadataConfiguration = soap_new_tt__MetadataConfiguration(soap);
+	profile->MetadataConfiguration->Name = token;
+	profile->MetadataConfiguration->token = token;
 	return profile;
 }
 
@@ -531,5 +537,11 @@ tls__Capabilities *ServiceContext::getDisplayServiceCapabilities(struct soap *so
 tmd__Capabilities *ServiceContext::getDeviceIOServiceCapabilities(struct soap *soap)
 {
 	tmd__Capabilities *capabilities = soap_new_tmd__Capabilities(soap);
+	return capabilities;
+}
+
+tptz__Capabilities *ServiceContext::getPTZServiceCapabilities(struct soap *soap)
+{
+	tptz__Capabilities *capabilities = soap_new_tptz__Capabilities(soap);
 	return capabilities;
 }
