@@ -377,8 +377,10 @@ tt__VideoEncoderConfiguration *ServiceContext::getVideoEncoderCfg(struct soap *s
 		if (format == V4L2_PIX_FMT_H264)
 		{
 			cfg->Encoding = tt__VideoEncoding__H264;
+			cfg->RateControl->BitrateLimit = getCtrlValue(token, V4L2_CID_MPEG_VIDEO_BITRATE);
 			cfg->H264 = soap_new_tt__H264Configuration(soap);
 			cfg->H264->H264Profile = getH264Profile(getCtrlValue(token, V4L2_CID_MPEG_VIDEO_H264_PROFILE));
+			cfg->H264->GovLength = getCtrlValue(token, V4L2_CID_MPEG_VIDEO_H264_I_PERIOD);
 		}
 		else if (format == V4L2_PIX_FMT_JPEG)
 		{
@@ -456,11 +458,16 @@ tt__VideoEncoderConfigurationOptions *ServiceContext::getVideoEncoderCfgOptions(
 		close(fd);
 		std::cout << "[" << minFrameRate << "," << maxFrameRate << "]"<< std::endl;
 
+		cfg->Extension = soap_new_tt__VideoEncoderOptionsExtension(soap);
 		if (format == V4L2_PIX_FMT_H264)
 		{
-			cfg->H264 = soap_new_tt__H264Options(soap);
-			cfg->H264->ResolutionsAvailable = resolutions;
-			cfg->H264->FrameRateRange = soap_new_req_tt__IntRange(soap, minFrameRate, maxFrameRate);
+			cfg->Extension->H264 = soap_new_tt__H264Options2(soap);
+			cfg->Extension->H264->ResolutionsAvailable = resolutions;
+			cfg->Extension->H264->FrameRateRange = soap_new_req_tt__IntRange(soap, minFrameRate, maxFrameRate);
+			std::pair<int, int> bitrate = getCtrlRange(token, V4L2_CID_MPEG_VIDEO_BITRATE);
+			cfg->Extension->H264->BitrateRange = soap_new_req_tt__IntRange(soap, bitrate.first, bitrate.second);
+			std::pair<int, int> gov = getCtrlRange(token, V4L2_CID_MPEG_VIDEO_H264_I_PERIOD);
+			cfg->Extension->H264->GovLengthRange = soap_new_req_tt__IntRange(soap, gov.first, gov.second);
 		}
 		else if (format == V4L2_PIX_FMT_JPEG)
 		{

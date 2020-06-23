@@ -21,3 +21,23 @@
 ## Usage
 
     onvif-server.exe [-u username] [-p password] [-i v4l2 input device] [-o v4l2 output device]
+
+Using Docker image
+===============
+You can start the application using the docker image :
+
+        docker run -p 8080:8080 -it mpromonet/v4l2onvif
+
+You can expose V4L2 devices from your host using :
+
+        docker run --device=/dev/video0 -p 8080:8080 -it mpromonet/v4l2onvif
+
+The container entry point is the v4l2web application, then you can :
+
+* get the help using :
+
+        docker run -it mpromonet/v4l2onvif -h
+
+* run the container specifying some paramaters :
+
+        docker run --device=/dev/video0 -p 8080:8080 -it mpromonet/v4l2onvif -uadmin -padmin 
