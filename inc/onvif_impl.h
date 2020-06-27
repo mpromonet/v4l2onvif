@@ -91,6 +91,8 @@ public:
 	int         m_rtspport;
 	std::map<std::string, User> m_userList;
 	std::list<NotificationConsumerBindingProxy*> m_subscriber;
+	std::string m_timezone;
+	int         m_isdst;
 };
 
 template<typename T>

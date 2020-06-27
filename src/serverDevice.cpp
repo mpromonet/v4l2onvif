@@ -190,19 +190,27 @@ int DeviceBindingService::GetDeviceInformation(_tds__GetDeviceInformation *tds__
 int DeviceBindingService::SetSystemDateAndTime(_tds__SetSystemDateAndTime *tds__SetSystemDateAndTime, _tds__SetSystemDateAndTimeResponse *tds__SetSystemDateAndTimeResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
+	if (tds__SetSystemDateAndTime->TimeZone) {
+		ctx->m_timezone = tds__SetSystemDateAndTime->TimeZone->TZ;
+	}
+	if (tds__SetSystemDateAndTime->TimeZone) {
+		ctx->m_isdst = tds__SetSystemDateAndTime->DaylightSavings;
+	}
 	return SOAP_OK;
 }
 
 int DeviceBindingService::GetSystemDateAndTime(_tds__GetSystemDateAndTime *tds__GetSystemDateAndTime, _tds__GetSystemDateAndTimeResponse *tds__GetSystemDateAndTimeResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
+	ServiceContext* ctx = (ServiceContext*)this->soap->user;
 	const time_t timestamp = time(NULL);
 	struct tm * tm = gmtime(&timestamp);
 	tds__GetSystemDateAndTimeResponse->SystemDateAndTime = soap_new_tt__SystemDateTime(this->soap);
 	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->DateTimeType = tt__SetDateTimeType__Manual;
-	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->DaylightSavings = tm->tm_isdst;
+	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->DaylightSavings = ctx->m_isdst;
 	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->TimeZone = soap_new_tt__TimeZone(this->soap);
-	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->TimeZone->TZ = tm->tm_zone;
+	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->TimeZone->TZ = ctx->m_timezone;
 	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->UTCDateTime = soap_new_tt__DateTime(this->soap);
 	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->UTCDateTime->Time = soap_new_req_tt__Time(this->soap, tm->tm_hour, tm->tm_min  , tm->tm_sec );
 	tds__GetSystemDateAndTimeResponse->SystemDateAndTime->UTCDateTime->Date = soap_new_req_tt__Date(this->soap, tm->tm_year, tm->tm_mon+1, tm->tm_mday);

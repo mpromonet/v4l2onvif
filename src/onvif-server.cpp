@@ -157,7 +157,11 @@ int main(int argc, char* argv[])
 	deviceCtx.m_port          = httpport;
 	deviceCtx.m_rtspport      = atoi(rtspport.c_str());
 	deviceCtx.m_outdevice     = outdevice;
-	
+	const time_t timestamp = time(NULL);
+	struct tm * localtm = localtime(&timestamp);
+	deviceCtx.m_timezone     = localtm->tm_zone;
+	deviceCtx.m_isdst        = localtm->tm_isdst;
+
 	// start WS server
 	struct soap *soap = soap_new();
 	soap->user = (void*)&deviceCtx;

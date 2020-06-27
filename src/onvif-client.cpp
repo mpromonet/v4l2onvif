@@ -257,6 +257,17 @@ int main(int argc, char* argv[])
 	{
 		deviceProxy.soap_stream_fault(std::cerr);
 	}
+
+	//
+	std::cout << "=>Device::GetSystemDateAndTime" << std::endl;		
+	_tds__GetSystemDateAndTime         tds__GetSystemDateAndTime;
+       	_tds__GetSystemDateAndTimeResponse tds__GetSystemDateAndTimeResponse;
+	addSecurity(deviceProxy.soap, username, password);	
+	if (deviceProxy.GetSystemDateAndTime(&tds__GetSystemDateAndTime, &tds__GetSystemDateAndTimeResponse) == SOAP_OK)
+	{
+		if (tds__GetSystemDateAndTimeResponse.SystemDateAndTime && tds__GetSystemDateAndTimeResponse.SystemDateAndTime->TimeZone)
+			std::cout << "\tTZ:" << tds__GetSystemDateAndTimeResponse.SystemDateAndTime->TimeZone->TZ << std::endl;		
+	}
 	
 	// call Device::GetServices
 	std::cout << "=>Device::GetServices" << std::endl;		
