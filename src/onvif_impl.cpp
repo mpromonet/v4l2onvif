@@ -390,92 +390,100 @@ tt__VideoEncoderConfiguration *ServiceContext::getVideoEncoderCfg(struct soap *s
 	return cfg;
 }
 
+void computeFrameRate(int fd, int width, int height, int format, int& minFrameRate, int& maxFrameRate) {
+	struct v4l2_frmivalenum frmival;
+	memset(&frmival,0,sizeof(frmival));
+	frmival.pixel_format = format;
+	frmival.width = width;
+	frmival.height = height;
+	for (;ioctl(fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival) == 0; frmival.index++) 
+	{
+		if (frmival.type == V4L2_FRMIVAL_TYPE_DISCRETE) {
+			int frameRate = frmival.discrete.denominator/frmival.discrete.numerator;
+			if (frameRate > maxFrameRate) maxFrameRate = frameRate;
+			if (frameRate < minFrameRate) minFrameRate = frameRate;
+		} else {
+			int frameRate = frmival.stepwise.max.denominator/frmival.stepwise.max.numerator;
+			if (frameRate < minFrameRate) minFrameRate = frameRate;
+			frameRate = frmival.stepwise.min.denominator/frmival.stepwise.min.numerator;
+			if (frameRate > maxFrameRate) maxFrameRate = frameRate;
+		}
+	}
+}
+
 tt__VideoEncoderConfigurationOptions *ServiceContext::getVideoEncoderCfgOptions(struct soap *soap, const std::string &token)
 {
 	tt__VideoEncoderConfigurationOptions *cfg = soap_new_tt__VideoEncoderConfigurationOptions(soap);
-	int width;
-	int height;
-	int format;
-	if (getFormat(token, width, height, format))
-	{
-		cfg->QualityRange = soap_new_req_tt__IntRange(soap, 0, 100);
-		std::vector<tt__VideoResolution *> resolutions;
-		int fd = open(token.c_str(), O_RDWR | O_NONBLOCK, 0);
+	int fd = open(token.c_str(), O_RDWR | O_NONBLOCK, 0);
+    if (fd != -1)
+    {
+        struct v4l2_fmtdesc fmtdesc;
+        memset(&fmtdesc,0,sizeof(fmtdesc));
+        fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        for (;ioctl(fd,VIDIOC_ENUM_FMT,&fmtdesc) == 0; fmtdesc.index++)
+        {    
+			cfg->QualityRange = soap_new_req_tt__IntRange(soap, 0, 100);
+			std::vector<tt__VideoResolution *> resolutions;
+			int minFrameRate = 0;
+			int maxFrameRate = 0;
 
-		struct v4l2_frmsizeenum frmsize;
-		memset(&frmsize, 0, sizeof(frmsize));
-		frmsize.pixel_format = format;
-		frmsize.index = 0;
-		for (frmsize.index = 0; (ioctl(fd, VIDIOC_ENUM_FRAMESIZES, &frmsize) == 0); frmsize.index++)
-		{
-			if (frmsize.type == V4L2_FRMSIZE_TYPE_DISCRETE)
+			struct v4l2_frmsizeenum frmsize;
+			memset(&frmsize, 0, sizeof(frmsize));
+			frmsize.pixel_format = fmtdesc.pixelformat;
+			frmsize.index = 0;
+			for (frmsize.index = 0; (ioctl(fd, VIDIOC_ENUM_FRAMESIZES, &frmsize) == 0); frmsize.index++)
 			{
-				resolutions.push_back(soap_new_req_tt__VideoResolution(soap, frmsize.discrete.width, frmsize.discrete.height));
-			}
-			else
-			{
-				int nb = (frmsize.stepwise.max_width - frmsize.stepwise.min_width) / frmsize.stepwise.step_width;
-				if (nb > 4)
+				if (frmsize.type == V4L2_FRMSIZE_TYPE_DISCRETE)
 				{
-					frmsize.stepwise.step_width *= (nb / 4);
+					resolutions.push_back(soap_new_req_tt__VideoResolution(soap, frmsize.discrete.width, frmsize.discrete.height));
+					computeFrameRate(fd, frmsize.discrete.width, frmsize.discrete.height, frmsize.pixel_format, minFrameRate, maxFrameRate);
 				}
-				nb = (frmsize.stepwise.max_height - frmsize.stepwise.min_height) / frmsize.stepwise.step_height;
-				if (nb > 4)
+				else
 				{
-					frmsize.stepwise.step_height *= (nb / 4);
-				}
-
-				for (int w = frmsize.stepwise.min_width; w <= frmsize.stepwise.max_width; w += frmsize.stepwise.step_width)
-				{
-					for (int h = frmsize.stepwise.min_height; h <= frmsize.stepwise.max_height; h += frmsize.stepwise.step_height)
+					int nb = (frmsize.stepwise.max_width - frmsize.stepwise.min_width) / frmsize.stepwise.step_width;
+					if (nb > 4)
 					{
-						resolutions.push_back(soap_new_req_tt__VideoResolution(soap, w, h));
+						frmsize.stepwise.step_width *= (nb / 4);
+					}
+					nb = (frmsize.stepwise.max_height - frmsize.stepwise.min_height) / frmsize.stepwise.step_height;
+					if (nb > 4)
+					{
+						frmsize.stepwise.step_height *= (nb / 4);
+					}
+
+					for (int w = frmsize.stepwise.min_width; w <= frmsize.stepwise.max_width; w += frmsize.stepwise.step_width)
+					{
+						for (int h = frmsize.stepwise.min_height; h <= frmsize.stepwise.max_height; h += frmsize.stepwise.step_height)
+						{
+							resolutions.push_back(soap_new_req_tt__VideoResolution(soap, w, h));
+							computeFrameRate(fd, w, h, frmsize.pixel_format, minFrameRate, maxFrameRate);
+						}
 					}
 				}
 			}
-		}
 
-		struct v4l2_frmivalenum frmival;
-		memset(&frmival,0,sizeof(frmival));
-		frmival.pixel_format = format;
-		frmival.width = width;
-		frmival.height = height;
-		int minFrameRate = 0;
-		int maxFrameRate = 0;
-		for (;ioctl(fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival) == 0; frmival.index++) 
-		{
-			if (frmival.type == V4L2_FRMIVAL_TYPE_DISCRETE) {
-				int frameRate = frmival.discrete.denominator/frmival.discrete.numerator;
-				if (frameRate > maxFrameRate) maxFrameRate = frameRate;
-				if (frameRate < minFrameRate) minFrameRate = frameRate;
-			} else {
-				int frameRate = frmival.stepwise.max.denominator/frmival.stepwise.max.numerator;
-				if (frameRate < minFrameRate) minFrameRate = frameRate;
-				frameRate = frmival.stepwise.min.denominator/frmival.stepwise.min.numerator;
-				if (frameRate > maxFrameRate) maxFrameRate = frameRate;
+			std::cout << "[" << minFrameRate << "," << maxFrameRate << "]"<< std::endl;
+
+			cfg->Extension = soap_new_tt__VideoEncoderOptionsExtension(soap);
+			if (fmtdesc.pixelformat == V4L2_PIX_FMT_H264)
+			{
+				cfg->Extension->H264 = soap_new_tt__H264Options2(soap);
+				cfg->Extension->H264->ResolutionsAvailable = resolutions;
+				cfg->Extension->H264->FrameRateRange = soap_new_req_tt__IntRange(soap, minFrameRate, maxFrameRate);
+				std::pair<int, int> bitrate = getCtrlRange(token, V4L2_CID_MPEG_VIDEO_BITRATE);
+				cfg->Extension->H264->BitrateRange = soap_new_req_tt__IntRange(soap, bitrate.first, bitrate.second);
+				std::pair<int, int> gov = getCtrlRange(token, V4L2_CID_MPEG_VIDEO_H264_I_PERIOD);
+				cfg->Extension->H264->GovLengthRange = soap_new_req_tt__IntRange(soap, gov.first, gov.second);
 			}
-		}
-		close(fd);
-		std::cout << "[" << minFrameRate << "," << maxFrameRate << "]"<< std::endl;
-
-		cfg->Extension = soap_new_tt__VideoEncoderOptionsExtension(soap);
-		if (format == V4L2_PIX_FMT_H264)
-		{
-			cfg->Extension->H264 = soap_new_tt__H264Options2(soap);
-			cfg->Extension->H264->ResolutionsAvailable = resolutions;
-			cfg->Extension->H264->FrameRateRange = soap_new_req_tt__IntRange(soap, minFrameRate, maxFrameRate);
-			std::pair<int, int> bitrate = getCtrlRange(token, V4L2_CID_MPEG_VIDEO_BITRATE);
-			cfg->Extension->H264->BitrateRange = soap_new_req_tt__IntRange(soap, bitrate.first, bitrate.second);
-			std::pair<int, int> gov = getCtrlRange(token, V4L2_CID_MPEG_VIDEO_H264_I_PERIOD);
-			cfg->Extension->H264->GovLengthRange = soap_new_req_tt__IntRange(soap, gov.first, gov.second);
-		}
-		else if (format == V4L2_PIX_FMT_JPEG)
-		{
-			cfg->JPEG = soap_new_tt__JpegOptions(soap);
-			cfg->JPEG->ResolutionsAvailable = resolutions;
-			cfg->JPEG->FrameRateRange = soap_new_req_tt__IntRange(soap, minFrameRate, maxFrameRate);
-		}
-	}
+			else if (fmtdesc.pixelformat == V4L2_PIX_FMT_JPEG)
+			{
+				cfg->JPEG = soap_new_tt__JpegOptions(soap);
+				cfg->JPEG->ResolutionsAvailable = resolutions;
+				cfg->JPEG->FrameRateRange = soap_new_req_tt__IntRange(soap, minFrameRate, maxFrameRate);
+			}
+        }
+        close(fd);
+    }
 	return cfg;
 }
 
