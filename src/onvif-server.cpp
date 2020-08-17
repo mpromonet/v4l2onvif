@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
 			case 'o':	outdevice = optarg; break;
 			
 			case 'h':
-				std::cout << argv[0] << " [-u username] [-p password] [-i v4l2 input device] [-o v4l2 output device]" << std::endl;
+				std::cout << argv[0] << " [-H http port] [-R rtsp port] [-u username] [-p password] [-i v4l2 input device] [-o v4l2 output device]" << std::endl;
 				exit(0);
 			break;
 		}

@@ -1,0 +1,8 @@
+#!/bin/sh -e
+
+http_port="$(snapctl get http-port)"
+echo "http_port:$http_port"
+rtsp_port="$(snapctl get rtsp-port)"
+echo "rtsp_port:$rtsp_port"
+devices="$(snapctl get devices)"
+echo "devices:$devices"

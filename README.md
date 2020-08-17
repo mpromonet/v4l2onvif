@@ -20,7 +20,10 @@
 
 ## Usage
 
-    onvif-server.exe [-u username] [-p password] [-i v4l2 input device] [-o v4l2 output device]
+    onvif-server.exe [-H http port] [-R rtsp port] [-u username] [-p password] [-i v4l2 input device] [-o v4l2 output device]
+
+    onvif-client.exe [-u username] [-p password] url
+
 
 Using Docker image
 ===============
