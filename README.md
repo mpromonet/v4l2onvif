@@ -35,7 +35,7 @@ You can expose V4L2 devices from your host using :
 
         docker run --device=/dev/video0 -p 8080:8080 -it mpromonet/v4l2onvif
 
-The container entry point is the v4l2web application, then you can :
+The container entry point is the onvif-server.exe application, then you can :
 
 * get the help using :
 
