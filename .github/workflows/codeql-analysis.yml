@@ -15,6 +15,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: apt
+      run: sudo apt-get install -y --no-install-recommends gsoap libgsoap-dev libssl-dev zlib1g-dev
+      
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
