@@ -41,6 +41,4 @@ FROM $IMAGE
 WORKDIR /app
 COPY --from=builder /usr/bin/ /app/
 
-EXPOSE 8080
-
 ENTRYPOINT [ "./onvif-server.exe" ]

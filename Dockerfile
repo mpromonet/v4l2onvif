@@ -21,6 +21,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
     && ./onvif-server.exe -h
 
 
-EXPOSE 8080
-
 ENTRYPOINT [ "./onvif-server.exe" ]
