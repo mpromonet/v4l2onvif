@@ -13,7 +13,7 @@ COPY . /v4l2onvif
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git wget g++ make cmake zlib1g-dev libssl-dev autoconf automake flex bison busybox \
         # gsoap native \
         && wget -qO- https://sourceforge.net/projects/gsoap2/files/gsoap-2.8/gsoap_2.8.112.zip | busybox unzip - \
-        && cd gsoap* && autoreconf -i && ./configure --prefix=/usr && make CXXFLAGS="-fpermissive" && make install && make clean && cd .. \
+        && cd gsoap* && autoreconf -i && ./configure --prefix=/usr && make install CXXFLAGS="-fpermissive" && make clean && cd .. \
         # cross-compiler \
         && echo "CROSSCOMPILER=${CROSSCOMPILER}" \
         && wget -qO- ${CROSSCOMPILER} | tar xz -C /opt \
@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
         # gsoap \
         && cd gsoap* \
                 && cd gsoap/wsdl && soapcpp2 -SC -pwsdl -I../import ./wsdl.h && cd ../.. \
-                && ac_cv_func_malloc_0_nonnull=yes ./configure --host arm --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr && make install LDFLAGS="-ldl" \
+                && ac_cv_func_malloc_0_nonnull=yes ./configure --host arm --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr && make install CXXFLAGS="-fpermissive" LDFLAGS="-ldl" \
         && cd .. \
         # build \
         && make GSOAP_BIN=/usr/bin  \
