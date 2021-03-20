@@ -914,3 +914,20 @@ int DeviceBindingService::DeleteStorageConfiguration(_tds__DeleteStorageConfigur
 	return SOAP_OK;
 }
 
+int DeviceBindingService::GetGeoLocation(_tds__GetGeoLocation *tds__GetGeoLocation, _tds__GetGeoLocationResponse *tds__GetGeoLocationResponse) 
+{
+	std::cout << __FUNCTION__ << std::endl;
+	return SOAP_OK;
+}
+
+int DeviceBindingService::SetGeoLocation(_tds__SetGeoLocation *tds__SetGeoLocation, _tds__SetGeoLocationResponse *tds__SetGeoLocationResponse) 
+{
+	std::cout << __FUNCTION__ << std::endl;
+	return SOAP_OK;
+}
+
+int DeviceBindingService::DeleteGeoLocation(_tds__DeleteGeoLocation *tds__DeleteGeoLocation, _tds__DeleteGeoLocationResponse *tds__DeleteGeoLocationResponse)
+{
+	std::cout << __FUNCTION__ << std::endl;
+	return SOAP_OK;
+}
