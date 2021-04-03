@@ -49,7 +49,7 @@
 // v4l2rstp
 #include "logger.h"
 #include "V4l2Capture.h"
-#include "DeviceSourceFactory.h"
+#include "V4l2Output.h"
 #include "V4l2RTSPServer.h"
 
 
@@ -192,26 +192,30 @@ int main(int argc, char* argv[])
 			});
 
 			// start RTSP
-			V4l2RTSPServer rtspserver(deviceCtx.m_rtspport);
+			V4l2RTSPServer rtspServer(deviceCtx.m_rtspport);
 
 			for (auto & device : deviceList) {
 				std::list<unsigned int> videoformatList = {V4L2_PIX_FMT_H264, V4L2_PIX_FMT_MJPEG, V4L2_PIX_FMT_JPEG, 0 };
-				V4l2Capture* videoCapture = V4l2Capture::create(V4L2DeviceParameters(device.first.c_str(), videoformatList, 0, 0, 0), V4l2Access::IOTYPE_MMAP);
-				if (videoCapture) {
-					StreamReplicator* videoReplicator = DeviceSourceFactory::createStreamReplicator(rtspserver.env(), videoCapture->getFormat(), new DeviceCaptureAccess<V4l2Capture>(videoCapture));
-					if (videoReplicator)
-					{
-						std::string url = basename(device.first.c_str());
-						std::cout << "add RTSP session url:" << url << std::endl;
-						rtspserver.addSession(url, UnicastServerMediaSubsession::createNew(*rtspserver.env(), videoReplicator, V4l2RTSPServer::getVideoRtpFormat(videoCapture->getFormat())));			
-					}
-				}				
-				device.second = videoCapture;
+				V4l2Output* out = NULL;
+				V4L2DeviceParameters inParam(device.first.c_str(), videoformatList, 0, 0, 0, IOTYPE_MMAP);
+				std::string rtpVideoFormat;
+				StreamReplicator* videoReplicator = rtspServer.CreateVideoReplicator(
+								inParam,
+								5, true, true,
+								"", IOTYPE_MMAP, out,
+								rtpVideoFormat);
+
+				if (videoReplicator)
+				{
+					std::string url = basename(device.first.c_str());
+					std::cout << "add RTSP session url:" << url << std::endl;
+					rtspServer.AddUnicastSession(url, videoReplicator, rtpVideoFormat, NULL, "");
+				}
 			}
 
 			char rtspstop = 0; 
-			std::thread rtsp( [&rtspserver,&rtspstop] {
-				rtspserver.eventLoop(&rtspstop); 
+			std::thread rtsp( [&rtspServer,&rtspstop] {
+				rtspServer.eventLoop(&rtspstop); 
 			});		
 
 			// SOAP services
@@ -229,10 +233,6 @@ int main(int argc, char* argv[])
 			}
 			rtspstop = 1;
 			rtsp.join();
-
-			for (auto & device : deviceList) {
-				delete device.second;
-			}
 
 			conf.m_stop = true;
 			wsdd.join();

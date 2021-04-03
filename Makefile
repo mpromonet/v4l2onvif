@@ -64,13 +64,13 @@ libwsdd.a:
 # v4l2rtsp
 liblibv4l2rtspserver.a:
 	git submodule update --recursive --init v4l2rtspserver
-	cd v4l2rtspserver && cmake . && make libv4l2rtspserver		
+	cd v4l2rtspserver && cmake -DALSA=OFF . && make libv4l2rtspserver		
 	cp v4l2rtspserver/$@ .
 
 # lib4l2cpp
 libv4l2wrapper.a: 
 	git submodule update --recursive --init v4l2rtspserver
-	cd v4l2rtspserver && cmake . && make v4l2wrapper
+	cd v4l2rtspserver && cmake -DALSA=OFF . && make v4l2wrapper
 	cp v4l2rtspserver/$@ .
 
 LIVE = v4l2rtspserver/live
