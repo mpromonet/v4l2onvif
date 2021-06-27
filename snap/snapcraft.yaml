@@ -16,6 +16,7 @@
       source: .
       source-type: git
       build-packages:
+      - gcc
       - g++
       - make
       - cmake
