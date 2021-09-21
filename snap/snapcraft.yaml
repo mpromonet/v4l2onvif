@@ -7,7 +7,6 @@
 
   grade: stable 
   confinement: strict
-  base: core20
 
   parts:
     v4l2onvif:
@@ -16,10 +15,7 @@
       source: .
       source-type: git
       build-packages:
-      - gcc-c++
-      - gcc
       - g++
-      - make
       - cmake
       - pkg-config
       - autoconf 
