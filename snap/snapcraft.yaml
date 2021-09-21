@@ -16,7 +16,7 @@
       source: .
       source-type: git
       build-packages:
-      - build-essential
+      - gcc-c++
       - gcc
       - g++
       - make
