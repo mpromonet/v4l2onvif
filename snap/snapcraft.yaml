@@ -28,7 +28,7 @@
       - zlib1g-dev
       stage-packages:
       - libssl1.1
-      - libgsoap-2.8
+      - libgsoap-2.8.91
 
   apps:
     server:
