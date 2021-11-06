@@ -197,19 +197,19 @@ int main(int argc, char* argv[])
 			for (auto & device : deviceList) {
 				std::list<unsigned int> videoformatList = {V4L2_PIX_FMT_H264, V4L2_PIX_FMT_MJPEG, V4L2_PIX_FMT_JPEG, 0 };
 				V4l2Output* out = NULL;
-				V4L2DeviceParameters inParam(device.first.c_str(), videoformatList, 0, 0, 0, IOTYPE_MMAP);
-				std::string rtpVideoFormat;
+				V4L2DeviceParameters inParam(device.first.c_str(), videoformatList, 0, 0, 0);
 				StreamReplicator* videoReplicator = rtspServer.CreateVideoReplicator(
 								inParam,
 								5, true, true,
-								"", IOTYPE_MMAP, out,
-								rtpVideoFormat);
+								"", IOTYPE_MMAP, out);
 
 				if (videoReplicator)
 				{
 					std::string url = basename(device.first.c_str());
 					std::cout << "add RTSP session url:" << url << std::endl;
-					rtspServer.AddUnicastSession(url, videoReplicator, rtpVideoFormat, NULL, "");
+					rtspServer.AddUnicastSession(url, videoReplicator, NULL);
+				} else {
+					std::cout << "Fails to create Source for device:" << device.first << std::endl;
 				}
 			}
 

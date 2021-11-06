@@ -11,7 +11,7 @@ GSOAP_BIN?=$(GSOAP_PREFIX)/bin
 GSOAP_BASE=$(GSOAP_PREFIX)/share/gsoap
 GSOAP_PLUGINS=$(GSOAP_BASE)/plugin
 
-CXXFLAGS+=-std=c++11 -g -I inc -I ws-discovery/gsoap/
+CXXFLAGS+=-std=c++11 -g2 -I inc -I ws-discovery/gsoap/
 CXXFLAGS+=-I gen -I $(GSOAP_PREFIX)/include -I $(GSOAP_PLUGINS) 
 CXXFLAGS+=-DWITH_OPENSSL -DSOAP_PURE_VIRTUAL -fpermissive -pthread -DVERSION=\"$(VERSION)\"
 LDFLAGS+=-L $(GSOAP_PREFIX)/lib/ -lgsoapssl++ -lz -pthread -lssl -lcrypto -ldl -static-libstdc++
@@ -71,7 +71,7 @@ liblibv4l2rtspserver.a:
 libv4l2wrapper.a: 
 	git submodule update --recursive --init v4l2rtspserver
 	cd v4l2rtspserver && cmake -DALSA=OFF . && make v4l2wrapper
-	cp v4l2rtspserver/$@ .
+	cp v4l2rtspserver/v4l2wrapper/$@ .
 
 LIVE = v4l2rtspserver/live
 CXXFLAGS += -I ${LIVE}/groupsock/include -I ${LIVE}/liveMedia/include -I ${LIVE}/UsageEnvironment/include -I ${LIVE}/BasicUsageEnvironment/include
