@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
 				V4L2DeviceParameters inParam(device.first.c_str(), videoformatList, 0, 0, 0);
 				StreamReplicator* videoReplicator = rtspServer.CreateVideoReplicator(
 								inParam,
-								5, true, true,
+								5, V4L2DeviceSource::CAPTURE_INTERNAL_THREAD, true,
 								"", IOTYPE_MMAP, out);
 
 				if (videoReplicator)
