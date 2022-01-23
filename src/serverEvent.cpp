@@ -23,15 +23,15 @@
 #include "onvif_impl.h"
 
 
-int EventBindingService::GetServiceCapabilities(_tev__GetServiceCapabilities *tev__GetServiceCapabilities, _tev__GetServiceCapabilitiesResponse *tev__GetServiceCapabilitiesResponse) 
+int EventBindingService::GetServiceCapabilities(_tev__GetServiceCapabilities *tev__GetServiceCapabilities, _tev__GetServiceCapabilitiesResponse &tev__GetServiceCapabilitiesResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
-	tev__GetServiceCapabilitiesResponse->Capabilities = ctx->getEventServiceCapabilities(this->soap);		
+	tev__GetServiceCapabilitiesResponse.Capabilities = ctx->getEventServiceCapabilities(this->soap);		
 	return SOAP_OK;
 }
 
-int EventBindingService::CreatePullPointSubscription(_tev__CreatePullPointSubscription *tev__CreatePullPointSubscription, _tev__CreatePullPointSubscriptionResponse *tev__CreatePullPointSubscriptionResponse) 
+int EventBindingService::CreatePullPointSubscription(_tev__CreatePullPointSubscription *tev__CreatePullPointSubscription, _tev__CreatePullPointSubscriptionResponse &tev__CreatePullPointSubscriptionResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
@@ -43,15 +43,15 @@ int EventBindingService::CreatePullPointSubscription(_tev__CreatePullPointSubscr
 	timeval tv;
 	tv.tv_sec = time(NULL);
 	tv.tv_usec = 0;
-	tev__CreatePullPointSubscriptionResponse->SubscriptionReference.Address = strcpy((char*)soap_malloc(this->soap, url.size()+1), url.c_str());
-	tev__CreatePullPointSubscriptionResponse->wsnt__CurrentTime = tv;
+	tev__CreatePullPointSubscriptionResponse.SubscriptionReference.Address = strcpy((char*)soap_malloc(this->soap, url.size()+1), url.c_str());
+	tev__CreatePullPointSubscriptionResponse.wsnt__CurrentTime = tv;
 	tv.tv_sec += 3600;
-	tev__CreatePullPointSubscriptionResponse->wsnt__TerminationTime = tv;
+	tev__CreatePullPointSubscriptionResponse.wsnt__TerminationTime = tv;
 		
 	return SOAP_OK;
 }
 
-int EventBindingService::GetEventProperties(_tev__GetEventProperties *tev__GetEventProperties, _tev__GetEventPropertiesResponse *tev__GetEventPropertiesResponse) 
+int EventBindingService::GetEventProperties(_tev__GetEventProperties *tev__GetEventProperties, _tev__GetEventPropertiesResponse &tev__GetEventPropertiesResponse) 
 {
 	std::cout << __FUNCTION__ << std::endl;
 	return SOAP_OK;

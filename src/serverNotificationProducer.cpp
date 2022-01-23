@@ -23,7 +23,7 @@
 #include "soapNotificationConsumerBindingProxy.h"
 #include "onvif_impl.h"
 
-int NotificationProducerBindingService::Subscribe(_wsnt__Subscribe *wsnt__Subscribe, _wsnt__SubscribeResponse *wsnt__SubscribeResponse)
+int NotificationProducerBindingService::Subscribe(_wsnt__Subscribe *wsnt__Subscribe, _wsnt__SubscribeResponse &wsnt__SubscribeResponse)
 {
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
@@ -48,15 +48,15 @@ int NotificationProducerBindingService::Subscribe(_wsnt__Subscribe *wsnt__Subscr
 	timeval tv;
 	tv.tv_sec = time(NULL);
 	tv.tv_usec = 0;
-	wsnt__SubscribeResponse->SubscriptionReference.Address = strcpy((char*)soap_malloc(this->soap, url.size()+1), url.c_str());
-	wsnt__SubscribeResponse->CurrentTime = soap_new_ptr(this->soap,tv);
+	wsnt__SubscribeResponse.SubscriptionReference.Address = strcpy((char*)soap_malloc(this->soap, url.size()+1), url.c_str());
+	wsnt__SubscribeResponse.CurrentTime = soap_new_ptr(this->soap,tv);
 	tv.tv_sec += 3600;
-	wsnt__SubscribeResponse->TerminationTime = soap_new_ptr(this->soap,tv);
+	wsnt__SubscribeResponse.TerminationTime = soap_new_ptr(this->soap,tv);
 	
 	return SOAP_OK;
 }
 
-int NotificationProducerBindingService::GetCurrentMessage(_wsnt__GetCurrentMessage *wsnt__GetCurrentMessage, _wsnt__GetCurrentMessageResponse *wsnt__GetCurrentMessageResponse)
+int NotificationProducerBindingService::GetCurrentMessage(_wsnt__GetCurrentMessage *wsnt__GetCurrentMessage, _wsnt__GetCurrentMessageResponse &wsnt__GetCurrentMessageResponse)
 {
 	std::cout << __FUNCTION__ << std::endl;
 	ServiceContext* ctx = (ServiceContext*)this->soap->user;
