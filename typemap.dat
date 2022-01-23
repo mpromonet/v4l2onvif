@@ -31,9 +31,8 @@ wsrfr   = <http://docs.oasis-open.org/wsrf/r-2>
 wsrfrw  = "http://docs.oasis-open.org/wsrf/rw-2"
 wstop   = <http://docs.oasis-open.org/wsn/t-1>
 xop     = <http://www.w3.org/2004/08/xop/include>
+wsa     = <http://schemas.xmlsoap.org/ws/2004/08/addressing>
 wsa5    = <http://www.w3.org/2005/08/addressing>
-
-xsd__dateTime = #import "custom/struct_timeval.h" | xsd__dateTime
 
 
 [
