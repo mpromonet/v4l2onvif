@@ -17,7 +17,7 @@ WORKDIR /app
 COPY --from=builder /usr/bin/ /app/
 
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates libgsoap-2.8 libssl1.1 zlib1g \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates libgsoap-2.8 libssl3 zlib1g \
     && ./onvif-server.exe -h
 
 
