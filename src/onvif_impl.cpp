@@ -38,7 +38,7 @@ int ServiceContext::isAuthorized(soap* soap)
 		if (!username) {
 			ret = soap->error;
 		}
-		else if (m_userList.find(username) != m_userList.end()) {
+		else if (m_userList.find(username) == m_userList.end()) {
 			ret = SOAP_FAULT;
 		} else {
 			User user = m_userList[username];
