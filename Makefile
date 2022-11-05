@@ -6,7 +6,7 @@ $(info PREFIX=$(PREFIX) SYSROOT=$(SYSROOT) DESTDIR=$(DESTDIR))
 VERSION=$(shell git describe --tags --always --dirty)
 $(info VERSION=$(VERSION))
 
-GSOAP_PREFIX?=$(SYSROOT)/usr
+GSOAP_PREFIX?=$(SYSROOT)/usr/local
 GSOAP_BIN?=$(GSOAP_PREFIX)/bin
 GSOAP_BASE=$(GSOAP_PREFIX)/share/gsoap
 GSOAP_PLUGINS=$(GSOAP_BASE)/plugin
@@ -36,7 +36,7 @@ CLIENT_OBJ+=gen/soapEventBindingProxy.o gen/soapPullPointSubscriptionBindingProx
 CLIENT_OBJ+=gen/soapRecordingBindingProxy.o gen/soapReplayBindingProxy.o gen/soapReceiverBindingProxy.o gen/soapSearchBindingProxy.o 
 CLIENT_OBJ+=gen/soapDisplayBindingProxy.o
 
-all: gen/onvif.h libwsdd.a liblibv4l2rtspserver.a libv4l2wrapper.a onvif-server.exe onvif-client.exe
+all: gen/onvif.h libwsdd.a liblibv4l2rtspserver.a onvif-server.exe onvif-client.exe
 
 gen/onvif.h: $(wildcard wsdl/*) 
 	mkdir -p gen
@@ -67,17 +67,12 @@ liblibv4l2rtspserver.a:
 	cd v4l2rtspserver && cmake -DALSA=OFF . && make libv4l2rtspserver		
 	cp v4l2rtspserver/$@ .
 
-# lib4l2cpp
-libv4l2wrapper.a: 
-	git submodule update --recursive --init v4l2rtspserver
-	cd v4l2rtspserver && cmake -DALSA=OFF . && make v4l2wrapper
-	cp v4l2rtspserver/v4l2wrapper/$@ .
 
 LIVE = v4l2rtspserver/live
 CXXFLAGS += -I ${LIVE}/groupsock/include -I ${LIVE}/liveMedia/include -I ${LIVE}/UsageEnvironment/include -I ${LIVE}/BasicUsageEnvironment/include
-CXXFLAGS += -I v4l2rtspserver/inc -I v4l2rtspserver/v4l2wrapper/inc
+CXXFLAGS += -I v4l2rtspserver/inc -I v4l2rtspserver/libv4l2cpp/inc
 
-onvif-server.exe: src/onvif-server.o src/onvif_impl.o $(WSSE_SRC) libserver.a libonvif.a gen/soapNotificationConsumerBindingProxy.o libwsdd.a liblibv4l2rtspserver.a libv4l2wrapper.a
+onvif-server.exe: src/onvif-server.o src/onvif_impl.o $(WSSE_SRC) libserver.a libonvif.a gen/soapNotificationConsumerBindingProxy.o libwsdd.a liblibv4l2rtspserver.a 
 	$(CXX) -g -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 onvif-client.exe: src/onvif-client.o $(WSSE_SRC) $(GSOAP_PLUGINS)/wsaapi.c libclient.a gen/soapNotificationConsumerBindingService.o libonvif.a
