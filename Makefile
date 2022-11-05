@@ -6,7 +6,7 @@ $(info PREFIX=$(PREFIX) SYSROOT=$(SYSROOT) DESTDIR=$(DESTDIR))
 VERSION=$(shell git describe --tags --always --dirty)
 $(info VERSION=$(VERSION))
 
-GSOAP_PREFIX?=$(SYSROOT)/usr/local
+GSOAP_PREFIX?=$(SYSROOT)/usr
 GSOAP_BIN?=$(GSOAP_PREFIX)/bin
 GSOAP_BASE=$(GSOAP_PREFIX)/share/gsoap
 GSOAP_PLUGINS=$(GSOAP_BASE)/plugin
