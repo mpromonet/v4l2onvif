@@ -72,7 +72,7 @@ LIVE = v4l2rtspserver/live
 CXXFLAGS += -I ${LIVE}/groupsock/include -I ${LIVE}/liveMedia/include -I ${LIVE}/UsageEnvironment/include -I ${LIVE}/BasicUsageEnvironment/include
 CXXFLAGS += -I v4l2rtspserver/inc -I v4l2rtspserver/libv4l2cpp/inc
 
-onvif-server.exe: src/onvif-server.o src/onvif_impl.o $(WSSE_SRC) libserver.a libonvif.a gen/soapNotificationConsumerBindingProxy.o libwsdd.a liblibv4l2rtspserver.a 
+onvif-server.exe: src/onvif-server.o src/onvif_impl.o $(WSSE_SRC) libserver.a libonvif.a gen/soapNotificationConsumerBindingProxy.o libwsdd.a liblibv4l2rtspserver.a v4l2rtspserver/libv4l2cpp/liblibv4l2cpp.a
 	$(CXX) -g -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 onvif-client.exe: src/onvif-client.o $(WSSE_SRC) $(GSOAP_PLUGINS)/wsaapi.c libclient.a gen/soapNotificationConsumerBindingService.o libonvif.a
