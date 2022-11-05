@@ -12,7 +12,7 @@ COPY . /v4l2onvif
 
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git wget g++ make cmake zlib1g-dev libssl-dev autoconf automake flex bison busybox \
         # gsoap native \
-        && wget -qO- https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.117.zip | busybox unzip - \
+        && wget -qO- https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.123.zip | busybox unzip - \
         && cd gsoap* && autoreconf -i && ./configure --prefix=/usr && make install && make clean && cd .. \
         # cross-compiler \
         && echo "CROSSCOMPILER=${CROSSCOMPILER}" \
@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
         && wget -qO- https://www.openssl.org/source/openssl-1.1.1g.tar.gz | tar xz \
         && cd openssl* && ./Configure linux-armv4 no-shared no-tests --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr && make install && cd .. \
         # zilb \
-        && wget -qO- https://zlib.net/zlib-1.2.11.tar.gz | tar xz \
+        && wget -qO- https://zlib.net/zlib-1.2.13.tar.gz | tar xz \
         && cd zlib* && ./configure --static --prefix=$(arm-linux-gnueabihf-gcc -print-sysroot)/usr && make install && cd .. \
         # gsoap \
         && cd gsoap* \
