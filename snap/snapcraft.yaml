@@ -32,7 +32,7 @@
 
   apps:
     server:
-      command: onvif-server.exe -H "$(snapctl get http-port)" -P "$(snapctl get rtsp-port)" -i "$(snapctl get devices)"
+      command: onvif-server.exe -H $http_port -P $rtsp_port -i $devices
       daemon: simple
       plugs: [network-bind, camera]
 
