@@ -27,7 +27,7 @@
       - libssl-dev
       - zlib1g-dev
       stage-packages:
-      - libssl1.1
+      - libgsoap-dev
       - libssl-dev
 
   apps:
