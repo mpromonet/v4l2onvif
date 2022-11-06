@@ -12,7 +12,7 @@
   parts:
     v4l2onvif:
       plugin: make
-      disable-parallel: true
+      make-parameters: -j1
       source: .
       source-type: git
       build-packages:
