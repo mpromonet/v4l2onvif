@@ -7,7 +7,7 @@
 
   grade: stable 
   confinement: strict
-  base: core20
+  base: core22
 
   parts:
     v4l2onvif:
@@ -28,7 +28,7 @@
       - zlib1g-dev
       stage-packages:
       - libssl1.1
-      - libgsoap-2.8.91
+      - libssl-dev
 
   apps:
     server:
