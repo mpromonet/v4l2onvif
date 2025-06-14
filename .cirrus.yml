@@ -1,7 +1,7 @@
 linux_docker_builder:    
   env:
     DOCKERHUB_USER: ENCRYPTED[d141f69cf141cb769cc02c110baa2cfb6e316535dfa7d24f0a93ae00629c386e7f77286660adec8887823aa409447cd1]
-    DOCKERHUB_PASS: ENCRYPTED[983a4ca342215a298198297c542adfec147321c65142cd03a8eaf1f71f530a8d133be2dfa67eb0d4f81337b968340e7d]
+    DOCKERHUB_PASS: ENCRYPTED[fee383dcad0a81ec7278117c45f69366870903264bccd71e9880224e189cff271bd82dc154f711917478a1492060753b]
   script: |
     export TAG=${CIRRUS_TAG:-latest}-amd64
     docker build -t $CIRRUS_REPO_FULL_NAME:${TAG} . -f Dockerfile
@@ -11,7 +11,7 @@ linux_docker_builder:
 linuxarmv7_docker_builder:    
   env:
     DOCKERHUB_USER: ENCRYPTED[d141f69cf141cb769cc02c110baa2cfb6e316535dfa7d24f0a93ae00629c386e7f77286660adec8887823aa409447cd1]
-    DOCKERHUB_PASS: ENCRYPTED[983a4ca342215a298198297c542adfec147321c65142cd03a8eaf1f71f530a8d133be2dfa67eb0d4f81337b968340e7d]
+    DOCKERHUB_PASS: ENCRYPTED[fee383dcad0a81ec7278117c45f69366870903264bccd71e9880224e189cff271bd82dc154f711917478a1492060753b]
   script: |
     export TAG=${CIRRUS_TAG:-latest}-armv7
     docker build -t $CIRRUS_REPO_FULL_NAME:${TAG} . -f Dockerfile.rpi --build-arg ARCH=armv7l --build-arg CROSSCOMPILER=https://sourceforge.net/projects/raspberry-pi-cross-compilers/files/Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/Buster/GCC%2010.2.0/Raspberry%20Pi%202%2C%203/cross-gcc-10.2.0-pi_2-3.tar.gz --build-arg IMAGE=balenalib/raspberry-pi2
@@ -21,7 +21,7 @@ linuxarmv7_docker_builder:
 linuxarmv6_docker_builder:    
   env:
     DOCKERHUB_USER: ENCRYPTED[d141f69cf141cb769cc02c110baa2cfb6e316535dfa7d24f0a93ae00629c386e7f77286660adec8887823aa409447cd1]
-    DOCKERHUB_PASS: ENCRYPTED[983a4ca342215a298198297c542adfec147321c65142cd03a8eaf1f71f530a8d133be2dfa67eb0d4f81337b968340e7d]
+    DOCKERHUB_PASS: ENCRYPTED[fee383dcad0a81ec7278117c45f69366870903264bccd71e9880224e189cff271bd82dc154f711917478a1492060753b]
   script: |
     export TAG=${CIRRUS_TAG:-latest}-armv6
     docker build -t $CIRRUS_REPO_FULL_NAME:${TAG} . -f Dockerfile.rpi --build-arg CROSSCOMPILER=https://sourceforge.net/projects/raspberry-pi-cross-compilers/files/Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/Buster/GCC%2010.2.0/Raspberry%20Pi%201%2C%20Zero/cross-gcc-10.2.0-pi_0-1.tar.gz
@@ -36,7 +36,7 @@ publish_docker_builder:
   env:
     DOCKER_CLI_EXPERIMENTAL: enabled
     DOCKERHUB_USER: ENCRYPTED[d141f69cf141cb769cc02c110baa2cfb6e316535dfa7d24f0a93ae00629c386e7f77286660adec8887823aa409447cd1]
-    DOCKERHUB_PASS: ENCRYPTED[983a4ca342215a298198297c542adfec147321c65142cd03a8eaf1f71f530a8d133be2dfa67eb0d4f81337b968340e7d]
+    DOCKERHUB_PASS: ENCRYPTED[fee383dcad0a81ec7278117c45f69366870903264bccd71e9880224e189cff271bd82dc154f711917478a1492060753b]
   script: | 
     docker info
     export TAG=${CIRRUS_TAG:-latest}
