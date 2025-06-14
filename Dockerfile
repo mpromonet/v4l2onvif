@@ -1,5 +1,5 @@
 # build
-FROM ubuntu:24.04 as builder
+FROM debian:trixie as builder
 LABEL maintainer=michel.promonet@free.fr
 
 WORKDIR /v4l2onvif
@@ -11,7 +11,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
 	&& apt-get clean && rm -rf /var/lib/apt/lists/
 
 # run
-FROM ubuntu:24.04
+FROM debian:trixie
 
 WORKDIR /app
 COPY --from=builder /usr/bin/ /app/
