@@ -13,9 +13,7 @@ jobs:
       
     steps:
     - uses: actions/checkout@v4
-    - run: |
-        git fetch --prune --unshallow --tags
-        git submodule update --init --recursive
+    - run: git fetch --prune --unshallow --tags
 
     - name: Extract metadata (tags, labels) for Docker
       id: meta
@@ -50,6 +48,7 @@ jobs:
       uses: docker/build-push-action@v6
       id: push
       with:
+        context: .
         push: true
         tags: ${{ steps.meta.outputs.tags }} 
         platforms: linux/amd64,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6
