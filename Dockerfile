@@ -1,5 +1,5 @@
 # build
-FROM debian:trixie as builder
+FROM debian:trixie AS builder
 LABEL maintainer=michel.promonet@free.fr
 
 WORKDIR /v4l2onvif
@@ -17,7 +17,7 @@ WORKDIR /app
 COPY --from=builder /usr/bin/ /app/
 
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates libgsoap-2.8 libssl3 zlib1g \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates libgsoap-dev libssl-dev zlib1g-dev \
     && ./onvif-server.exe -h
 
 
