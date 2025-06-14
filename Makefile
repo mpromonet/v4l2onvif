@@ -57,8 +57,7 @@ libonvif.a: $(ONVIF_SRC:%.cpp=%.o)
 
 # ws-discovery
 libwsdd.a:
-	git submodule init ws-discovery
-	git submodule update ws-discovery
+	git submodule update --init ws-discovery
 	make -C ws-discovery/gsoap libwsdd.a
 	cp ws-discovery/gsoap/libwsdd.a .
 

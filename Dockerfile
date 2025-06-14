@@ -3,7 +3,7 @@ FROM debian:trixie AS builder
 LABEL maintainer=michel.promonet@free.fr
 
 WORKDIR /v4l2onvif
-COPY . /v4l2onvif
+COPY . .
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates git g++ make cmake gsoap libgsoap-dev libssl-dev zlib1g-dev \
 	&& make \
