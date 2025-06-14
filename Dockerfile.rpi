@@ -12,7 +12,7 @@ COPY . /v4l2onvif
 
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git wget g++ make cmake zlib1g-dev libssl-dev autoconf automake flex bison busybox \
         # gsoap native \
-        && wget -qO- https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.129.zip | busybox unzip - \
+        && wget -qO- https://sourceforge.net/projects/gsoap2/files/gsoap_2.8.138.zip | busybox unzip - \
         && cd gsoap* && autoreconf -i && ./configure --prefix=/usr && make install && make clean && cd .. \
         # cross-compiler \
         && echo "CROSSCOMPILER=${CROSSCOMPILER}" \
