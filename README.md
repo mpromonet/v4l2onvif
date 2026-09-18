@@ -41,6 +41,6 @@ The container entry point is the onvif-server.exe application, then you can :
 
         docker run -it mpromonet/v4l2onvif -h
 
-* run the container specifying some paramaters :
+* run the container specifying some parameters :
 
         docker run --device=/dev/video0 -p 8080:8080 -it mpromonet/v4l2onvif -uadmin -padmin 
